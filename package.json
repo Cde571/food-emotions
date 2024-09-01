@@ -10,8 +10,19 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.15.1",
     "@astrojs/check": "^0.9.3",
+    "astro": "^4.15.1",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.8.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }
+  
+    "scripts": {
+      "test-connection": "ts-node src/testConnection.ts"
+    }
+  
+  
 }
