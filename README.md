@@ -1,40 +1,98 @@
-# Astro Starter Kit: Basics
+# 🚀 Proyecto Astro: Bot IA con Expresiones Faciales
 
-```sh
-npm create astro@latest -- --template basics
-```
+¡Bienvenido a nuestro proyecto de Bot IA con Astro! Este proyecto utiliza **Astro** para crear una página web rápida y optimizada, enfocada en la interacción con bots de inteligencia artificial con expresiones faciales.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+Si nunca has trabajado con Astro, este README te guiará para configurar el proyecto y comenzar a trabajar en él. 🌟
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 📋 **Requisitos Previos**
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+Antes de comenzar, asegúrate de tener los siguientes programas instalados en tu sistema:
 
-## 🚀 Project Structure
+- **Node.js** (v14.18.0 o superior)
+- **npm** (incluido con Node.js)
+- **Git** para clonar el repositorio
 
-Inside of your Astro project, you'll see the following folders and files:
+## ⚙️ **Configuración del Proyecto Localmente**
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+Sigue estos pasos para configurar el proyecto en tu máquina local:
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+1. **Clona el Repositorio**
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+   Abre tu terminal y ejecuta:
+   ```bash
+   git clone [URL_DEL_REPOSITORIO]
+   cd NOMBRE_DEL_PROYECTO
+## Instala las Dependencias
 
-Any static assets, like images, can be placed in the `public/` directory.
+Dentro de la carpeta del proyecto, instala las dependencias necesarias ejecutando:
+npm install
+
+
+Ejecuta el Proyecto en Desarrollo
+
+Inicia el servidor de desarrollo con:
+
+npm run dev
+
+Construye para Producción
+
+Si necesitas crear una versión para producción, usa:
+
+npm run build
+
+## 🗂️ Estructura del Proyecto
+Aquí tienes la estructura básica del proyecto para que puedas orientarte fácilmente:
+
+/src
+│
+├── /components
+│   ├── NavBar.astro          # Componente de la barra de navegación
+│   ├── Footer.astro          # Componente del pie de página
+│   └── ...                   # Otros componentes reutilizables
+│
+├── /layouts
+│   └── MainLayout.astro      # Layout principal utilizado en las páginas
+│
+├── /pages
+│   ├── index.astro           # Página de inicio
+│   ├── login.astro           # Página de inicio de sesión
+│   ├── register.astro        # Página de registro de usuario
+│   ├── bot-animation.astro   # Página con animaciones de bots
+│   └── ...                   # Otras páginas adicionales
+│
+└── /public
+    ├── /img                  # Carpeta de imágenes
+    └── /styles               # Archivos de estilos globales
+
+🌐 Secciones en el Index
+La página principal (index.astro) incluirá las siguientes secciones:
+
+Intro: Introducción a los bots y la inteligencia artificial.
+Asks: Preguntas frecuentes o casos de uso destacados.
+Variedad de Bots: Presentación de los diferentes bots disponibles.
+Características: Detalle de las características clave de nuestros bots.
+📄 Páginas en el Proyecto
+Index: Página de inicio que presenta los diferentes elementos de la aplicación.
+Login y Register: Páginas dedicadas para que los usuarios inicien sesión o se registren.
+Bot Animation: Página que muestra las animaciones y funcionalidades de los bots.
+🔧 Mejoras y Contribuciones
+Si deseas contribuir al proyecto, sigue estos pasos para crear una rama, realizar cambios, y enviar un pull request. Asegúrate de probar todos los cambios localmente antes de subirlos.
+
+## Crea una rama nueva
+
+git checkout -b nombre-de-tu-rama
+
+## Realiza tus cambios y confirma
+
+git add .
+git commit -m "Descripción de los cambios"
+
+
+Sube la rama y crea un pull request
+
+git push origin nombre-de-tu-rama
+
+
 
 ## 🧞 Commands
 
@@ -49,6 +107,5 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
-
+## 👀 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
