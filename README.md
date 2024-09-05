@@ -31,18 +31,18 @@ npm install
 Ejecuta el Proyecto en Desarrollo
 
 Inicia el servidor de desarrollo con:
-
-npm run dev
-
+   ```bash
+   npm run dev
+   ```
 Construye para Producción
 
 Si necesitas crear una versión para producción, usa:
-
+ ```bash
 npm run build
-
+ ```
 ## 🗂️ Estructura del Proyecto
 Aquí tienes la estructura básica del proyecto para que puedas orientarte fácilmente:
-
+```bash
 /src
 │
 ├── /components
@@ -63,7 +63,7 @@ Aquí tienes la estructura básica del proyecto para que puedas orientarte fáci
 └── /public
     ├── /img                  # Carpeta de imágenes
     └── /styles               # Archivos de estilos globales
-
+```
 🌐 Secciones en el Index
 La página principal (index.astro) incluirá las siguientes secciones:
 
@@ -79,19 +79,19 @@ Bot Animation: Página que muestra las animaciones y funcionalidades de los bots
 Si deseas contribuir al proyecto, sigue estos pasos para crear una rama, realizar cambios, y enviar un pull request. Asegúrate de probar todos los cambios localmente antes de subirlos.
 
 ## Crea una rama nueva
-
+```
 git checkout -b nombre-de-tu-rama
-
+```
 ## Realiza tus cambios y confirma
-
+```
 git add .
 git commit -m "Descripción de los cambios"
-
+```
 
 Sube la rama y crea un pull request
-
+```
 git push origin nombre-de-tu-rama
-
+```
 
 
 ## 🧞 Commands
