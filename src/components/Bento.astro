@@ -1,0 +1,120 @@
+---
+import BentoItem from "./BentoItem.astro"
+---
+<section class="w-full max-w-[1400px] mx-auto px-20 mt-36" id="intro-vue">
+    <div id="header-vue" class=" flex flex-col items-center justify-between">
+        <!-- Contenedor de texto alineado a la izquierda -->
+        <div class="text-left">
+            <h1 class="text-3xl text-pretty text-center">
+                <strong class="text-[#ffffff]">Choose your bot</strong>
+            </h1>
+            <p class="text-center text-[#ffffff]">
+                Discover the next generation of AI with BotFaceIA. Dive into unparalleled intelligence and innovation.
+            </p>
+            <!-- Botones debajo del texto -->
+            <div class="mt-16 text-center">
+                <button class="bg-[#425638] text-white py-2 px-4 rounded mr-2">Try now</button>
+                <button class="bg-white text-[#425638] py-2 px-4 rounded border border-[#425638]">Learn more</button>
+            </div>
+        </div>
+        <!-- Imagen alineada a la derecha -->
+      <!--  <img id="logo-vue" class="w-1/3 mt-24" src="/src/img/Image (4).png" alt="Logo"> -->
+    </div>
+</section>
+<section
+    class=`
+        w-full max-w-[1400px]
+        grid grid-cols-10 auto-rows-[25rem] gap-4
+        mx-auto px-20 mt-44`
+    >
+    <BentoItem 
+        class="col-span-1 md:col-span-4"  
+        title="Bot Music"
+        subtitle="Alex JohnsonHello! I'm your music expert"
+        
+        >
+        <div
+        slot="image"
+        class=" absolute top-0 left-0 w-full 
+            h-full group-hover:scale-110 transit-scale duration-900
+            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
+            bg-no-repeat  -z-10"
+            style="background-image: url('src/img/Image (5).png');"
+            > </div>              
+            </button>
+        
+    </button>
+      
+        <p slot="content"
+        class="text-pretty"></p>
+        <p slot="content" 
+        class="text-pretty"
+      "Desde $6.200.000">
+
+        
+        </p>
+    </BentoItem>
+    <BentoItem 
+        class="col-span-10 md:col-span-6" 
+        title="Bot Food" 
+        subtitle="¡Hola! Soy tu experto en comida, y estoy aquí para guiarte en un delicioso viaje por el mundo de los sabores. "
+        
+
+        ><div
+        slot="image"
+        class="item absolute top-0 left-0 w-3/12
+            h-2/5 group-hover:scale-110 transit-scale duration-1000
+            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
+            bg-no-repeat  "
+      style="background-image: url('src/img/image 1 1.png');"
+        
+        />
+    </BentoItem>
+    <BentoItem 
+        class="col-span-10 md:col-span-6" 
+        title="Samantha Lee " 
+        subtitle=" Hello! I am your guide in the art world. I'm here to take you on a journey through centuries of human creativity,"
+        
+
+        ><div
+        slot="image"
+        class=" absolute top-0 left-0 w-full 
+            h-full group-hover:scale-110 transit-scale duration-900
+            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
+            bg-no-repeat  -z-10"
+      style="background-image: url('src/img/Image (6).png');"
+        
+        />
+        
+
+
+</section>
+<h1 class="text-[#ffffff] text-5xl text-pretty text-center mt-44" >BotFaceIA Chapters</h1>
+<div class="flex justify-center space-x-4 px-4 mt-44">
+  
+    <!-- Card 1 -->
+    <div class="bg-slate-300 rounded-lg overflow-hidden w-1/4">
+        <img src="src/img/Robot Icon.png" alt="Imagen 1" class="w-auto h-auto mx-auto rounded-md mb-4">
+        <div class="p-4">
+            <h2 class="text-xl font-semibold mb-2">Chapter 1: Introduction to AI</h2>
+            <p class="text-gray-600">Dive into the basics of Artificial Intelligence, understand its applications, and explore the fundamentals of AI development.</p>
+        </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="bg-green-400 shadow-md rounded-lg overflow-hidden w-1/4">
+        <img src="src/img/Brain Icon.png" alt="Imagen 2" class="w-auto h-auto object-cover">
+        <div class="p-4">
+            <h2 class="text-xl font-semibold mb-2">Chapter 2: Neural Networks</h2>
+            <p class="text-gray-600">Unravel the mysteries of Neural Networks, the building blocks of AI, and learn how they mimic the human brain's learning process.</p>
+        </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="bg-green-500 shadow-md rounded-lg overflow-hidden w-1/4">
+        <img src="src/img/Cpu Icon.png" alt="Imagen 3" class="w-auto h-48 object-cover">
+        <div class="p-4">
+            <h2 class="text-xl font-semibold mb-2">Chapter 3: AI in Practice</h2>
+            <p class="text-gray-600">See AI in real-world applications, from predictive analytics to machine learning, and understand how it's shaping the future.</p>
+        </div>
+    </div>
