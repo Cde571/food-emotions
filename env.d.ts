@@ -1,4 +1,4 @@
-/// <reference path="../.astro/types.d.ts" />
+/// <reference path="./.astro/types.d.ts" />
 // .env.d.ts
 declare module NodeJS {
     interface ProcessEnv {
