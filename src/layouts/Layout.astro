@@ -47,6 +47,59 @@ const { title } = Astro.props;
 		.Header {
 			background: #425638;
 		}
+        p {
+		color:rgba(0, 0, 0, 0.9);
+		line-height: 1.1;
+		margin-bottom: 1em;
+		font-size: 0.9em;
+		letter-spacing: 0.5px;
+		font-weight: 50;
+		
+		
+	}
+	@keyframes brillo {
+		0% {
+			background-position: -200px;
+
+		}
+		100% {
+			background-position: 10px;
+		}
+	}
+	p  {
+  color: #242424;
+  
+  font-weight: 800;
+  background-image: linear-gradient(65deg, #000000, #ffffff, #000000);
+  background-clip: text;
+  line-height: 1.4;
+}
+
+/* Cambia #header-dev a .header-dev si usas clases en lugar de IDs */
+.header-dev {
+    color: #000000;
+    backdrop-filter: blur(5px);
+}
+
+/* Mantén ID si es único */
+#header-vip {
+    background-color: rgb(255, 255, 255);
+}
+
+#header-nav {
+    animation: blurAnimation 1s linear both; /* Añade nombre y duración de la animación */
+}
+
+@keyframes blurAnimation {
+    to {
+        box-shadow: 
+            0px 5px 50px -5px rgba(255, 255, 255, 0.1),
+            0px 5px 50px 1px rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(20px);
+    }
+}
+
     }
     code {
         font-family:

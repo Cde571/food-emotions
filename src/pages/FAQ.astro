@@ -1,0 +1,80 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+
+// Definición de la interfaz y datos de las preguntas frecuentes
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+const faqs: FAQItem[] = [
+  {
+    question: "¿Qué es este bot y para qué sirve?",
+    answer:
+      "Este bot es una inteligencia artificial interactiva con rostro humano que puede comprender y responder a preguntas en lenguaje natural. Está diseñado para ofrecer recomendaciones en áreas clave como medicina, educación, comidas, negocios y marketing.",
+  },
+  {
+    question: "¿Cómo funciona el procesamiento de lenguaje natural (NLP) en este bot?",
+    answer:
+      "El bot utiliza procesamiento de lenguaje natural (NLP) para entender las preguntas de los usuarios y proporcionar respuestas relevantes. Esto incluye la capacidad de hacer recomendaciones basadas en el contexto de la conversación.",
+  },
+  {
+    question: "¿Qué capacidades tiene el bot en cuanto al reconocimiento de emociones?",
+    answer:
+      "El bot puede reconocer emociones básicas a través del análisis facial y adaptar sus respuestas en función de cómo se sientan los usuarios, personalizando así la interacción.",
+  },
+  {
+    question: "¿Cuál es el enfoque inicial del bot?",
+    answer:
+      "El enfoque inicial del bot está en el área de comidas, ofreciendo recomendaciones basadas en libros de recetas de cada país. Esto incluirá una interfaz básica con rostro humano y funcionalidades centradas en el área de comidas.",
+  },
+  {
+    question: "¿A quién está dirigido este bot?",
+    answer:
+      "El bot está dirigido a cualquier persona interesada en explorar recetas de cocina de diferentes culturas, así como a profesionales de la cocina y entusiastas de la gastronomía que busquen inspiración en platos de todo el mundo.",
+  },
+  {
+    question: "¿Cómo mejorará la experiencia del usuario con el reconocimiento emocional?",
+    answer:
+      "El bot adaptará sus respuestas basadas en las emociones detectadas, haciendo la interacción más natural y amigable, lo cual mejorará la experiencia del usuario al hacer las recomendaciones más personalizadas.",
+  },
+  {
+    question: "¿Cómo puedo empezar a usar el bot?",
+    answer:
+      "Para empezar a usar el bot, simplemente inicia la interacción a través de la interfaz de usuario, donde podrás hacer preguntas y recibir recomendaciones de recetas basadas en la gastronomía de diferentes países.",
+  },
+];
+---
+
+<!-- Contenido HTML con la lógica para mapear las preguntas frecuentes -->
+<Layout>
+  <Header />
+  <section class="faq-section max-w-4xl mx-auto p-6 mt-44">
+    <h2 class="text-3xl font-bold mb-4">Preguntas Frecuentes</h2>
+    <div class="faq-container space-y-4">
+      {faqs.map((faq) => (
+        <div class="faq-item bg-white shadow-md p-4 rounded-lg">
+          <h3 class="text-xl font-semibold">{faq.question}</h3>
+          <p class="text-gray-700 mt-2">{faq.answer}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<style is:global>
+  .faq-section {
+    background-color: #687450;
+    padding: 2rem;
+  }
+  .faq-item {
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .faq-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+</style>
