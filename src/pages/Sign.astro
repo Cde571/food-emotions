@@ -1,51 +1,48 @@
---- 
+---
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Login">
+<Layout title="Sign Up">
 
-  <div class="login-container">
-    <h1 class="text-pretty text-3xl font-semibold">Welcome to FaceIA</h1>
-    <p>Please login to your account to continue exploring the future of IA</p>
+  <div class="sign-up-container">
+    <h1>Create Your Account</h1>
+    <p>Fill in the details below to sign up for FACEIA</p>
     
-    <form action="/login" method="post">
+    <form action="/sign-up" method="post">
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required />
 
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
 
-      <div class="login-options">
-        <label>
-          <input type="checkbox" id="rememberMe" name="rememberMe" />
-          Remember me
-        </label>
-      </div>
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required />
 
-      <button type="submit">Login</button>
+      <a href="/sign">Sign up</a>
       
       <div class="form-links">
-        <a href="/forgot-password">Forgot password?</a>
-        <a href="/sign-up">Sign up</a>
+        <a href="/login">Already have an account? Login</a>
+        <a href="/">Back to Home</a>
       </div>
     </form>
   </div>
 
   <style>
-    .login-container {
-      max-width: 600px;
+    .sign-up-container {
+      max-width: 400px;
       margin: auto;
       padding: 20px;
       border: 1px solid #ccc;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 300px;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 10px;
-      color: #ffffff;
     }
 
     p {
@@ -71,23 +68,19 @@ import Layout from "../layouts/Layout.astro";
       border-radius: 5px;
     }
 
-    .login-options {
-      margin-bottom: 10px;
-    }
-
     button {
       padding: 10px;
       font-size: 16px;
       border: none;
       border-radius: 5px;
-      background-color: #00aa41;
+      background-color: #007bff;
       color: white;
       cursor: pointer;
       margin-bottom: 10px;
     }
 
     button:hover {
-      background-color: #2d5e00;
+      background-color: #0056b3;
     }
 
     .form-links {
@@ -96,7 +89,7 @@ import Layout from "../layouts/Layout.astro";
 
     .form-links a {
       margin: 0 10px;
-      color: #ffffff;
+      color: #007bff;
       text-decoration: none;
     }
 

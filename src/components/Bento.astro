@@ -49,21 +49,21 @@ import BentoItem from "./BentoItem.astro"
         class="text-pretty"></p>
         <p slot="content" 
         class="text-pretty"
-      "Desde $6.200.000">
+      >
 
         
         </p>
     </BentoItem>
     <BentoItem 
-        class="col-span-10 md:col-span-6" 
+        class="col-span-10 md:col-span-5" 
         title="Bot Food" 
         subtitle="¡Hola! Soy tu experto en comida, y estoy aquí para guiarte en un delicioso viaje por el mundo de los sabores. "
         
 
         ><div
         slot="image"
-        class="item absolute top-0 left-0 w-3/12
-            h-2/5 group-hover:scale-110 transit-scale duration-1000
+        class=" absolute top-0 left-0 w-full
+            h-full group-hover:scale-110 transit-scale duration-1000
             ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
             bg-no-repeat  "
       style="background-image: url('src/img/image 1 1.png');"
@@ -104,7 +104,7 @@ import BentoItem from "./BentoItem.astro"
 
     <!-- Card 2 -->
     <div class="bg-green-400 shadow-md rounded-lg overflow-hidden w-1/4">
-        <img src="src/img/Brain Icon.png" alt="Imagen 2" class="w-auto h-auto object-cover">
+        <img src="src/img/Brain Icon.png" alt="Imagen 2" class="w-auto h-auto mx-auto rounded-md mb-4">
         <div class="p-4">
             <h2 class="text-xl font-semibold mb-2">Chapter 2: Neural Networks</h2>
             <p class="text-gray-600">Unravel the mysteries of Neural Networks, the building blocks of AI, and learn how they mimic the human brain's learning process.</p>
@@ -112,8 +112,8 @@ import BentoItem from "./BentoItem.astro"
     </div>
 
     <!-- Card 3 -->
-    <div class="bg-green-500 shadow-md rounded-lg overflow-hidden w-1/4">
-        <img src="src/img/Cpu Icon.png" alt="Imagen 3" class="w-auto h-48 object-cover">
+    <div class="bg-green-500 shadow-md rounded-lg overflow-hidden w-1/4 h-auto">
+        <img src="src/img/Cpu Icon.png" alt="Imagen 3" class="w-auto h-auto mx-auto rounded-md mb-4">
         <div class="p-4">
             <h2 class="text-xl font-semibold mb-2">Chapter 3: AI in Practice</h2>
             <p class="text-gray-600">See AI in real-world applications, from predictive analytics to machine learning, and understand how it's shaping the future.</p>
