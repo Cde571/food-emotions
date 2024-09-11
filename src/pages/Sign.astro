@@ -4,98 +4,47 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout title="Sign Up">
 
-  <div class="sign-up-container">
-    <h1>Create Your Account</h1>
-    <p>Fill in the details below to sign up for FACEIA</p>
+  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
+    <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
+    <p class="text-center text-gray-600 mb-8">Fill in the details below to sign up for FACE IA</p>
     
-    <form action="/sign-up" method="post">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
+    <form action="/sign-up" method="post" class="space-y-6">
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+        <input type="text" id="username" name="username" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required />
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="password" name="password" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <label for="confirmPassword">Confirm Password:</label>
-      <input type="password" id="confirmPassword" name="confirmPassword" required />
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <a href="/sign">Sign up</a>
+      <div class="flex justify-center">
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
+      </div>
       
-      <div class="form-links">
-        <a href="/login">Already have an account? Login</a>
-        <a href="/">Back to Home</a>
+      <div class="mt-4 flex justify-center">
+        <a href="Register" class="text-sm text-indigo-600 hover:text-indigo-500">Already have an account? Login</a>
+      </div>
+      
+      <div class="mt-2 text-center">
+        <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Back to home</a>
       </div>
     </form>
   </div>
-
-  <style>
-    .sign-up-container {
-      max-width: 400px;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    p {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-
-    input {
-      margin-bottom: 10px;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    button {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .form-links {
-      text-align: center;
-    }
-
-    .form-links a {
-      margin: 0 10px;
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .form-links a:hover {
-      text-decoration: underline;
-    }
-  </style>
 
 </Layout>
