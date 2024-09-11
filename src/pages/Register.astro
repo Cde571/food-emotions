@@ -1,108 +1,56 @@
---- 
+---
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Login">
+<Layout title="Register">
 
-  <div class="login-container">
-    <h1 class="text-pretty text-3xl font-semibold">Welcome to FaceIA</h1>
-    <p>Please login to your account to continue exploring the future of IA</p>
+  <div class="register-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
+    <h1 class="text-3xl font-bold text-center mb-4">Register</h1>
+    <p class="text-center text-gray-600 mb-8">Fill in the details below to create your account</p>
     
-    <form action="/login" method="post">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
+    <form action="/register" method="post" class="space-y-6">
+      <!-- Nombre y Apellido -->
+      <div class="flex space-x-4">
+        <div class="w-1/2">
+          <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
+          <input type="text" id="first-name" name="first-name" required 
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-
-      <div class="login-options">
-        <label>
-          <input type="checkbox" id="rememberMe" name="rememberMe" />
-          Remember me
-        </label>
+        <div class="w-1/2">
+          <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
+          <input type="text" id="last-name" name="last-name" required 
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
       </div>
 
-      <button type="submit">Login</button>
-      
-      <div class="form-links">
-        <a href="/forgot-password">Forgot password?</a>
-        <a href="/sign-up">Sign up</a>
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+
+      <!-- Celular -->
+      <div>
+        <label for="phone" class="block text-sm font-medium text-gray-700">Phone number</label>
+        <input type="tel" id="phone" name="phone" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+
+      <div class="flex justify-center">
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Confirm registration
+        </button>
+      </div>
+
+      <!-- Botón de Google -->
+      <div class="text-center">
+        <button type="button" class="mt-4 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+          Sign in with Google
+        </button>
       </div>
     </form>
   </div>
-
-  <style>
-    .login-container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 300px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #ffffff;
-    }
-
-    p {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-
-    input {
-      margin-bottom: 10px;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    .login-options {
-      margin-bottom: 10px;
-    }
-
-    button {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #00aa41;
-      color: white;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    button:hover {
-      background-color: #2d5e00;
-    }
-
-    .form-links {
-      text-align: center;
-    }
-
-    .form-links a {
-      margin: 0 10px;
-      color: #ffffff;
-      text-decoration: none;
-    }
-
-    .form-links a:hover {
-      text-decoration: underline;
-    }
-  </style>
 
 </Layout>

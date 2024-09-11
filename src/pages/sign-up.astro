@@ -5,36 +5,67 @@ import Index from "./index.astro";
 
 <Layout title="Sign">
 
-  <div class="sign-up-container">
-    <h1>Create Your Account</h1>
-    <p>Fill in the details below to sign up for FACEIA</p>
+  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
+    <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
+    <p class="text-center text-gray-600 mb-8">Fill in the details below to sign up for FACE IA</p>
     
-    <form action="/sign-up" method="post">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
+    <form action="/sign-up" method="post" class="space-y-6">
+      <div>
+        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+        <input type="text" id="username" name="username" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required />
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="email" name="email" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
+<<<<<<< HEAD:src/pages/sign-up.astro
       <label for="telefono">Telefono:</label>
       <input type="telefono" id="telefono" name="telefono" required />
 
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
+=======
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="password" name="password" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+>>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
 
-      <label for="confirmPassword">Confirm Password:</label>
-      <input type="password" id="confirmPassword" name="confirmPassword" required />
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
+<<<<<<< HEAD:src/pages/sign-up.astro
       <button type="submit">Sign Up</button>
       <a href='Register'></a>
       
       <div class="form-links">
         <a href='Register'>Already have an account? Login</a>
         <a href='/'>Back to Home</a>
+=======
+      <div class="flex justify-center">
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
+      </div>
+      
+      <div class="mt-4 flex justify-center">
+        <a href="Register" class="text-sm text-indigo-600 hover:text-indigo-500">Already have an account? Login</a>
+      </div>
+      
+      <div class="mt-2 text-center">
+        <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Back to home</a>
+>>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
       </div>
     </form>
   </div>
 
+<<<<<<< HEAD:src/pages/sign-up.astro
   <style>
     .sign-up-container {
       max-width: 600px;
@@ -105,4 +136,6 @@ import Index from "./index.astro";
     }
   </style>
 
+=======
+>>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
 </Layout>
