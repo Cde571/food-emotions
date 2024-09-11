@@ -1,8 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Index from "./index.astro";
 ---
 
-<Layout title="Sign Up">
+<Layout title="Sign">
 
   <div class="sign-up-container">
     <h1>Create Your Account</h1>
@@ -15,25 +16,29 @@ import Layout from "../layouts/Layout.astro";
       <label for="email">Email:</label>
       <input type="email" id="email" name="email" required />
 
+      <label for="telefono">Telefono:</label>
+      <input type="telefono" id="telefono" name="telefono" required />
+
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
 
       <label for="confirmPassword">Confirm Password:</label>
       <input type="password" id="confirmPassword" name="confirmPassword" required />
 
-      <a href="/sign">Sign up</a>
+      <button type="submit">Sign Up</button>
+      <a href='Register'></a>
       
       <div class="form-links">
-        <a href="/login">Already have an account? Login</a>
-        <a href="/">Back to Home</a>
+        <a href='Register'>Already have an account? Login</a>
+        <a href='/'>Back to Home</a>
       </div>
     </form>
   </div>
 
   <style>
     .sign-up-container {
-      max-width: 400px;
-      margin: auto;
+      max-width: 600px;
+      margin: 250px auto;
       padding: 20px;
       border: 1px solid #ccc;
       border-radius: 10px;
@@ -43,6 +48,8 @@ import Layout from "../layouts/Layout.astro";
     h1 {
       text-align: center;
       margin-bottom: 10px;
+      color: #ffffff;
+      font-size: 30px;
     }
 
     p {
@@ -89,7 +96,7 @@ import Layout from "../layouts/Layout.astro";
 
     .form-links a {
       margin: 0 10px;
-      color: #007bff;
+      color: #ffffff;
       text-decoration: none;
     }
 

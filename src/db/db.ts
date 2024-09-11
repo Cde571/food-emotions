@@ -1,24 +1,14 @@
-// src/db.ts
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI as string;
-
-const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-
-let db: any;
-
 export async function connectToDatabase() {
-  if (!db) {
+    const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
+
     try {
-      await client.connect();
-      db = client.db();
-      console.log('Conectado a MongoDB');
+        await client.connect();
+        console.log('Connected to MongoDB successfully!');
+        return client;
     } catch (error) {
-      console.error('Error conectando a MongoDB', error);
+        console.error('Error connecting to MongoDB:', error);
+        throw error;
     }
-  }
-  return db;
 }
