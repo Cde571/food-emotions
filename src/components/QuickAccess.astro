@@ -1,0 +1,19 @@
+---
+const { quickAccessItems } = Astro.props;
+---
+
+<section class="quick-access">
+    <h3>Acceso a Funciones Rápidas</h3>
+    <div class="cards-container">
+        {quickAccessItems.map(item => (
+            <div class="card">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+            </div>
+        ))}
+    </div>
+</section>
+
+<style>
+    /* Agrega aquí tu estilo para el acceso a funciones rápidas */
+</style>
