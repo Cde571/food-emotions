@@ -1,4 +1,4 @@
-<header id="header-nav" class="fixed w-screen py-1 z-40 top-0 px-8 lg:px-0 mt-12">
+<header id="header-nav" class="fixed w-screen py-1 z-40 top-0 px-8 lg:px-0 ">
     <div class="grid grid-cols-3 max-w-7xl mx-auto items-center justify-between">
         <a href="/" class="col-span-1">
             <img class="w-auto mx-20" src="src/img/Robot Icon.png" alt="Logo IA" />
@@ -19,7 +19,20 @@
                 </li>
             </ul>
         </nav>
-        <a id="header-vip" href='sign-up' class="border rounded-full inline-block border-white px-4 py-2
+        <a id="header-vip" href="Register" class="border rounded-full inline-block border-white px-4 py-2
         justify-self-end hover:bg-white hover:text-black duration-300">IA Bot</a>
     </div>
+
+    <script>
+        window.addEventListener('scroll', function () {
+          const header = document.getElementById('header-nav');
+          if (header) { 
+            if (window.scrollY > 50) {
+              header.classList.add('fixed-blur');
+            } else {
+              header.classList.remove('fixed-blur');
+            }
+          }
+        });
+      </script>
 </header>
