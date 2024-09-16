@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Index from "./index.astro";
 ---
 
-<Layout title="Sign">
+<Layout title='sign-up'>
 
   <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
     <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
@@ -22,19 +22,17 @@ import Index from "./index.astro";
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
-<<<<<<< HEAD:src/pages/sign-up.astro
       <label for="telefono">Telefono:</label>
-      <input type="telefono" id="telefono" name="telefono" required />
+      <input type="tel" id="telefono" name="telefono" />
 
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
-=======
+
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
         <input type="password" id="password" name="password" required 
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
->>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
 
       <div>
         <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
@@ -42,14 +40,13 @@ import Index from "./index.astro";
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
-<<<<<<< HEAD:src/pages/sign-up.astro
       <button type="submit">Sign Up</button>
       <a href='Register'></a>
       
       <div class="form-links">
         <a href='Register'>Already have an account? Login</a>
         <a href='/'>Back to Home</a>
-=======
+
       <div class="flex justify-center">
         <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
       </div>
@@ -60,12 +57,11 @@ import Index from "./index.astro";
       
       <div class="mt-2 text-center">
         <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Back to home</a>
->>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
+
       </div>
     </form>
   </div>
 
-<<<<<<< HEAD:src/pages/sign-up.astro
   <style>
     .sign-up-container {
       max-width: 600px;
@@ -135,7 +131,4 @@ import Index from "./index.astro";
       text-decoration: underline;
     }
   </style>
-
-=======
->>>>>>> 90f03720e77f8d81639d6035908449687c55c7fd:src/pages/Sign.astro
 </Layout>
