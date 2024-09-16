@@ -3,61 +3,74 @@ import Layout from "../layouts/Layout.astro";
 import Index from "./index.astro";
 ---
 
-<Layout title='sign-up'>
-
-  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
+<Layout title="sign-up">
+  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16 mt">
     <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
     <p class="text-center text-gray-600 mb-8">Fill in the details below to sign up for FACE IA</p>
-    
+
     <form action="/sign-up" method="post" class="space-y-6">
+      <!-- Nombre -->
       <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-        <input type="text" id="username" name="username" required 
+        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+        <input type="text" id="firstName" name="firstName" required 
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
+      <!-- Apellido -->
+      <div>
+        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+        <input type="text" id="lastName" name="lastName" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
+
+      <!-- Correo Electrónico -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
         <input type="email" id="email" name="email" required 
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
-      <label for="telefono">Telefono:</label>
-      <input type="tel" id="telefono" name="telefono" />
+      <!-- Teléfono -->
+      <div>
+        <label for="telefono" class="block text-sm font-medium text-gray-700">Phone</label>
+        <input type="tel" id="telefono" name="telefono" required 
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      </div>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-
+      <!-- Contraseña -->
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
         <input type="password" id="password" name="password" required 
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
+      <!-- Confirmación de Contraseña -->
       <div>
-        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required 
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
-      <button type="submit">Sign Up</button>
-      <a href='Register'></a>
-      
-      <div class="form-links">
-        <a href='Register'>Already have an account? Login</a>
-        <a href='/'>Back to Home</a>
-
+      <!-- Botón de Envío -->
       <div class="flex justify-center">
         <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
       </div>
-      
+
+      <!-- Botón de Google -->
+      <div class="flex justify-center mt-4">
+        <a href="/auth/google" class="w-full flex items-center justify-center bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="h-5 mr-3"/>
+          Sign in with Google
+        </a>
+      </div>
+
+      <!-- Enlaces -->
       <div class="mt-4 flex justify-center">
         <a href="Register" class="text-sm text-indigo-600 hover:text-indigo-500">Already have an account? Login</a>
       </div>
-      
+
       <div class="mt-2 text-center">
         <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Back to home</a>
-
       </div>
     </form>
   </div>
@@ -75,7 +88,7 @@ import Index from "./index.astro";
     h1 {
       text-align: center;
       margin-bottom: 10px;
-      color: #ffffff;
+      color: #333;
       font-size: 30px;
     }
 
@@ -123,7 +136,7 @@ import Index from "./index.astro";
 
     .form-links a {
       margin: 0 10px;
-      color: #ffffff;
+      color: #007bff;
       text-decoration: none;
     }
 
