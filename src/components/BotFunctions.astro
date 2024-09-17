@@ -1,0 +1,20 @@
+---
+const { sections } = Astro.props;
+---
+
+<section class="bot-functions">
+    <h3>Funciones Principales del Bot</h3>
+    <div class="cards-container">
+        {sections.map(section => (
+            <div class="card">
+                <img src={section.image} alt={section.title} />
+                <h4>{section.title}</h4>
+                <p>{section.description}</p>
+            </div>
+        ))}
+    </div>
+</section>
+
+<style>
+    /* Agrega aquí tu estilo para las funciones del bot */
+</style>
