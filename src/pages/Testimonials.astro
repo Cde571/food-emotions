@@ -4,6 +4,71 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Testimonials">   
-
-    <Header/>
+    <Header />
+    
+    <section class="testimonials-container">
+        <h1 class="title">Testimonials</h1>
+        <div class="testimonials-grid">
+            {Array.from({ length: 6 }).map(() => (
+                <div class="testimonial-card">
+                    <img src="/src/img/Image (2).png" alt="Testimonial Avatar" class="testimonial-avatar">
+                    <p class="testimonial-text">Lorem ipsum dolor sit amet consectetur adipiscing elit vehicula iaculi</p>
+                    <p class="testimonial-author">JENNA ORTEGA</p>
+                </div>
+            ))}
+        </div>
+    </section>
 </Layout>
+
+
+<style>
+    .testimonials-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4rem;
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    justify-items: center; /* Centra las tarjetas en su contenedor */
+}
+
+.testimonial-card {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Haz que la tarjeta ocupe todo el ancho posible */
+    max-width: 300px; /* Limita el tamaño máximo de la tarjeta */
+}
+
+.testimonial-avatar {
+    width: 100px; /* Ajusta el tamaño de la imagen */
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem auto; /* Centra la imagen horizontalmente */
+}
+
+.testimonial-text {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.testimonial-author {
+    font-weight: bold;
+    color: #333;
+}
+</style>
