@@ -1,69 +1,81 @@
 ---
 // Importar el layout
 import Layout from "../layouts/Layout.astro";
+
+let profileData = {
+  profilePic: '',
+  userName: '',
+  email: '',
+  status: '',
+  bio: '',
+  interactionHistory: '',
+  preferences: {
+    interests: [],
+    notifications: false,
+    language: ''
+  }
+};
+
+// Efecto para obtener los datos del perfil al cargar el componente
+async function fetchProfileData() {
+  try {
+    const response = await fetch('http://localhost:3000/profile-data', {
+      method: 'GET',
+      credentials: 'include', // Incluir cookies de sesión
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al obtener datos del perfil');
+    }
+
+    profileData = await response.json(); // Actualiza el objeto con los datos del perfil
+  } catch (error) {
+    console.error('Error al obtener datos del perfil:', error);
+  }
+}
+
+// Llamar a la función para obtener los datos al cargar el componente
+fetchProfileData();
 ---
 
-<Layout title="Perfil de Usuario">
-
+<Layout>
   <section class="profile-section">
-    <h2 class="text-2xl font-bold mb-4 mt-24">Perfil de Usuario</h2>
-
-    <!-- Sección de perfil del usuario -->
-    <div class="profile-content">
-      <img src="src/img/Image (6).png" alt="Foto de Perfil" class="profile-pic mx-auto" />
+    <div class="profile-header">
+      <img src={profileData.profilePic} alt="Foto de Perfil" class="profile-pic" />
       <div class="profile-info">
-        <h3 class="text-xl font-semibold">CRISTIAN ECHEVERRY</h3>
-        <p>Email: davidecheverry57@gmail.com</p>
-        <p>Estado: Activo</p>
-        <p>Biografía: Soy un usuario ejemplar</p>
+        <h2>{profileData.userName}</h2>
+        <p>Estado: {profileData.status}</p>
+        <p>Biografía: {profileData.bio}</p>
       </div>
     </div>
-
-    <!-- Botón de cierre de sesión -->
-    <button class="logout-button" onclick="logout()">Cerrar sesión</button>
-
-    <p id="logout-message"></p>
+    <div class="profile-details">
+      <h3>Historial de Interacciones</h3>
+      <p>{profileData.interactionHistory}</p>
+      <h3>Preferencias</h3>
+      <p>Temas de interés: {profileData.preferences.interests.join(', ')}</p>
+      <p>Notificaciones: {profileData.preferences.notifications ? 'Activadas' : 'Desactivadas'}</p>
+      <p>Idioma: {profileData.preferences.language}</p>
+    </div>
   </section>
-
 </Layout>
 
 <style>
-  /* Estilos del perfil */
+  /* Agrega aquí tu estilo personalizado */
   .profile-section {
-    padding: 20px;
-    text-align: center;
+    /* Estilo de la sección de perfil */
   }
-
+  .profile-header {
+    display: flex;
+    align-items: center;
+  }
   .profile-pic {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    width: 150px;
-    height: 150px;
-    margin-bottom: 20px;
+    margin-right: 20px;
   }
-
-  .profile-info {
-    margin-top: 20px;
-  }
-
-  .logout-button {
-    background-color: #ff6666;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
-  }
-
-  .logout-button:hover {
-    background-color: #ff3333;
+  .profile-info h2 {
+    margin: 0;
+    font-size: 1.5rem;
   }
 </style>
-
-<script>
-  function logout() {
-    // Función de cierre de sesión simulada
-    // En una aplicación real, deberías redirigir al usuario o hacer una solicitud de cierre de sesión
-    document.getElementById('logout-message').innerText = 'Has cerrado sesión correctamente.';
-  }
-</script>

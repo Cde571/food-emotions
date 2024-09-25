@@ -9,39 +9,52 @@ import Layout from "../layouts/Layout.astro";
    
     <!-- Contenedor principal de la imagen y botones -->
     <div class="features-container">
-        <h1 class=" items-center text-5xl text-white  mx-72 ">Características</h1> 
+        <h1 class="items-center text-5xl text-white mx-72">Características</h1> 
         <!-- Imagen de fondo -->
-        <img src="/src/img/modelado1.png"  alt="Modelo" class="features-image mt-12" />
+        <img src="/src/img/modelado1.png" alt="Modelo" class="features-image mt-12" />
         
         <!-- Botones dinámicos -->
         <button class="feature-button feature-button-eye" data-target="eye-info">Eye</button>
         <button class="feature-button feature-button-mouth" data-target="mouth-info">Mouth</button>
         <button class="feature-button feature-button-forehead" data-target="forehead-info">Forehead</button>
-        <button class="feature-button feature-button-foreja" data-target="forehead-info">Oreja</button>
-        <button class="feature-button feature-button-noise" data-target="forehead-noise">Noise</button>
+        <button class="feature-button feature-button-foreja" data-target="foreja-info">Ear</button>
+        <button class="feature-button feature-button-noise" data-target="noise-info">Nose</button>
         
         <!-- Paneles de información -->
-        <div id="eye-info" class="info-panel">Información sobre la característica "Eye".</div>
-        <div id="mouth-info" class="info-panel">Información sobre la característica "Mouth".</div>
-        <div id="forehead-info" class="info-panel">Información sobre la característica "Forehead".</div>
-        <div id="foreja-info" class="info-panel">Información sobre la característica "Oreja".</div>        
-        
+        <div id="eye-info" class="info-panel">
+            <h3>Vision AI</h3>
+            <p>El sistema de visión del bot utiliza técnicas avanzadas de reconocimiento facial con <b>TensorFlow.js</b> y <b>Face API</b>. Al igual que los ojos humanos, detecta emociones y expresiones para personalizar las interacciones.</p>
+        </div>
+        <div id="mouth-info" class="info-panel">
+            <h3>Speech Interface</h3>
+            <p>La "boca" del bot está equipada con <b>Google Cloud Speech-to-Text</b> y <b>Text-to-Speech</b>, permitiendo una comunicación fluida mediante voz, similar a cómo articulamos palabras para expresar pensamientos.</p>
+        </div>
+        <div id="forehead-info" class="info-panel">
+            <h3>Intellectual Core</h3>
+            <p>El "cerebro" del bot alberga modelos de <b>procesamiento de lenguaje natural</b> y capacidades de aprendizaje con <b>Hugging Face</b> y <b>spaCy</b>, simulando la parte delantera del cerebro humano donde se procesa la información compleja.</p>
+        </div>
+        <div id="foreja-info" class="info-panel">
+            <h3>Audio Reception</h3>
+            <p>La "oreja" del bot escucha mediante una combinación de micrófonos y procesamiento de audio en tiempo real, interpretando comandos de voz y contextos, igual que cómo procesamos sonidos y palabras en nuestro entorno.</p>
+        </div>        
+        <div id="noise-info" class="info-panel">
+            <h3>Sensory System</h3>
+            <p>El "olfato" del bot detecta patrones en datos externos para identificar contextos y preferencias del usuario. Funciona como un "sistema sensorial" que ayuda a crear interacciones más precisas y contextuales.</p>
+        </div>
     </div>
     
     <!-- Agrega tu CSS aquí o en un archivo separado -->
     <style>
         /* Textura de fondo para la página */
-       /* Textura de fondo para la página */
-    body {
-        margin: 0;
-        padding: 0;
-        height: 100vh; /* Asegura que el body tenga al menos la altura de la ventana de visualización */
-        background-image: url('/png');
-        background-size: cover; /* Ajusta el tamaño de la textura para cubrir toda la pantalla */
-        background-repeat: no-repeat; /* No repite la textura */
-        background-attachment: fixed; /* Fija la textura en su lugar al hacer scroll */
-    }
-
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Asegura que el body tenga al menos la altura de la ventana de visualización */
+            background-image: url('/src/img/tu_imagen.png'); /* Asegúrate de que la ruta sea correcta */
+            background-size: cover; /* Ajusta el tamaño de la textura para cubrir toda la pantalla */
+            background-repeat: no-repeat; /* No repite la textura */
+            background-attachment: fixed; /* Fija la textura en su lugar al hacer scroll */
+        }
 
         .features-container {
             position: relative;
@@ -67,7 +80,8 @@ import Layout from "../layouts/Layout.astro";
             cursor: pointer;
             transition: transform 0.3s, opacity 0.3s;
         }
-        .feature-button-noise{
+
+        .feature-button-noise {
             top: 55%;
             left: 25%;
         }
@@ -76,10 +90,10 @@ import Layout from "../layouts/Layout.astro";
             top: 30%;
             left: 20%;
         }
+
         .feature-button-foreja {
             top: 50%;
             left: 70%;
-            
         }
 
         .feature-button-mouth {

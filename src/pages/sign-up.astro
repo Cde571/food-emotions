@@ -8,49 +8,47 @@ import Index from "./index.astro";
     <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
     <p class="text-center text-gray-600 mb-8">Fill in the details below to sign up for FACE IA</p>
 
-    <form action="/sign-up" method="post" class="space-y-6">
+    <form id="signUpForm" class="space-y-6">
       <div>
         <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-        <input type="text" id="username" name="username" required 
+        <input type="text" id="username" name="username" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" id="email" name="email" required 
+        <input type="email" id="email" name="email" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
       <div>
         <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
-        <input type="tel" id="telefono" name="telefono" required 
+        <input type="tel" id="telefono" name="telefono" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" name="password" required 
+        <input type="password" id="password" name="password" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
       <div>
         <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required 
+        <input type="password" id="confirmPassword" name="confirmPassword" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
 
       <div class="flex justify-center">
-        <a href="Main" class="w-full text-center bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</a>
+        <button type="submit" class="w-full text-center bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
       </div>
 
       <div class="mt-4 flex justify-center">
-        <!-- Cambiar el href a la ruta de inicio de sesión si es necesario -->
         <a href="http://localhost:4321/Register" class="text-sm text-indigo-600 hover:text-indigo-500">Already have an account? Login</a>
       </div>
 
       <div class="mt-4 flex justify-center">
-        <!-- Agregar botón para redirigir a la autenticación de Google -->
-        <a href="http://localhost:3000/auth/google" class=" text-center w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Sign up with Google</a>
+        <a href="http://localhost:3000/auth/google" class="text-center w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Sign up with Google</a>
       </div>
 
       <div class="mt-2 text-center">
@@ -58,76 +56,41 @@ import Index from "./index.astro";
       </div>
     </form>
   </div>
-</Layout>
 
+  <script>
+    document.getElementById('signUpForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData.entries());
+
+      // Aquí puedes agregar la lógica de validación si es necesario
+
+      // Realiza la solicitud POST al backend
+      try {
+        const response = await fetch('/sign-up', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          // Redirige al perfil del usuario después de un registro exitoso
+          window.location.href = '/Profile';
+        } else {
+          const errorData = await response.json();
+          alert(`Error: ${errorData.message}`);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('There was a problem with the signup. Please try again later.');
+      }
+    });
+  </script>
 
   <style>
-    .sign-up-container {
-      max-width: 600px;
-      margin: 250px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: #333;
-      font-size: 30px;
-    }
-
-    p {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-
-    input {
-      margin-bottom: 10px;
-      padding: 8px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-
-    button {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .form-links {
-      text-align: center;
-    }
-
-    .form-links a {
-      margin: 0 10px;
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .form-links a:hover {
-      text-decoration: underline;
-    }
+    /* Aquí va tu estilo CSS */
   </style>
 </Layout>
