@@ -1,0 +1,41 @@
+---
+const { description, website, skills } = Astro.props;
+---
+
+<div class="bibliography">
+  <h3>Bibliography:</h3>
+  <p>{description}</p>
+  <h4>Website</h4>
+  <a href={website} target="_blank">{website}</a>
+  <h4>Skills</h4>
+  <div class="skills-list">
+    {skills.map(skill => (
+      <span class="skill">{skill}</span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .bibliography {
+    background-color: #9b9b9b;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+    margin-top: 30px;
+  }
+
+  .skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .skill {
+    background-color: #4d098d;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+  }
+</style>

@@ -1,81 +1,159 @@
 ---
-// Importar el layout
-import Layout from "../layouts/Layout.astro";
+import Layout from '../layouts/Layout.astro';
+import ProfilePic from '../components/ProfilePic.astro'; // Componente para la foto de perfil
+import PopularCollections from '../components/PopularCollections.astro'; // Componente para las colecciones populares
+import Bibliography from '../components/Bibliography.astro'; // Componente para la bibliografía y habilidades
 
-let profileData = {
-  profilePic: '',
-  userName: '',
-  email: '',
-  status: '',
-  bio: '',
-  interactionHistory: '',
-  preferences: {
-    interests: [],
-    notifications: false,
-    language: ''
-  }
-};
-
-// Efecto para obtener los datos del perfil al cargar el componente
-async function fetchProfileData() {
-  try {
-    const response = await fetch('http://localhost:3000/profile-data', {
-      method: 'GET',
-      credentials: 'include', // Incluir cookies de sesión
-    });
-
-    if (!response.ok) {
-      throw new Error('Error al obtener datos del perfil');
-    }
-
-    profileData = await response.json(); // Actualiza el objeto con los datos del perfil
-  } catch (error) {
-    console.error('Error al obtener datos del perfil:', error);
-  }
-}
-
-// Llamar a la función para obtener los datos al cargar el componente
-fetchProfileData();
+const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' según la sección activa
 ---
 
-<Layout>
-  <section class="profile-section">
-    <div class="profile-header">
-      <img src={profileData.profilePic} alt="Foto de Perfil" class="profile-pic" />
-      <div class="profile-info">
-        <h2>{profileData.userName}</h2>
-        <p>Estado: {profileData.status}</p>
-        <p>Biografía: {profileData.bio}</p>
+<Layout title="Profile">
+  <div class="profile-container mt-36">
+    <!-- Sección Izquierda -->
+    <div class="left-section">
+      <div class="button-bar">
+        <button class={activeSection === 'home' ? 'active' : ''} onclick="navigateTo('home')">
+          Home
+        </button>
+        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('profile')">
+          Perfil
+        </button>
+        <button class={activeSection === 'options' ? 'active' : ''} onclick="navigateTo('options')">
+          Opciones
+        </button>
+      </div>
+
+      <ProfilePic src="src/img/Image (4).png" alt="Jenna Ortega" />
+      <div class="user-info">
+        <h2>Jenna Ortega</h2>
+        <p class="user-title">Student</p>
+        <div class="user-stats">
+          <p>42 Recipes</p>
+          <p>1302 Followers</p>
+          <p>18K Likes</p>
+        </div>
+        <div class="user-links">
+          <a href="#">Blog</a>
+          <a href="#">Archives</a>
+          <a href="#">Collections</a>
+        </div>
       </div>
     </div>
-    <div class="profile-details">
-      <h3>Historial de Interacciones</h3>
-      <p>{profileData.interactionHistory}</p>
-      <h3>Preferencias</h3>
-      <p>Temas de interés: {profileData.preferences.interests.join(', ')}</p>
-      <p>Notificaciones: {profileData.preferences.notifications ? 'Activadas' : 'Desactivadas'}</p>
-      <p>Idioma: {profileData.preferences.language}</p>
+    
+    <!-- Sección Principal -->
+    <div class="main-section">
+      <input type="text" placeholder="Buscar" class="search-input" />
+      <div class="banner">
+        <img src="src/img/1.png" alt="Banner" class="banner-image" />
+      </div>
+      <PopularCollections />
+      <div class="team-info">
+        <h3>Jenna appears in this team</h3>
+        <div class="team-card">
+          <h4>ROYAL UI FORCE</h4>
+          <p>Formed in 2013</p>
+          <button>Follow</button>
+          <p>JENNA IS A MEMBER SINCE NOV, 2014</p>
+        </div>
+      </div>
     </div>
-  </section>
+
+    <!-- Sección Derecha -->
+    <div class="right-section ">
+      <Bibliography 
+        description="Lorem ipsum dolor sit amet consectetur adipiscing elit..."
+        website="https://youtube.com/cdecp"
+        skills={["Photoshop", "Cocina", "Musica", "Jugar"]}
+      />
+    </div>
+  </div>
 </Layout>
 
+<script>
+  function navigateTo(section) {
+    // Redirige a la sección correspondiente. Este código se debería adaptar a tu lógica de navegación.
+    console.log(`Navigating to ${section}`);
+  }
+</script>
+
 <style>
-  /* Agrega aquí tu estilo personalizado */
-  .profile-section {
-    /* Estilo de la sección de perfil */
-  }
-  .profile-header {
+  .profile-container {
     display: flex;
-    align-items: center;
+    gap: 20px;
+    padding: 20px;
   }
-  .profile-pic {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 20px;
+
+  .left-section {
+    flex: 1;
+    background-color: #3B432B; /* Fondo verde oscuro */
+    padding: 20px;
+    color: white;
+    text-align: center;
+    border-radius: 10px;
   }
-  .profile-info h2 {
+
+  .button-bar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .button-bar button {
+    background-color: #555;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+  }
+
+  .button-bar button.active {
+    background-color: #72B340; /* Color para botón activo */
+  }
+
+  .main-section {
+    flex: 2;
+    padding: 20px;
+  }
+
+  .right-section {
+    flex: 1;
+    background-color: #3B432B; /* Fondo verde oscuro */
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+  }
+
+  .banner-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .team-card {
+    background-color: white;
+    color: #831400;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .user-links a {
+    display: block;
+    margin: 5px 0;
+    color: white;
+    text-decoration: none;
+  }
+
+  .user-stats p {
     margin: 0;
-    font-size: 1.5rem;
   }
 </style>

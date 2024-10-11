@@ -1,0 +1,187 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Edit Profile">
+  <section class="edit-profile-container">
+    <div class="header">
+      <h1>Edit profile</h1>
+      <button class="premium-btn">Be premium</button>
+    </div>
+
+    <div class="profile-picture-section">
+      <img src="profile-pic.jpg" alt="Profile Picture" class="profile-pic" />
+      <div class="profile-btns">
+        <button class="change-img-btn">Change image</button>
+        <button class="reset-img-btn">Reset</button>
+      </div>
+    </div>
+
+    <form class="profile-form">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" value="Jenna" />
+
+      <label for="last-name">Last name</label>
+      <input type="text" id="last-name" name="last-name" value="Ortega" />
+
+      <label for="email">E-mail</label>
+      <div class="email-modify">
+        <input type="email" id="email" name="email" value="Jenna.ortega29@gmail.com" />
+        <button type="button" class="modify-btn">Modificar</button>
+      </div>
+
+      <label for="phone">Phone number</label>
+      <input type="tel" id="phone" name="phone" value="(555) 555-1212" />
+
+      <label>Background color</label>
+      <div class="color-options">
+        <span class="color-circle blue"></span>
+        <span class="color-circle lime"></span>
+        <span class="color-circle pink"></span>
+        <span class="color-circle purple"></span>
+        <span class="color-circle orange"></span>
+        <span class="color-circle green"></span>
+        <span class="color-circle red"></span>
+      </div>
+
+      <label>Mood</label>
+      <div class="mood-options">
+        <label><input type="radio" name="mood" value="default" checked /> Default</label>
+        <label><input type="radio" name="mood" value="light" /> Light</label>
+        <label><input type="radio" name="mood" value="dark" /> Dark</label>
+      </div>
+
+      <button type="submit" class="save-changes-btn">Save changes</button>
+    </form>
+  </section>
+</Layout>
+
+<style>
+  .edit-profile-container {
+    padding: 20px;
+    background-color: #3B432B;
+    color: #ffffff;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .premium-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .profile-picture-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .profile-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .change-img-btn, .reset-img-btn {
+    background-color: white;
+    color: #3B432B;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .profile-form {
+    display: grid;
+    gap: 10px;
+  }
+
+  .profile-form label {
+    font-size: 0.9rem;
+  }
+
+  .profile-form input[type="text"],
+  .profile-form input[type="email"],
+  .profile-form input[type="tel"] {
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+  }
+
+  .email-modify {
+    display: flex;
+    gap: 5px;
+  }
+
+  .modify-btn {
+    background-color: #ffffff;
+    color: #3B432B;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .color-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .color-circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .blue { background-color: #7b9acc; }
+  .lime { background-color: #b5d13b; }
+  .pink { background-color: #f49ac2; }
+  .purple { background-color: #af69ee; }
+  .orange { background-color: #f7a76d; }
+  .green { background-color: #8bcf78; }
+  .red { background-color: #f7746d; }
+
+  .mood-options {
+    display: flex;
+    gap: 10px;
+  }
+
+  .mood-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .save-changes-btn {
+    background-color: #2f3725;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+</style>
