@@ -130,8 +130,14 @@ import Layout from '../layouts/Layout.astro';
 
 <script>
   function selectPlan(planName, price) {
-    document.getElementById('selected-plan').textContent = planName;
-    document.getElementById('plan-price').textContent = price ? price.toFixed(2) : 'Contact for pricing';
-    document.getElementById('selected-plan-details').classList.remove('hidden');
+    const selectedPlanElement = document.getElementById('selected-plan');
+    const planPriceElement = document.getElementById('plan-price');
+    const selectedPlanDetailsElement = document.getElementById('selected-plan-details');
+
+    if (selectedPlanElement && planPriceElement && selectedPlanDetailsElement) {
+      selectedPlanElement.textContent = planName;
+      planPriceElement.textContent = price ? price.toFixed(2) : 'Contact for pricing';
+      selectedPlanDetailsElement.classList.remove('hidden');
+    }
   }
 </script>

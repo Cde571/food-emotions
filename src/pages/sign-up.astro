@@ -2,9 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import Index from "./index.astro";
 ---
-
 <Layout title="Sign">
-  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16 mt">
+  <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
     <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
     <p class="text-center text-gray-600 mb-8">Fill in the details below to sign up for FACE IA</p>
 
@@ -14,25 +13,21 @@ import Index from "./index.astro";
         <input type="text" id="username" name="username" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
-
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
         <input type="email" id="email" name="email" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
-
       <div>
         <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
         <input type="tel" id="telefono" name="telefono" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
-
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
         <input type="password" id="password" name="password" required
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
       </div>
-
       <div>
         <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm password</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required
@@ -42,55 +37,78 @@ import Index from "./index.astro";
       <div class="flex justify-center">
         <button type="submit" class="w-full text-center bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Sign up</button>
       </div>
+    </form>
 
-      <div class="mt-4 flex justify-center">
-        <a href="http://localhost:4321/Register" class="text-sm text-indigo-600 hover:text-indigo-500">Already have an account? Login</a>
-      </div>
-
+    <div class="mt-6 text-center">
+      <p class="text-gray-600">Or sign up with</p>
       <div class="mt-4 flex justify-center">
         <a href="http://localhost:3000/auth/google" class="text-center w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Sign up with Google</a>
       </div>
-
-      <div class="mt-2 text-center">
-        <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Back to home</a>
-      </div>
-    </form>
   </div>
 
   <script>
-    document.getElementById('signUpForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('signUpForm');
+      const googleSignInButton = document.getElementById('googleSignIn');
 
-      const formData = new FormData(event.target);
-      const data = Object.fromEntries(formData.entries());
+      if (form) {
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
 
-      // Aquí puedes agregar la lógica de validación si es necesario
+          try {
+            // Verifica que el formulario sea un elemento válido
+            if (!(form instanceof HTMLFormElement)) {
+              console.error('El elemento no es un formulario válido');
+              return;
+            }
 
-      // Realiza la solicitud POST al backend
-      try {
-        const response = await fetch('/sign-up', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/sign-up', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+              window.location.href = '/Profile';
+            } else {
+              const errorData = await response.json();
+              alert(`Error: ${errorData.message}`);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('There was a problem with the signup. Please try again later.');
+          }
         });
+      } else {
+        console.error('Formulario no encontrado');
+      }
 
-        if (response.ok) {
-          // Redirige al perfil del usuario después de un registro exitoso
-          window.location.href = '/Profile';
-        } else {
-          const errorData = await response.json();
-          alert(`Error: ${errorData.message}`);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('There was a problem with the signup. Please try again later.');
+      if (googleSignInButton) {
+        googleSignInButton.addEventListener('click', async () => {
+          try {
+            const response = await fetch('/auth/google', {
+              method: 'GET',
+            });
+
+            if (response.ok) {
+              window.location.href = (await response.json() as { redirectUrl: string }).redirectUrl; // Cambia según cómo manejes la redirección en el backend
+            } else {
+              const errorData = await response.json();
+              alert(`Error: ${errorData.message}`);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('There was a problem with Google Sign-In. Please try again later.');
+          }
+        });
+      } else {
+        console.error('Botón de inicio de sesión de Google no encontrado');
       }
     });
   </script>
-
-  <style>
-    /* Aquí va tu estilo CSS */
-  </style>
 </Layout>

@@ -21,12 +21,12 @@ import Layout from '../layouts/Layout.astro';
     <h2 class="recent-title">Recent:</h2>
     <div class="recent-recipes gap-7">
       {['src/img/image (7).png', 'src/img/image (8).png', 'src/img/image (9).png', 'src/img/image (10).png'].map((img, index) => (
-        <div class="recipe-item" key={index}>
-          <img src={img} alt="Recent Recipe" class="recipe-img" />
-          <button class="favorite-btn">❤️</button>
-          <button class="delete-btn">🗑️</button>
-        </div>
-      ))}
+  <Layout client:only title="Recipes">
+  <section class="recipes-container mt-36">
+    <!-- Rest of your code -->
+  </section>
+</Layout>
+))}
     </div>
     
     <p class="view-more">View more...</p>

@@ -1,0 +1,123 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Login">
+
+  <style>
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      background-color: #ffffff; /* Color de fondo suave */
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #333; /* Color del título */
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #666; /* Color del texto */
+      text-align: center;
+    }
+
+    #statusMessage {
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff; /* Color del botón */
+      color: rgb(255, 255, 255); /* Color del texto del botón */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3; /* Color al pasar el mouse */
+    }
+
+    .form-links {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .form-links a {
+      color: #007bff; /* Color de los enlaces */
+      text-decoration: none; /* Quitar subrayado */
+    }
+
+    .form-links a:hover {
+      text-decoration: underline; /* Subrayado al pasar el mouse */
+    }
+  </style>
+
+  <div class="login-container">
+    <h1 class="text-pretty text-3xl font-semibold">Welcome to FaceIA</h1>
+    <p>Please login to your account to continue exploring the future of IA</p>
+
+    <p id="statusMessage" class="text-center text-red-500"></p>
+
+    <button id="loginButton">Login Automatically</button>
+    
+    <div class="form-links">
+      <a href="/forgot-password">Forgot password?</a>
+      <a href="/">Back Home</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginButton = document.getElementById('loginButton');
+      const statusMessage = document.getElementById('statusMessage');
+      let errorData; // declare errorData here
+  
+      if (loginButton) {
+        loginButton.addEventListener('click', async (event) => {
+          event.preventDefault(); // Prevenir la acción predeterminada del botón
+  
+          try {
+            // Realiza la solicitud de inicio de sesión automáticamente
+            const response = await fetch('/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ autoLogin: true }), // Cambia según tu lógica de autenticación
+            });
+  
+            if (response.ok) {
+              // Si la respuesta es exitosa, redirige a /Profile
+              window.location.href = '/Profile';
+            } else {
+              errorData = await response.json(); // reassign errorData here
+              if (statusMessage) {
+                statusMessage.textContent = `Error: ${errorData.message}`;
+              }
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            if (statusMessage) {
+              statusMessage.textContent = `Error: ${errorData.message}`;
+            }
+          }
+        });
+      } else {
+        console.error('Botón de inicio de sesión no encontrado');
+      }
+    });
+  </script>
+</Layout>

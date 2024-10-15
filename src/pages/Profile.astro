@@ -12,13 +12,13 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
     <!-- Sección Izquierda -->
     <div class="left-section">
       <div class="button-bar">
-        <button class={activeSection === 'home' ? 'active' : ''} onclick="navigateTo('home')">
+        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('home')">
           Home
         </button>
         <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('profile')">
           Perfil
         </button>
-        <button class={activeSection === 'options' ? 'active' : ''} onclick="navigateTo('options')">
+        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('options')">
           Opciones
         </button>
       </div>
@@ -73,7 +73,16 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
   function navigateTo(section) {
     // Redirige a la sección correspondiente. Este código se debería adaptar a tu lógica de navegación.
     console.log(`Navigating to ${section}`);
+    
   }
+  let activeSection: 'profile' | 'options' = 'profile';
+  
+  
+  function setActiveSection(section: 'profile' | 'options') {
+    activeSection = section;
+  }
+  
+  
 </script>
 
 <style>

@@ -140,17 +140,20 @@ import Layout from "../layouts/Layout.astro";
                 
                 // Muestra el panel correspondiente
                 const targetId = this.getAttribute('data-target');
-                document.getElementById(targetId).classList.add('active');
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.classList.add('active');
+                }
             });
         });
         
         // Cierra el panel al hacer clic fuera de él
         document.addEventListener('click', function(event) {
-            if (!event.target.classList.contains('feature-button')) {
-                document.querySelectorAll('.info-panel').forEach(panel => {
-                    panel.classList.remove('active');
-                });
-            }
+    if (!((event.target as HTMLElement)?.classList.contains('feature-button'))) {
+        document.querySelectorAll('.info-panel').forEach(panel => {
+            panel.classList.remove('active');
         });
+    }
+});
     </script>
 </Layout>
