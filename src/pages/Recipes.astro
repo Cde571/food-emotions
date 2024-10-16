@@ -21,7 +21,7 @@ import Layout from '../layouts/Layout.astro';
     <h2 class="recent-title">Recent:</h2>
     <div class="recent-recipes gap-7">
       {['src/img/image (7).png', 'src/img/image (8).png', 'src/img/image (9).png', 'src/img/image (10).png'].map((img, index) => (
-  <Layout client:only title="Recipes">
+  <Layout title="Recipes">
   <section class="recipes-container mt-36">
     <!-- Rest of your code -->
   </section>
@@ -87,6 +87,7 @@ import Layout from '../layouts/Layout.astro';
     padding: 8px;
     border-radius: 5px;
     border: none;
+    color: #353535;
   }
 
   .categories-dropdown {
@@ -97,7 +98,7 @@ import Layout from '../layouts/Layout.astro';
 
   .search-btn {
     background-color: #2f3725;
-    color: #ffffff;
+    color: #353535;
     padding: 8px;
     border-radius: 5px;
     border: none;
