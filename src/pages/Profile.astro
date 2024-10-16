@@ -8,21 +8,9 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
 ---
 
 <Layout title="Profile">
-  <div class="profile-container mt-36">
+  <div class="profile-container">
     <!-- Sección Izquierda -->
     <div class="left-section">
-      <div class="button-bar">
-        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('home')">
-          Home
-        </button>
-        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('profile')">
-          Perfil
-        </button>
-        <button class={activeSection === 'profile' ? 'active' : ''} onclick="navigateTo('options')">
-          Opciones
-        </button>
-      </div>
-
       <ProfilePic src="src/img/Image (4).png" alt="Jenna Ortega" />
       <div class="user-info">
         <h2>Jenna Ortega</h2>
@@ -59,7 +47,7 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
     </div>
 
     <!-- Sección Derecha -->
-    <div class="right-section ">
+    <div class="right-section">
       <Bibliography 
         description="Lorem ipsum dolor sit amet consectetur adipiscing elit..."
         website="https://youtube.com/cdecp"
@@ -86,83 +74,109 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
 </script>
 
 <style>
-  .profile-container {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-  }
+.profile-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* Sección izquierda, principal y derecha */
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
 
-  .left-section {
-    flex: 1;
-    background-color: #3B432B; /* Fondo verde oscuro */
-    padding: 20px;
-    color: white;
-    text-align: center;
-    border-radius: 10px;
-  }
+.left-section, .right-section {
+  background-color: #3B432B; /* Fondo verde oscuro */
+  padding: 20px;
+  color: white;
+  border-radius: 10px;
+}
 
-  .button-bar {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
+.main-section {
+  padding: 20px;
+}
 
-  .button-bar button {
-    background-color: #555;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    color: white;
-    cursor: pointer;
-  }
+.user-info h2 {
+  font-size: 1.5rem;
+  margin-top: 10px;
+}
 
-  .button-bar button.active {
-    background-color: #72B340; /* Color para botón activo */
-  }
+.user-stats p {
+  margin: 5px 0;
+}
 
-  .main-section {
-    flex: 2;
-    padding: 20px;
-  }
+.user-links a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin-top: 10px;
+}
 
-  .right-section {
-    flex: 1;
-    background-color: #3B432B; /* Fondo verde oscuro */
-    padding: 20px;
-    color: white;
-    border-radius: 10px;
-  }
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: none;
+}
 
-  .search-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-  }
+.banner-image {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
 
-  .banner-image {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
+.team-card {
+  background-color: white;
+  color: #831400;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  margin-top: 20px;
+}
 
-  .team-card {
-    background-color: white;
-    color: #831400;
-    padding: 10px;
-    border-radius: 10px;
-    text-align: center;
-  }
+.team-card button {
+  background-color: #72B340;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
 
-  .user-links a {
-    display: block;
-    margin: 5px 0;
-    color: white;
-    text-decoration: none;
-  }
+.right-section {
+  display: flex;
+  flex-direction: column;
+}
 
-  .user-stats p {
-    margin: 0;
-  }
+.skills-container {
+  margin-top: 20px;
+}
+
+.skill {
+  background-color: #555;
+  color: white;
+  padding: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: inline-block;
+  border-radius: 10px;
+  cursor: default;
+}
+
+/* Para cada color de las habilidades */
+.skill.Photoshop {
+  background-color: #00baff;
+}
+
+.skill.Cocina {
+  background-color: #ff4b00;
+}
+
+.skill.Musica {
+  background-color: #5aff00;
+}
+
+.skill.Jugar {
+  background-color: #ff00a7;
+}
 </style>

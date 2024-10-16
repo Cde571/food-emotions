@@ -1,94 +1,49 @@
 ---
 import BentoItem from "./BentoItem.astro"
 ---
-<section class="w-full max-w-[1400px] mx-auto px-20 mt-36" id="intro-vue">
-    <div id="header-vue" class=" flex flex-col items-center justify-between">
-        <!-- Contenedor de texto alineado a la izquierda -->
-        <div class="text-left">
-            <h1 class="text-3xl text-pretty text-center">
-                <strong class="text-[#ffffff]">Choose your bot</strong>
-            </h1>
-            <p class="text-center text-[#ffffff]">
-                Discover the next generation of AI with BotFaceIA. Dive into unparalleled intelligence and innovation.
-            </p>
-            <!-- Botones debajo del texto -->
-            <div class="mt-16 text-center">
-                <button class="bg-[#425638] text-white py-2 px-4 rounded mr-2">Try now</button>
-                <button class="bg-white text-[#425638] py-2 px-4 rounded border border-[#425638]">Learn more</button>
-            </div>
-        </div>
-        <!-- Imagen alineada a la derecha -->
-      <!--  <img id="logo-vue" class="w-1/3 mt-24" src="/src/img/Image (4).png" alt="Logo"> -->
-    </div>
-</section>
 <section
-    class=`
-        w-full max-w-[1400px]
-        grid grid-cols-10 auto-rows-[25rem] gap-4
-        mx-auto px-20 mt-44`
-    >
+    class="w-full max-w-[1400px] grid grid-cols-10 auto-rows-[25rem] gap-4 mx-auto px-20 mt-44"
+>
+    <!-- Cuadro 1: Bot Music -->
     <BentoItem 
-        class="col-span-1 md:col-span-4"  
+        class="col-span-5"  
         title="Bot Music"
         subtitle="Alex JohnsonHello! I'm your music expert"
-        
-        >
+    >
         <div
-        slot="image"
-        class="absolute top-0 left-0 w-full
-            h-full group-hover:scale-110 transit-scale duration-1000
-            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
-            bg-no-repeat "
+            slot="image"
+            class="absolute top-0 left-0 w-full h-full group-hover:scale-110 transit-scale duration-1000 ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover bg-no-repeat"
             style="background-image: url('src/img/Musicbot.jpg');"
-            > </div>              
-            </button>
-        
-    </button>
-      
-        <p slot="content"
-        class="text-pretty"></p>
-        <p slot="content" 
-        class="text-pretty"
-      >
-
-        
-        </p>
+        > </div>              
     </BentoItem>
+    
+    <!-- Cuadro 2: Bot Food -->
     <BentoItem 
-        class="col-span-10 md:col-span-5" 
+        class="col-span-5" 
         title="Bot Food" 
-        subtitle="¡Hola! Soy tu experto en comida, y estoy aquí para guiarte en un delicioso viaje por el mundo de los sabores. "
-        
-
-        ><div
-        slot="image"
-        class=" absolute top-0 left-0 w-full
-            h-full group-hover:scale-110 transit-scale duration-1000
-            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
-            bg-no-repeat  "
-      style="background-image: url('src/img/Foodcook.jpg');"
-        
-        />
+        subtitle="¡Hola! Soy tu experto en comida, y estoy aquí para guiarte en un delicioso viaje por el mundo de los sabores."
+    >
+        <div
+            slot="image"
+            class="absolute top-0 left-0 w-full h-full group-hover:scale-110 transit-scale duration-1000 ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover bg-no-repeat"
+            style="background-image: url('src/img/Foodcook.jpg');"
+        ></div>
     </BentoItem>
+    
+    <!-- Cuadro 3: Samantha Lee (cuadro grande en la parte inferior) -->
     <BentoItem 
         class="col-span-10 flex items-center justify-center"
-        title="Samantha Lee " 
-        subtitle=" Hello! I am your guide in the art world. I'm here to take you on a journey through centuries of human creativity,"
-        
-
-        ><div
-        slot="image"
-        class="absolute top-0 left-0 w-full
-            h-full group-hover:scale-110 transit-scale duration-1000
-            ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover
-            bg-no-repeat "
-      style="background-image: url('src/img/Mbot.jpg');"
-        
-        />
-        
-
-
+        title="Samantha Lee" 
+        subtitle="Hello! I am your guide in the art world. I'm here to take you on a journey through centuries of human creativity."
+    >
+        <div
+            slot="image"
+            class="absolute top-0 left-0 w-full h-full group-hover:scale-110 transit-scale duration-1000 ease-in-out opacity-90 bg-blend-luminosity bg-center bg-cover bg-no-repeat"
+            style="background-image: url('src/img/Mbot.jpg');"
+        ></div>
+    </BentoItem>
 </section>
+
 <section>
     <h1 class="text-[#ffffff] text-5xl text-pretty text-center mt-44">BotFaceIA Chapters</h1>
     <div class="flex justify-center space-x-4 px-4 mt-44">
