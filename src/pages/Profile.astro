@@ -1,32 +1,54 @@
 ---
+// Importaciones y configuración inicial
 import Layout from '../layouts/Layout.astro';
-import ProfilePic from '../components/ProfilePic.astro'; // Componente para la foto de perfil
-import PopularCollections from '../components/PopularCollections.astro'; // Componente para las colecciones populares
-import Bibliography from '../components/Bibliography.astro'; // Componente para la bibliografía y habilidades
+import ProfilePic from '../components/ProfilePic.astro';
+import PopularCollections from '../components/PopularCollections.astro';
+import Bibliography from '../components/Bibliography.astro';
 
-const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' según la sección activa
+let userData = {
+  profilePic: 'src/img/Image (4).png', // Valor por defecto
+  userName: 'Cargando...',
+  email: '',
+  phone: '',
+  status: '',
+  bio: '',
+  interactionHistory: '',
+  preferences: {
+    interests: [],
+    notifications: false,
+    language: '',
+  },
+};
+let error = null;
 ---
 
 <Layout title="Profile">
+   <!-- Botón para cerrar sesión -->
+  
   <div class="profile-container">
     <!-- Sección Izquierda -->
     <div class="left-section">
-      <ProfilePic src="src/img/Image (4).png" alt="Jenna Ortega" />
+      <ProfilePic src={userData.profilePic} id="profile-pic" alt={userData.userName} />
       <div class="user-info">
-        <h2>Jenna Ortega</h2>
-        <p class="user-title">Student</p>
+        <h2 id="user-name">{userData.userName}</h2>
+        <p class="user-title" id="user-status">{userData.status}</p>
         <div class="user-stats">
-          <p>42 Recipes</p>
-          <p>1302 Followers</p>
-          <p>18K Likes</p>
+          <p class="stat">42 Recipes</p>
+          <p class="stat">1302 Followers</p>
+          <p class="stat">18K Likes</p>
         </div>
         <div class="user-links">
           <a href="#">Blog</a>
           <a href="#">Archives</a>
           <a href="#">Collections</a>
+          <div id="logout-container">
+            <button id="logout-button" class="logout-button">Cerrar sesión</button>
+           </div>
         </div>
+       
       </div>
     </div>
+    
     
     <!-- Sección Principal -->
     <div class="main-section">
@@ -36,11 +58,11 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
       </div>
       <PopularCollections />
       <div class="team-info">
-        <h3>Jenna appears in this team</h3>
+        <h3 class="team">Jenna appears in this team</h3>
         <div class="team-card">
           <h4>ROYAL UI FORCE</h4>
           <p>Formed in 2013</p>
-          <button>Follow</button>
+          <button>UnFollow</button>
           <p>JENNA IS A MEMBER SINCE NOV, 2014</p>
         </div>
       </div>
@@ -49,31 +71,38 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
     <!-- Sección Derecha -->
     <div class="right-section">
       <Bibliography 
-        description="Lorem ipsum dolor sit amet consectetur adipiscing elit..."
+        id="bio-description"
+        description={userData.bio || "Descripción no disponible"}
         website="https://youtube.com/cdecp"
-        skills={["Photoshop", "Cocina", "Musica", "Jugar"]}
+        skills={userData.preferences.interests}
       />
     </div>
   </div>
+
+  <p id="error-message" style="color: red;"></p>
 </Layout>
 
-<script>
-  function navigateTo(section) {
-    // Redirige a la sección correspondiente. Este código se debería adaptar a tu lógica de navegación.
-    console.log(`Navigating to ${section}`);
-    
-  }
-  let activeSection: 'profile' | 'options' = 'profile';
-  
-  
-  function setActiveSection(section: 'profile' | 'options') {
-    activeSection = section;
-  }
-  
-  
-</script>
+<!-- Importar el archivo de script para ejecutarlo en el cliente -->
+<script src="src/scripts/fetchUserData.js" type="module" ></script>
+
+
 
 <style>
+  .logout-button {
+    margin-top: 90px;
+    padding: 10px ;
+    background-color: #ff4b4b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+
+  .logout-button:hover {
+    background-color: #e04343;
+  }
+  
 .profile-container {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr; /* Sección izquierda, principal y derecha */
@@ -81,6 +110,7 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
   padding: 20px;
   max-width: 1200px;
   margin: auto;
+  margin-top: 200px;
 }
 
 .left-section, .right-section {
@@ -178,5 +208,14 @@ const activeSection = 'profile'; // Cambia este valor a 'home' o 'options' segú
 
 .skill.Jugar {
   background-color: #ff00a7;
+}
+.stat{
+  color: white;
+}
+.team{
+  color: aliceblue;
+  font-size: 30px;
+  
+  
 }
 </style>

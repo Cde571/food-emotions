@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Index from "./index.astro";
 ---
+
 <Layout title="Sign">
   <div class="sign-up-container bg-white p-8 shadow-lg rounded-lg max-w-lg mx-auto my-16">
     <h1 class="text-3xl font-bold text-center mb-4">Create your account</h1>
@@ -44,70 +45,50 @@ import Index from "./index.astro";
       <div class="mt-4 flex justify-center">
         <a href="http://localhost:3000/auth/google" class="text-center w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">Sign up with Google</a>
       </div>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('signUpForm');
-      const googleSignInButton = document.getElementById('googleSignIn');
 
       if (form) {
         form.addEventListener('submit', async (event) => {
           event.preventDefault();
 
           try {
-            // Verifica que el formulario sea un elemento válido
-            if (!(form instanceof HTMLFormElement)) {
-              console.error('El elemento no es un formulario válido');
-              return;
-            }
-
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
-            const response = await fetch('/sign-up', {
+            // Validar que las contraseñas coinciden en el frontend
+            if (data.password !== data.confirmPassword) {
+              alert('Las contraseñas no coinciden.');
+              return;
+            }
+
+            const response = await fetch('http://localhost:3000/sign-up', { // Usa la URL completa para evitar errores
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify(data)
+              body: JSON.stringify(data),
+              credentials: 'include' // Importante para manejar la sesión
             });
 
             if (response.ok) {
+              // Redirigir al perfil del usuario después de registrarse
               window.location.href = '/Profile';
             } else {
               const errorData = await response.json();
-              alert(`Error: ${errorData.message}`);
+              alert(`Error: ${errorData.message || 'Registro fallido'}`);
             }
           } catch (error) {
             console.error('Error:', error);
-            alert('There was a problem with the signup. Please try again later.');
+            alert('Hubo un problema con el registro. Por favor, inténtelo de nuevo más tarde.');
           }
         });
       } else {
         console.error('Formulario no encontrado');
-      }
-
-      if (googleSignInButton) {
-        googleSignInButton.addEventListener('click', async () => {
-          try {
-            const response = await fetch('/auth/google', {
-              method: 'GET',
-            });
-
-            if (response.ok) {
-              window.location.href = (await response.json() as { redirectUrl: string }).redirectUrl; // Cambia según cómo manejes la redirección en el backend
-            } else {
-              const errorData = await response.json();
-              alert(`Error: ${errorData.message}`);
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            alert('There was a problem with Google Sign-In. Please try again later.');
-          }
-        });
-      } else {
-        console.error('Botón de inicio de sesión de Google no encontrado');
       }
     });
   </script>

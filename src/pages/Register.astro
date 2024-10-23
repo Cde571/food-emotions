@@ -1,15 +1,14 @@
---- 
+---
+// Importaciones y configuración inicial
 import Layout from "../layouts/Layout.astro";
-import Index from "./index.astro";
 ---
 
 <Layout title="Login">
-
   <div class="login-container">
     <h1 class="text-pretty text-3xl font-semibold">Welcome to FaceIA</h1>
     <p>Please login to your account to continue exploring the future of IA</p>
     
-    <form action="/login" method="post">
+    <form>
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required />
 
@@ -24,6 +23,8 @@ import Index from "./index.astro";
       </div>
 
       <button type="submit">Login</button>
+
+      <p class="error-message"></p>
       
       <div class="form-links">
         <a href="/forgot-password">Forgot password?</a>
@@ -32,7 +33,14 @@ import Index from "./index.astro";
     </form>
   </div>
 
+  <script src="/js/login.js" defer></script>
+
   <style>
+    .error-message {
+      color: rgb(255, 255, 255);
+      text-align: center;
+      margin-top: 10px;
+    }
     .login-container {
       max-width: 600px;
       margin: auto;

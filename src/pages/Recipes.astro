@@ -19,13 +19,18 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <h2 class="recent-title">Recent:</h2>
-    <div class="recent-recipes gap-7">
-      {['src/img/image (7).png', 'src/img/image (8).png', 'src/img/image (9).png', 'src/img/image (10).png'].map((img, index) => (
-  <Layout title="Recipes">
+<div class="recent-recipes gap-7">
+  {['src/img/image (7).png', 'src/img/image (8).png', 'src/img/image (9).png', 'src/img/image (10).png'].map((img, index) => (
+  <div data-index={index} class="recipe-item">
+    <img src={img} alt={`Recipe ${index + 1}`} class="recipe-img" />
+  </div>
+
+
+    
   <section class="recipes-container mt-36">
     <!-- Rest of your code -->
   </section>
-</Layout>
+
 ))}
     </div>
     
