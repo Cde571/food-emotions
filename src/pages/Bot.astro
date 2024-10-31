@@ -1,0 +1,115 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Bot">
+  <section class="bot-container mt-32">
+    <!-- Diseño del rostro del bot -->
+    <div class="bot-face">
+      <div class="bot-eyes">
+        <div class="eye left-eye"></div>
+        <div class="eye right-eye"></div>
+      </div>
+      <div class="bot-mouth"></div>
+    </div>
+    
+    <!-- Chat del bot -->
+    <div class="bot-chat mt-8">
+      <div id="bot-response" class="bot-response">Hola, ¿cómo puedo ayudarte hoy?</div>
+      <input type="text" id="user-input" placeholder="Escribe tu pregunta..." class="bot-input" />
+      <button id="send-btn" class="bot-button">Enviar</button>
+    </div>
+  </section>
+
+  <script src="/src/scripts/bot.js" type="module" defer></script>
+
+  <style>
+    .bot-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 150px;
+      margin-bottom: 100px;
+     
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .bot-face {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      background-color: #3B432B;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .bot-eyes {
+      display: flex;
+      gap: 30px;
+      position: absolute;
+      top: 40px;
+    }
+
+    .eye {
+      width: 20px;
+      height: 20px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .bot-mouth {
+      position: absolute;
+      bottom: 30px;
+      width: 50px;
+      height: 10px;
+      background-color: #ffffff;
+      border-radius: 20px;
+    }
+
+    .bot-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    .bot-response {
+      background-color: #f0f0f0;
+      color: #333;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      text-align: center;
+      min-height: 50px;
+    }
+
+    .bot-input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+
+    .bot-button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .bot-button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</Layout>

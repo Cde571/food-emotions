@@ -1,0 +1,32 @@
+---
+// BlogCard.astro
+export interface Props {
+  title: string;
+  description: string;
+  date: string;
+  slug: string;
+}
+
+const { title, description, date, slug } = Astro.props;
+---
+
+<article class="blog-card">
+  <h2><a href={slug}>{title}</a></h2>
+  <p>{description}</p>
+  <time datetime={date}>{new Date(date).toLocaleDateString()}</time>
+</article>
+
+<style>
+  .blog-card {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  .blog-card h2 {
+    margin: 0;
+  }
+  .blog-card p {
+    color: #555;
+  }
+</style>

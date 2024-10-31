@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FavoritesSection from '../components/FavoritesSection.astro';
+import HistorySection from '../components/HistorySection.astro';
+import CategoriesSection from '../components/CategoriesSection.astro';
+import SeasonsSection from '../components/SeasonsSection.astro';
+import BlogSection from '../components/BlogSection.astro';
+---
+
+<Layout title="Archives">
+  <section class="archives-container mt-36">
+    <h1 class="archives-title">📚 Archives</h1>
+
+    <!-- Barra de Búsqueda y Filtros -->
+    <div class="search-and-filter">
+      <input type="text" placeholder="Buscar en Archives..." class="search-input" />
+      <select class="filter-dropdown">
+        <option value="all">Todas las secciones</option>
+        <option value="favorites">Recetas Guardadas</option>
+        <option value="history">Historial</option>
+        <option value="categories">Categorías</option>
+        <option value="seasons">Temporadas</option>
+        <option value="blog">Blog</option>
+      </select>
+      <button class="search-btn">🔍 Buscar</button>
+    </div>
+
+    <!-- Navegación de Tabs -->
+    <div class="archive-tabs">
+      <button data-section="favorites">❤️ Recetas Guardadas (12)</button>
+      <button data-section="history">🕒 Historial de Recetas (8)</button>
+      <button data-section="categories">📂 Categorías (4)</button>
+      <button data-section="seasons">🍂 Temporadas</button>
+      <button data-section="blog">📝 Artículos del Blog (20)</button>
+    </div>
+
+    <!-- Componentes de cada sección -->
+    <FavoritesSection id="favorites" />
+    <HistorySection id="history" class="hidden" />
+    <CategoriesSection id="categories" class="hidden" />
+    <SeasonsSection id="seasons" class="hidden" />
+    <BlogSection id="blog" class="hidden" />
+  </section>
+
+  <script src="/src/scripts/archives.js" type="module" defer></script>
+
+  <style>
+    /* Estilos principales */
+    .archives-container {
+      padding: 20px;
+      background-color: #3B432B;
+      color: #ffffff;
+      border-radius: 10px;
+    }
+
+    .archives-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .search-and-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .search-input, .filter-dropdown {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      color: #353535;
+    }
+
+    .filter-dropdown {
+      background-color: #ffffff;
+      color: #353535;
+    }
+
+    .search-btn {
+      background-color: #2f3725;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .archive-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .archive-tabs button {
+      background-color: #2f3725;
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .archive-tabs button:hover {
+      background-color: #4f5a36;
+    }
+
+    .archive-section.hidden {
+      display: none;
+    }
+  </style>
+</Layout>

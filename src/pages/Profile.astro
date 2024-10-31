@@ -6,7 +6,7 @@ import PopularCollections from '../components/PopularCollections.astro';
 import Bibliography from '../components/Bibliography.astro';
 
 let userData = {
-  profilePic: 'src/img/Image (4).png', // Valor por defecto
+  profilePic: 'src/img/Image (4).png',
   userName: 'Cargando...',
   email: '',
   phone: '',
@@ -23,33 +23,34 @@ let error = null;
 ---
 
 <Layout title="Profile">
-   <!-- Botón para cerrar sesión -->
-  
   <div class="profile-container">
     <!-- Sección Izquierda -->
     <div class="left-section">
       <ProfilePic src={userData.profilePic} id="profile-pic" alt={userData.userName} />
       <div class="user-info">
         <h2 id="user-name">{userData.userName}</h2>
-        <p class="user-title" id="user-status">{userData.status}</p>
+        <p class="user-title">
+          <select id="status-select mt-4">
+            <option value="Online" selected={userData.status === 'Online'}>Online</option>
+            <option value="Away" selected={userData.status === 'Away'}>Away</option>
+          </select>
+        </p>
         <div class="user-stats">
-          <p class="stat">42 Recipes</p>
-          <p class="stat">1302 Followers</p>
-          <p class="stat">18K Likes</p>
+          <p class="stat"><span id="recipes-count">42</span> Recipes</p>
+          <p class="stat" onclick="openModal('followersModal')"><span id="followers-count">1302</span> Followers</p>
+          <p class="stat" onclick="openModal('likesModal')"><span id="likes-count">18K</span> Likes</p>
         </div>
         <div class="user-links">
-          <a href="#">Blog</a>
-          <a href="#">Archives</a>
-          <a href="#">Collections</a>
+          <a href="/Blog">Blog</a>
+          <a href="/Archives">Archives</a>
+          <a href="/Recipes">Collections</a>
           <div id="logout-container">
             <button id="logout-button" class="logout-button">Cerrar sesión</button>
-           </div>
+          </div>
         </div>
-       
       </div>
     </div>
-    
-    
+
     <!-- Sección Principal -->
     <div class="main-section">
       <input type="text" placeholder="Buscar" class="search-input" />
@@ -58,14 +59,15 @@ let error = null;
       </div>
       <PopularCollections />
       <div class="team-info">
-        <h3 class="team">Jenna appears in this team</h3>
+        <h3 class="team"><span id="team-user-name">{userData.userName}</span> appears in this team</h3>
         <div class="team-card">
           <h4>ROYAL UI FORCE</h4>
           <p>Formed in 2013</p>
-          <button>UnFollow</button>
-          <p>JENNA IS A MEMBER SINCE NOV, 2014</p>
+          <button id="follow-button">UnFollow</button>
+          <p>{userData.userName.toUpperCase()} IS A MEMBER SINCE NOV, 2014</p>
         </div>
       </div>
+      
     </div>
 
     <!-- Sección Derecha -->
@@ -76,146 +78,132 @@ let error = null;
         website="https://youtube.com/cdecp"
         skills={userData.preferences.interests}
       />
+      <textarea id="bio-editor" class="bio-editor hidden" placeholder="Escribe tu biografía aquí...">{userData.bio}</textarea>
     </div>
+  </div>
+
+  <!-- Modal para seguidores -->
+  <div id="followersModal" class="modal hidden">
+    <h2>Followers</h2>
+    <ul id="followersList"></ul>
+    <button onclick="closeModal('followersModal')">Cerrar</button>
+  </div>
+
+  <!-- Modal para likes -->
+  <div id="likesModal" class="modal hidden">
+    <h2>Likes</h2>
+    <ul id="likesList"></ul>
+    <button onclick="closeModal('likesModal')">Cerrar</button>
   </div>
 
   <p id="error-message" style="color: red;"></p>
 </Layout>
 
 <!-- Importar el archivo de script para ejecutarlo en el cliente -->
-<script src="src/scripts/fetchUserData.js" type="module" ></script>
-
-
+<script src="/src/scripts/fetchUserData.js" type="module" defer></script>
 
 <style>
-  .logout-button {
-    margin-top: 90px;
-    padding: 10px ;
-    background-color: #ff4b4b;
+  /* Estilos CSS */
+  .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+  .modal.hidden { display: none; }
+  .logout-button { margin-top: 20px; padding: 10px 20px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  .logout-button:hover { background-color: #e04343; }
+  .profile-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+    margin-top: 200px;
+  }
+
+  .left-section, .right-section {
+    background-color: #3B432B;
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+  }
+
+  .main-section {
+    padding: 20px;
+  }
+
+  .user-info h2 {
+    font-size: 1.5rem;
+    margin-top: 10px;
+  }
+
+  .user-stats p {
+    margin: 5px 0;
+  }
+
+  .user-links a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-top: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: none;
+  }
+
+  .banner-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .team-card {
+    background-color: white;
+    color: #831400;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .team-card button {
+    background-color: #72B340;
     color: white;
     border: none;
-    border-radius: 5px;
+    padding: 10px;
+    border-radius: 10px;
     cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .right-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .skills-container {
+    margin-top: 20px;
+  }
+
+  .skill {
+    background-color: #555;
+    color: white;
+    padding: 10px;
     margin-right: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+    border-radius: 10px;
+    cursor: default;
   }
 
-  .logout-button:hover {
-    background-color: #e04343;
-  }
-  
-.profile-container {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* Sección izquierda, principal y derecha */
-  gap: 20px;
-  padding: 20px;
-  max-width: 1200px;
-  margin: auto;
-  margin-top: 200px;
-}
+  /* Colores específicos de habilidades */
+  .skill.Photoshop { background-color: #00baff; }
+  .skill.Cocina { background-color: #ff4b00; }
+  .skill.Musica { background-color: #5aff00; }
+  .skill.Jugar { background-color: #ff00a7; }
 
-.left-section, .right-section {
-  background-color: #3B432B; /* Fondo verde oscuro */
-  padding: 20px;
-  color: white;
-  border-radius: 10px;
-}
-
-.main-section {
-  padding: 20px;
-}
-
-.user-info h2 {
-  font-size: 1.5rem;
-  margin-top: 10px;
-}
-
-.user-stats p {
-  margin: 5px 0;
-}
-
-.user-links a {
-  display: block;
-  color: white;
-  text-decoration: none;
-  margin-top: 10px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  border: none;
-}
-
-.banner-image {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
-
-.team-card {
-  background-color: white;
-  color: #831400;
-  padding: 10px;
-  border-radius: 10px;
-  text-align: center;
-  margin-top: 20px;
-}
-
-.team-card button {
-  background-color: #72B340;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.right-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.skills-container {
-  margin-top: 20px;
-}
-
-.skill {
-  background-color: #555;
-  color: white;
-  padding: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  display: inline-block;
-  border-radius: 10px;
-  cursor: default;
-}
-
-/* Para cada color de las habilidades */
-.skill.Photoshop {
-  background-color: #00baff;
-}
-
-.skill.Cocina {
-  background-color: #ff4b00;
-}
-
-.skill.Musica {
-  background-color: #5aff00;
-}
-
-.skill.Jugar {
-  background-color: #ff00a7;
-}
-.stat{
-  color: white;
-}
-.team{
-  color: aliceblue;
-  font-size: 30px;
-  
-  
-}
+  .stat { color: white; }
+  .team { color: aliceblue; font-size: 30px; }
 </style>

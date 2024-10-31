@@ -1,0 +1,135 @@
+---
+import BlogCard from '../components/BlogCard.astro';
+import BlogLayout from '../layouts/BlogLayout.astro';
+
+// Tipo para los posts
+type Post = {
+  frontmatter: {
+    title: string;
+    description: string;
+    date: string;
+  };
+  url: string;
+};
+
+// Importar todos los posts desde la carpeta content/posts
+const posts = Object.entries(import.meta.glob<Post>('../content/posts/*.md', { eager: true })).map(([path, post]) => ({
+  ...post,
+  url: `/blog/${path.split('/').pop()?.replace('.md', '')}`,
+}));
+---
+
+<BlogLayout title="Blog">
+  <div class="container">
+    <!-- Botón para volver al perfil -->
+    <div class="back-to-profile">
+      <a href="/profile" class="profile-button">Ir a Perfil</a>
+    </div>
+    
+    <h1>Blog</h1>
+    <p>Explora nuestras publicaciones más recientes sobre recetas, programación y creación.</p>
+
+    <section class="blog-grid">
+      {posts.map((post) => (
+        <BlogCard
+          title={post.frontmatter.title}
+          description={post.frontmatter.description}
+          date={post.frontmatter.date}
+          slug={post.url ? post.url : ''}  
+        />
+      ))}
+    </section>
+  </div>
+
+  <style>
+    /* Estilos generales */
+    h1 {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 2.5rem;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Botón para volver al perfil */
+    .back-to-profile {
+      text-align: right;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-button {
+      background-color: #0070f3;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .profile-button:hover {
+      background-color: #005bb5;
+    }
+
+    /* Estilos de la cuadrícula de las publicaciones */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* Estilos de la tarjeta del blog */
+    .blog-card {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #ddd;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .blog-card h2 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .blog-card p {
+      color: #666;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .blog-card time {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* Animaciones y transiciones */
+    .blog-card a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .blog-card:hover a {
+      color: #0070f3;
+    }
+  </style>
+</BlogLayout>

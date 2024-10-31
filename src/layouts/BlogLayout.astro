@@ -1,0 +1,40 @@
+---
+// BlogLayout.astro
+const { title, date, children } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <title>{title}</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <header>
+      <h1>{title}</h1>
+      <time datetime={date}>{new Date(date).toLocaleDateString()}</time>
+    </header>
+    <main>
+      {children}
+    </main>
+    <footer>
+      <a href="/blog">← Volver al blog</a>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    background-color: #647d4b;
+  }
+  header h1 {
+    font-size: 2rem;
+  }
+  footer {
+    margin-top: 2rem;
+  }
+</style>
