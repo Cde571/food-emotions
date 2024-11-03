@@ -3,72 +3,90 @@ import Header from "../components/Header.astro";
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Testimonials">   
-    <Header />
-    
-    <section class="testimonials-container">
-        <h1 class="title">Testimonials</h1>
-        <div class="testimonials-grid">
-            {Array.from({ length: 6 }).map(() => (
-                <div class="testimonial-card">
-                    <img src="/src/img/Image (2).png" alt="Testimonial Avatar" class="testimonial-avatar">
-                    <p class="testimonial-text">Lorem ipsum dolor sit amet consectetur adipiscing elit vehicula iaculi</p>
-                    <p class="testimonial-author">JENNA ORTEGA</p>
-                </div>
-            ))}
-        </div>
-    </section>
+<Layout title="Testimonials">
+  <Header />
+
+  <section class="testimonials-container">
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <img src="/src/img/person1.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <p class="testimonial-author">John Doe</p>
+      </div>
+
+      <div class="testimonial-card">
+        <img src="/src/img/person2.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        <p class="testimonial-author">Jane Smith</p>
+      </div>
+
+      <div class="testimonial-card">
+        <img src="/src/img/person3.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p class="testimonial-author">Michael Johnson</p>
+      </div>
+
+      <div class="testimonial-card">
+        <img src="/src/img/person4.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p class="testimonial-author">Emily Davis</p>
+      </div>
+
+      <div class="testimonial-card">
+        <img src="/src/img/person5.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+        <p class="testimonial-author">David Lee</p>
+      </div>
+
+      <div class="testimonial-card">
+        <img src="/src/img/person6.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
+        <p class="testimonial-text">Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+        <p class="testimonial-author">Sarah Kim</p>
+      </div>
+    </div>
+  </section>
 </Layout>
 
-
 <style>
-    .testimonials-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 4rem;
-}
-
-.title {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    color: #ffffff;
+.testimonials-container {
+  background-color: #c2d5cb;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    justify-items: center; /* Centra las tarjetas en su contenedor */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
 }
 
 .testimonial-card {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%; /* Haz que la tarjeta ocupe todo el ancho posible */
-    max-width: 300px; /* Limita el tamaño máximo de la tarjeta */
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  margin-top: 60px;
 }
 
 .testimonial-avatar {
-    width: 100px; /* Ajusta el tamaño de la imagen */
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 1rem auto; /* Centra la imagen horizontalmente */
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
 }
 
 .testimonial-text {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 1rem;
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
 }
 
 .testimonial-author {
-    font-weight: bold;
-    color: #333;
+  font-weight: bold;
+  margin-top: 10px;
 }
 </style>
