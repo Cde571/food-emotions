@@ -1,0 +1,75 @@
+---
+// Datos de las categorías de ejemplo
+const categories = [
+  { title: "Desserts", description: "Deliciosos postres para cada ocasión", icon: "🍰" },
+  { title: "Drinks", description: "Bebidas refrescantes y saludables", icon: "🍹" },
+  { title: "Lunch", description: "Platos principales para el almuerzo", icon: "🍛" },
+  { title: "Breakfast", description: "Inicia tu día con energía", icon: "🥐" },
+  { title: "Healthy", description: "Comida sana y equilibrada", icon: "🥗" },
+];
+---
+
+<section class="categories-container">
+  <h2 class="categories-title">Explora nuestras categorías</h2>
+  <div class="categories-grid">
+    {categories.map(category => (
+      <div class="category-card">
+  <span class="category-icon">{category.icon}</span>
+  <h3 class="category-title">{category.title}</h3>
+  <p class="category-description">{category.description}</p>
+</div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .categories-container {
+    padding: 20px;
+    background-color: #3B432B;
+    color: #ffffff;
+    border-radius: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .categories-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .category-card {
+    background-color: #ffffff;
+    color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .category-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .category-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+  }
+
+  .category-title {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+
+  .category-description {
+    font-size: 1rem;
+    color: #666;
+  }
+</style>

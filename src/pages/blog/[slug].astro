@@ -1,20 +1,13 @@
 ---
-// Importar el diseño del blog
-import BlogLayout from '../../layouts/BlogLayout.astro';
+// [slug].astro
+import BlogLayout from './[slug].astro';
 
-const { slug } = Astro.params;
+const { frontmatter, Content } = await import(`../../content/posts/${Astro.params.slug}.md`);
 
-// Intentar cargar el archivo Markdown con el slug especificado
-const post = await import(`../../content/posts/${slug}.md`).catch(() => null);
-
-// Verificar si el post existe; si no, mostrar un error o redirigir
-if (!post) {
-  throw new Error(`Post not found for slug: ${slug}`);
-}
-
-const { frontmatter, Content } = post;
+const title = frontmatter.title;
+const date = frontmatter.date;
 ---
 
-<BlogLayout title={frontmatter.title} date={frontmatter.date}>
+<BlogLayout title={title} date={date}>
   <Content />
 </BlogLayout>

@@ -1,9 +1,5 @@
 ---
-title: "Mi Primer Post"
-description: "Este es el primer post de mi blog."
-date: "2024-01-01"
+title: "Mi primera receta"
+description: "Una descripción breve de la receta"
+date: "2023-10-31"
 ---
-
-## ¡Bienvenido!
-
-Este es el contenido de mi primer post de blog, escrito en Markdown y manejado por Astro.

@@ -1,6 +1,6 @@
 ---
 // BlogLayout.astro
-const { title, date, children } = Astro.props;
+const { title = "Blog", children } = Astro.props;
 ---
 
 <html lang="es">
@@ -11,30 +11,20 @@ const { title, date, children } = Astro.props;
   <body>
     <header>
       <h1>{title}</h1>
-      <time datetime={date}>{new Date(date).toLocaleDateString()}</time>
+      <nav>
+        <a href="/contribute">Contribute</a>
+      </nav>
     </header>
     <main>
       {children}
     </main>
     <footer>
-      <a href="/blog">← Volver al blog</a>
+      <a href="/blog">← Back to Blog</a>
     </footer>
   </body>
 </html>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    background-color: #647d4b;
-  }
-  header h1 {
-    font-size: 2rem;
-  }
-  footer {
-    margin-top: 2rem;
-  }
+  body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; }
+  h1 { font-size: 2rem; }
 </style>

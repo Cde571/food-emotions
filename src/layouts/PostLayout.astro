@@ -1,0 +1,15 @@
+---
+const { title, date, children } = Astro.props;
+---
+
+<BlogLayout title={title}>
+  <article>
+    <header>
+      <h1>{title}</h1>
+      <time>{date}</time>
+    </header>
+    <div>{children}</div>
+    <ReactionBar />
+    <CommentSection />
+  </article>
+</BlogLayout>
