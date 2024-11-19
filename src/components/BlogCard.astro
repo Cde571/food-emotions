@@ -1,32 +1,128 @@
 ---
-// BlogCard.astro
-export interface Props {
+export interface BlogCardProps {
+  author: string;
   title: string;
   description: string;
-  date: string;
-  slug: string;
+  time: string;
+  image: string;
+  profilePic: string; 
 }
-
-const { title, description, date, slug } = Astro.props;
+const { author, title, description, time, image, profilePic } = Astro.props;
 ---
 
-<article class="blog-card">
-  <h2><a href={slug}>{title}</a></h2>
-  <p>{description}</p>
-  <time datetime={date}>{new Date(date).toLocaleDateString()}</time>
-</article>
-
 <style>
-  .blog-card {
-    margin: 1rem 0;
-    padding: 1rem;
-    border: 1px solid #ddd;
+  .card {
+    background-color: #c8e6c9; 
     border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
-  .blog-card h2 {
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .card-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; 
+    margin-right: 0.5rem;
+  }
+
+  .card-title {
+    font-weight: bold;
     margin: 0;
   }
-  .blog-card p {
-    color: #555;
+
+  .card-content img {
+    width: 100%;
+    height: auto; 
+    max-height: 150px; 
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+  .card-footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
+
+  .card-actions button {
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  color: #4caf50;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+}
+
+.card-actions button:hover {
+  color: #388e3c; 
+}
+
+  .image-container {
+    height: 200px;
+    overflow: hidden;
+    width: 100%;
+    max-height: 150px; 
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .recipe-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+  text-align: center; /* Centrar el título */
+  color: #2e7d32; /* Verde oscuro */
+}
 </style>
+
+<div class="card">
+  <!-- Encabezado con foto de perfil y autor -->
+  <div class="card-header">
+    <img src={profilePic} alt={`${author} profile picture`} />
+    <div>
+      <p class="card-title">{author}</p>
+    </div>
+  </div>
+
+  <!-- Imagen de la receta -->
+  <div class="image-container">
+    <img src={image} alt={title} />
+  </div>
+
+  <!-- Título de la receta -->
+  <h2 class="recipe-title">{title}</h2>
+  
+  <!-- Contenido principal -->
+  <div class="card-content">
+    <p>{description}</p>
+    <p><small>{time}</small></p>
+    <a href="#">See full recipe</a>
+  </div>
+
+  <div class="card-actions">
+    <button>
+      <img src="src/img/emojis/heart.svg" alt="Like" width="20" height="20" /> Like
+    </button>
+    <button>
+      <img src="src/img/emojis/comment.svg" alt="Comment" width="20" height="20" /> Comment
+    </button>
+    <button>
+      <img src="src/img/emojis/favorite.svg" alt="Save" width="20" height="20" /> Save
+    </button>
+  </div>
+</div>
