@@ -1,19 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import chatbotImage from '../img/chatbot.png';
 ---
 
 <Layout title="Bot">
   <section class="bot-container mt-32">
-    <!-- Diseño del rostro del bot -->
-    <div class="bot-face">
-      <div class="bot-eyes">
-        <div class="eye left-eye"></div>
-        <div class="eye right-eye"></div>
-      </div>
-      <div class="bot-mouth"></div>
-    </div>
-    
-    <!-- Chat del bot -->
+    <img src={chatbotImage.src} alt="Bot" class="bot-image" />
+
     <div class="bot-chat mt-8">
       <div id="bot-response" class="bot-response">Hola, ¿cómo puedo ayudarte hoy?</div>
       <input type="text" id="user-input" placeholder="Escribe tu pregunta..." class="bot-input" />
@@ -30,45 +23,14 @@ import Layout from '../layouts/Layout.astro';
       align-items: center;
       margin-top: 150px;
       margin-bottom: 100px;
-     
       padding: 20px;
       border-radius: 10px;
     }
 
-    .bot-face {
-      position: relative;
+    .bot-image {
       width: 150px;
-      height: 150px;
-      background-color: #3B432B;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      height: auto;
       margin-bottom: 20px;
-    }
-
-    .bot-eyes {
-      display: flex;
-      gap: 30px;
-      position: absolute;
-      top: 40px;
-    }
-
-    .eye {
-      width: 20px;
-      height: 20px;
-      background-color: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .bot-mouth {
-      position: absolute;
-      bottom: 30px;
-      width: 50px;
-      height: 10px;
-      background-color: #ffffff;
-      border-radius: 20px;
     }
 
     .bot-chat {

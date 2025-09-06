@@ -1,0 +1,230 @@
+---
+const recipes = [
+  {
+    id: 'modal-1',
+    title: 'Green smoothie',
+    image: '/img/green-smoothie.jpg',
+    category: 'Drinks',
+    origin: 'United States',
+    time: '5 mins',
+    servings: 1,
+    steps: [
+      'Blend 1 ripe banana, 1 cup of spinach, 1 apple, and 1 cup of water.',
+      'Add 1 tablespoon of chia seeds and a handful of ice cubes.',
+      'Serve fresh in a glass and enjoy.'
+    ],
+    ingredients: [
+      '1 ripe banana',
+      '1 cup spinach',
+      '1 apple',
+      '1 cup water',
+      '1 tablespoon chia seeds',
+      'Ice cubes (optional)'
+    ]
+  },
+  {
+    id: 'modal-2',
+    title: 'Avocado toast',
+    image: '/img/Avocado_toast.jpg',
+    description: 'A crunchy and nutritious snack.',
+    category: 'Breakfast',
+    origin: 'Australia',
+    time: '10 mins',
+    servings: 1,
+    steps: [
+      'Toast 2 slices of whole-grain bread until crispy.',
+      'Mash 1 ripe avocado with the juice of half a lemon and a pinch of salt.',
+      'Spread the mashed avocado on the toasted bread.',
+      'Top with sliced tomatoes, a sprinkle of seeds, and a drizzle of olive oil.'
+    ],
+    ingredients: [
+      '2 slices whole-grain bread',
+      '1 ripe avocado',
+      'Half a lemon (for juice)',
+      'Salt to taste',
+      '2-3 slices of tomato',
+      '1 tablespoon seeds (e.g., sunflower, pumpkin)',
+      'Olive oil (for drizzling)'
+    ]
+  },
+  {
+    id: 'modal-3',
+    title: 'Oatmeal bowl',
+    image: '/img/Oatmeal_bowl.jpg',
+    description: 'Ideal for a nourishing breakfast.',
+    category: 'Breakfast',
+    origin: 'Scotland',
+    time: '12 mins',
+    servings: 1,
+    steps: [
+      'Cook 1/2 cup of oats in 1 cup of almond milk over medium heat until soft and creamy.',
+      'Add sliced banana, fresh berries, and a handful of chopped nuts (e.g., almonds or walnuts).',
+      'Drizzle with 1 tablespoon of honey or maple syrup for sweetness.'
+    ],
+    ingredients: [
+      '1/2 cup oats',
+      '1 cup almond milk',
+      '1 banana (sliced)',
+      'A handful of fresh berries (e.g., strawberries, blueberries)',
+      'A handful of chopped nuts (e.g., almonds, walnuts)',
+      '1 tablespoon honey or maple syrup'
+    ]
+  },
+  {
+    id: 'modal-4',
+    title: 'Chia pudding',
+    image: '/img/chia_pudding.jpg',
+    description: 'A light and sweet treat, perfect after meals.',
+    category: 'Desserts',
+    origin: 'Mexico',
+    time: '8 mins',
+    servings: 1,
+    steps: [
+      'Mix 3 tablespoons of chia seeds with 1 cup of almond milk.',
+      'Let the mixture sit in the fridge overnight to thicken.',
+      'Top with fresh mango slices or berries before serving.'
+    ],
+    ingredients: [
+      '3 tablespoons chia seeds',
+      '1 cup almond milk',
+      'Fresh mango slices or berries (for topping)'
+    ]
+  },
+  {
+    id: 'modal-5',
+    title: 'Fruit yogurt parfait',
+    image: '/img/yogurt_parfait.png',
+    description: 'Healthy dessert with layers of yogurt, fruit and granola.',
+    category: 'Desserts',
+    origin: 'France',
+    time: '10 mins',
+    servings: 1,
+    steps: [
+      'Layer 1/2 cup of Greek yogurt with a handful of mixed berries (strawberries, blueberries).',
+      'Add 2 tablespoons of granola between the layers.',
+      'Repeat the layers and finish with a drizzle of honey on top.'
+    ],
+    ingredients: [
+      '1/2 cup Greek yogurt',
+      'A handful of mixed berries (e.g., strawberries, blueberries)',
+      '2 tablespoons granola',
+      'Honey (for drizzling)'
+    ]
+  },
+  {
+    id: 'modal-6',
+    title: 'Iced herbal tea',
+    image: '/img/herbal_tea.jpg',
+    description: 'Refreshing and caffeine-free option to stay hydrated.',
+    category: 'Drinks',
+    origin: 'Middle East',
+    time: '6 mins',
+    servings: 1,
+    steps: [
+      'Steep 2 mint or hibiscus tea bags in 1 cup of hot water for 5 minutes.',
+      'Let the tea cool to room temperature, then refrigerate to chill.',
+      'Serve in a glass with lemon slices and ice cubes.'
+    ],
+    ingredients: [
+      '2 mint or hibiscus tea bags',
+      '1 cup hot water',
+      'Lemon slices (for garnish)',
+      'Ice cubes'
+    ]
+  }
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Healthy recipes</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module">
+      export function openModal(id) {
+        const modal = document.getElementById(id);
+        const content = modal.querySelector('[data-modal-content]');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          content.classList.remove('scale-90', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      }
+
+      export function closeModal(id) {
+        const modal = document.getElementById(id);
+        const content = modal.querySelector('[data-modal-content]');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-90', 'opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 300);
+      }
+
+      window.openModal = openModal;
+      window.closeModal = closeModal;
+    </script>
+  </head>
+  <body class="bg-green-50 text-green-900 font-sans p-8">
+    <h1 class="text-4xl font-bold text-center mb-8">🌱 Healthy recipes</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {recipes.map(recipe => (
+        <div
+          class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer"
+          onclick={`openModal('${recipe.id}')`}
+        >
+          <img src={recipe.image} alt={recipe.title} class="w-full h-40 object-cover rounded-md mb-3" />
+          <h2 class="text-xl font-semibold mb-1">{recipe.title}</h2>
+          <p class="text-sm mb-2 text-gray-700">
+            {recipe.description}
+            <strong class="block mt-1 text-green-600">Category: {recipe.category}</strong>
+            <span class="block text-gray-500 text-xs">Origin: {recipe.origin}</span>
+          </p>
+        </div>
+      ))}
+    </div>
+
+    {recipes.map(recipe => (
+      <div
+        id={recipe.id}
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+      >
+        <div
+          data-modal-content
+          class="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-90 opacity-0"
+        >
+          <h2 class="text-2xl font-bold mb-3">{recipe.title}</h2>
+          <img src={recipe.image} alt={recipe.title} class="w-full h-48 object-cover rounded-md mb-4" />
+    
+          <div class="flex justify-between text-sm text-gray-600 mb-4">
+            <span>🕒 {recipe.time}</span>
+            <span>🍽️ {recipe.servings} serving{recipe.servings > 1 ? 's' : ''}</span>
+            <span>🌍 {recipe.origin}</span>
+          </div>
+    
+          <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
+          <ul class="list-disc list-inside space-y-1 text-gray-800 text-sm mb-4">
+            {recipe.ingredients.map(ingredient => (
+              <li>{ingredient}</li>
+            ))}
+          </ul>
+    
+          <h3 class="text-lg font-semibold mb-2">Steps</h3>
+          <ul class="list-decimal list-inside space-y-1 text-gray-800 text-sm mb-4">
+            {recipe.steps.map(step => (
+              <li>{step}</li>
+            ))}
+          </ul>
+    
+          <button
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            onclick={`closeModal('${recipe.id}')`}
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    ))}
+  </body>
+</html>

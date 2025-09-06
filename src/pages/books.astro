@@ -1,0 +1,86 @@
+---
+import { useState } from 'react'
+---
+
+<html lang="en">
+  <head>
+    <title>Books Section</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .verde {
+        background-color: #eafaf1;
+        color: #2f6135;
+      }
+      .book-card {
+        @apply bg-white shadow-md rounded-xl p-4 flex flex-col gap-2;
+      }
+    </style>
+  </head>
+  <body class="verde min-h-screen p-10 font-sans">
+    <h1 class="text-4xl font-bold mb-8 text-center">📚 Book Recommendations</h1>
+
+    <!-- Buscador -->
+    <div class="flex justify-center mb-8">
+      <input
+        type="text"
+        placeholder="Search by title, author or category..."
+        id="searchInput"
+        class="w-full max-w-xl p-3 rounded-lg border border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        oninput="filterBooks()"
+      />
+    </div>
+
+    <!-- Categorías -->
+    <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="book-card" data-title="El poder del ahora" data-author="Eckhart Tolle" data-category="Espiritualidad">
+        <img src="/img/el_poder_del_ahora.jpg" alt="El poder del ahora" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">El poder del ahora</h2>
+        <p class="text-sm text-gray-600">Autor: Eckhart Tolle</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Espiritualidad</span>
+        <p class="text-sm mt-2">Una guía para alcanzar la iluminación a través del poder del presente.</p>
+      </div>
+
+      <div class="book-card" data-title="Los secretos de la mente millonaria" data-author="T. Harv Eker" data-category="Autoayuda">
+        <img src="/img/el_hombre_en_busca_del_sentido.jpg" alt="El hombre en busca de sentido" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">El hombre en busca de sentido</h2>
+        <p class="text-sm text-gray-600">Autor: Viktor Frankl</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Autoayuda</span>
+        <p class="text-sm mt-2">Aprende a explorar tus habilidades no descubiertas para este mundo incierto.</p>
+      </div>
+
+      <div class="book-card" data-title="Inteligencia emocional" data-author="Daniel Goleman" data-category="Psicología">
+        <img src="/img/la_inteligencia_emocional.jpg" alt="Inteligencia emocional" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">Inteligencia emocional</h2>
+        <p class="text-sm text-gray-600">Autor: Daniel Goleman</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Psicología</span>
+        <p class="text-sm mt-2">Explora cómo la inteligencia emocional impacta tu vida personal y profesional.</p>
+      </div>
+
+      <div class="book-card" data-title="Hábitos atómicos" data-author="James Clear" data-category="Desarrollo personal">
+        <img src="/img/habitos_atomicos.png" alt="Hábitos atómicos" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">Hábitos atómicos</h2>
+        <p class="text-sm text-gray-600">Autor: James Clear</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Desarrollo personal</span>
+        <p class="text-sm mt-2">Pequeños cambios diarios que transforman tu vida y te ayudan a lograr grandes resultados.</p>
+      </div>
+
+      <div class="book-card" data-title="El alquimista" data-author="Paulo Coelho" data-category="Ficción">
+        <img src="/img/el_alquimista.png" alt="El alquimista" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">El alquimista</h2>
+        <p class="text-sm text-gray-600">Autor: Paulo Coelho</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Ficción</span>
+        <p class="text-sm mt-2">Una fábula inspiradora sobre seguir tus sueños y escuchar al corazón.</p>
+      </div>
+
+      <div class="book-card" data-title="Padre Rico Padre Pobre" data-author="Robert Kiyosaki" data-category="Finanzas">
+        <img src="/img/padre_rico_padre_pobre.png" alt="Padre Rico Padre Pobre" class="w-full h-60 object-cover rounded-md" />
+        <h2 class="text-xl font-semibold">Padre rico padre pobre</h2>
+        <p class="text-sm text-gray-600">Autor: Robert Kiyosaki</p>
+        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Finanzas</span>
+        <p class="text-sm mt-2">Una perspectiva diferente sobre el dinero, la inversión y la educación financiera.</p>
+      </div>
+    </div>
+    <script src="/search.js" defer></script>
+  </body>
+</html>

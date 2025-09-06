@@ -1,0 +1,93 @@
+---
+import { AiFillHeart, AiFillStar, AiOutlineComment } from 'react-icons/ai';
+
+interface Post {
+  id: number;
+  user: string;
+  type: "Book" | "Music" | "Recipe";
+  title: string;
+  description: string;
+  image: string;
+  liked: boolean;
+  favorite: boolean;
+  comments: string[];
+}
+
+let posts: Post[] = [
+  {
+    id: 1,
+    user: "Carolina García",
+    type: "Book",
+    title: "Atomic Habits",
+    description: "Great book to build healthy routines.",
+    image: "/img/atomichabits.jpg",
+    liked: false,
+    favorite: false,
+    comments: [],
+  },
+  {
+    id: 2,
+    user: "Luis López",
+    type: "Recipe",
+    title: "Avocado Toast",
+    description: "Quick and healthy breakfast idea.",
+    image: "/img/avocadotoast.jpg",
+    liked: false,
+    favorite: false,
+    comments: [],
+  },
+  {
+    id: 3,
+    user: "Camila Henao",
+    type: "Music",
+    title: "Rainforest Vibes",
+    description: "Relax with nature-inspired music.",
+    image: "/img/rainforest_vibes.jpg",
+    liked: false,
+    favorite: false,
+    comments: [],
+  }
+]
+---
+
+<section class="max-w-5xl mx-auto px-4 py-16">
+  <h1 class="text-4xl font-bold text-green-800 text-center mb-12">
+    Social Feed - Wellness Community
+  </h1>
+
+  <div class="grid gap-10">
+    {posts.map((post) => (
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
+        <img src={post.image} alt={post.title} class="w-full h-64 object-cover" />
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-2xl font-semibold text-green-700">{post.title}</h2>
+            <span class="px-3 py-1 bg-green-100 text-green-600 text-sm rounded-full">{post.type}</span>
+          </div>
+          <p class="text-gray-700 mb-4">{post.description}</p>
+          <p class="text-sm text-gray-400 mb-4">Posted by <strong>{post.user}</strong></p>
+
+          <div class="flex items-center gap-6">
+            <!-- Icono de Like -->
+            <button class="flex items-center gap-1 text-pink-600 hover:text-pink-800 transition">
+              <AiFillHeart className="h-6 w-6" />
+              <span class="text-sm">{post.liked ? "Liked" : "Like"}</span>
+            </button>
+
+            <!-- Icono de Favorite -->
+            <button class="flex items-center gap-1 text-yellow-600 hover:text-yellow-800 transition">
+              <AiFillStar className="h-6 w-6" />
+              <span class="text-sm">{post.favorite ? "Favorited" : "Favorite"}</span>
+            </button>
+
+            <!-- Icono de Comentarios -->
+            <button class="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition">
+              <AiOutlineComment className="h-6 w-6" />
+              <span class="text-sm">Comment</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

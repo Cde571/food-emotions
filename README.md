@@ -1,6 +1,6 @@
-# 🚀 Proyecto Astro: Bot IA con Expresiones Faciales
+# 🚀 Proyecto Astro: Chatbot iterativo
 
-¡Bienvenido a nuestro proyecto de Bot IA con Astro! Este proyecto utiliza **Astro** para crear una página web rápida y optimizada, enfocada en la interacción con bots de inteligencia artificial con expresiones faciales.
+¡Bienvenido a nuestro proyecto de ChatBot con Astro! Este proyecto utiliza **Astro** para crear una página web rápida y optimizada, enfocada en la interacción con bots interactivos.
 
 Si nunca has trabajado con Astro, este README te guiará para configurar el proyecto y comenzar a trabajar en él. 🌟
 
@@ -67,7 +67,7 @@ Aquí tienes la estructura básica del proyecto para que puedas orientarte fáci
 🌐 Secciones en el Index
 La página principal (index.astro) incluirá las siguientes secciones:
 
-Intro: Introducción a los bots y la inteligencia artificial.
+Intro: Introducción a los chatbots.
 Asks: Preguntas frecuentes o casos de uso destacados.
 Variedad de Bots: Presentación de los diferentes bots disponibles.
 Características: Detalle de las características clave de nuestros bots.

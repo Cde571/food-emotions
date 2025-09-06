@@ -9,21 +9,21 @@ import Layout from '../layouts/Layout.astro';
       <div class="card">
         <h2 class="plan-name">Starter</h2>
         <p class="price">USD 9.00<span>/mo</span></p>
-        <p class="features">• Access to basic features<br />• Monthly support</p>
+        <p class="social">• Access to basic features<br />• Monthly support</p>
         <button class="select-plan-btn" onclick="selectPlan('Starter', 9)">Select Starter</button>
       </div>
       
       <div class="card">
         <h2 class="plan-name">Professional</h2>
         <p class="price">USD 29.00<span>/mo</span></p>
-        <p class="features">• All Starter features<br />• Advanced analytics<br />• Monthly support</p>
+        <p class="social">• All Starter features<br />• Advanced analytics<br />• Monthly support</p>
         <button class="select-plan-btn" onclick="selectPlan('Professional', 29)">Select Professional</button>
       </div>
 
       <div class="card">
         <h2 class="plan-name">Enterprise</h2>
         <p class="price">Contact us</p>
-        <p class="features">• All Professional features<br />• Dedicated account manager<br />• Custom solutions</p>
+        <p class="social">• All Professional features<br />• Dedicated account manager<br />• Custom solutions</p>
         <button class="select-plan-btn" onclick="selectPlan('Enterprise')">Contact Sales</button>
       </div>
     </div>
@@ -79,7 +79,7 @@ import Layout from '../layouts/Layout.astro';
     font-weight: bold;
   }
 
-  .features {
+  .social {
     margin-bottom: 20px;
     font-size: 0.9rem;
   }
