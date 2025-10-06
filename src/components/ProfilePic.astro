@@ -1,9 +1,9 @@
 ---
-const { alt } = Astro.props;
+const { src, alt } = Astro.props;
 ---
 
 <div class="profile-pic">
-  <img src={"src/img/elena_profile.jpg"} alt={alt} class="profile-image" />
+  <img src={src || "src/img/Image (4).png"} alt={alt} class="profile-image" />
 </div>
 
 <style>

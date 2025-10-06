@@ -1,5 +1,4 @@
 ---
-// Importaciones y configuración inicial
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -7,10 +6,10 @@ import Layout from "../layouts/Layout.astro";
   <div class="login-container">
     <h1 class="text-pretty text-3xl font-semibold">Welcome to FaceIA</h1>
     <p>Please login to your account to continue exploring the future of IA</p>
-    
-    <form>
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required />
+
+    <form id="loginForm">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required />
 
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required />
@@ -24,8 +23,8 @@ import Layout from "../layouts/Layout.astro";
 
       <button type="submit">Login</button>
 
-      <p class="error-message"></p>
-      
+      <p id="statusMessage" class="error-message"></p>
+
       <div class="form-links">
         <a href="/forgot-password">Forgot password?</a>
         <a href="/sign-up">Sign up</a>
@@ -33,7 +32,50 @@ import Layout from "../layouts/Layout.astro";
     </form>
   </div>
 
-  <script src="/js/login.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('loginForm');
+      const statusMessage = document.getElementById('statusMessage');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!email || !password) {
+          statusMessage.textContent = 'Please enter both email and password.';
+          return;
+        }
+
+        try {
+          const response = await fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+            credentials: 'include', // Permite mantener la sesión
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            statusMessage.style.color = 'lightgreen';
+            statusMessage.textContent = '✅ Login successful. Redirecting...';
+            setTimeout(() => {
+              window.location.href = data.redirectUrl || '/Profile';
+            }, 1000);
+          } else {
+            statusMessage.style.color = 'red';
+            statusMessage.textContent = `❌ ${data.message || 'Invalid credentials.'}`;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          statusMessage.style.color = 'red';
+          statusMessage.textContent = '❌ Connection error. Please try again.';
+        }
+      });
+    });
+  </script>
 
   <style>
     .error-message {
@@ -41,14 +83,15 @@ import Layout from "../layouts/Layout.astro";
       text-align: center;
       margin-top: 10px;
     }
+
     .login-container {
       max-width: 600px;
       margin: auto;
       padding: 20px;
       border: 1px solid #ccc;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 300px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 200px;
     }
 
     h1 {
@@ -60,6 +103,7 @@ import Layout from "../layouts/Layout.astro";
     p {
       text-align: center;
       margin-bottom: 20px;
+      color: #ccc;
     }
 
     form {
@@ -70,6 +114,7 @@ import Layout from "../layouts/Layout.astro";
     label {
       margin-bottom: 5px;
       font-weight: bold;
+      color: #ffffff;
     }
 
     input {
@@ -82,6 +127,7 @@ import Layout from "../layouts/Layout.astro";
 
     .login-options {
       margin-bottom: 10px;
+      color: #fff;
     }
 
     button {
@@ -113,5 +159,4 @@ import Layout from "../layouts/Layout.astro";
       text-decoration: underline;
     }
   </style>
-
 </Layout>

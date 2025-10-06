@@ -1,5 +1,4 @@
 ---
-// Importaciones y configuración inicial
 import Layout from '../layouts/Layout.astro';
 import ProfilePic from '../components/ProfilePic.astro';
 import PopularCollections from '../components/PopularCollections.astro';
@@ -10,9 +9,8 @@ let userData = {
   userName: 'Cargando...',
   email: '',
   phone: '',
-  status: '',
+  status: 'Online',
   bio: '',
-  interactionHistory: '',
   preferences: {
     interests: [],
     notifications: false,
@@ -24,21 +22,22 @@ let error = null;
 
 <Layout title="Profile">
   <div class="profile-container">
-    <!-- Sección Izquierda -->
+    <!-- 🔹 Sección Izquierda -->
     <div class="left-section">
       <ProfilePic src={userData.profilePic} id="profile-pic" alt={userData.userName} />
       <div class="user-info">
         <h2 id="user-name">{userData.userName}</h2>
-        <p class="user-title">
-          <select id="status-select mt-4">
+        <div class="status-container">
+          <label for="status-select" class="status-label">Estado:</label>
+          <select id="status-select" class="mt-4">
             <option value="Online" selected={userData.status === 'Online'}>Online</option>
             <option value="Away" selected={userData.status === 'Away'}>Away</option>
           </select>
-        </p>
+        </div>
         <div class="user-stats">
           <p class="stat"><span id="recipes-count">42</span> Recipes</p>
-          <p class="stat" onclick="openModal('followersModal')"><span id="followers-count">1302</span> Followers</p>
-          <p class="stat" onclick="openModal('likesModal')"><span id="likes-count">18K</span> Likes</p>
+          <p class="stat" onclick="openModal('followersModal')"><span id="followers-count">0</span> Followers</p>
+          <p class="stat" onclick="openModal('likesModal')"><span id="likes-count">0</span> Likes</p>
         </div>
         <div class="user-links">
           <a href="/blog">Blog</a>
@@ -51,26 +50,27 @@ let error = null;
       </div>
     </div>
 
-    <!-- Sección Principal -->
+    <!-- 🔹 Sección Principal -->
     <div class="main-section">
-      <input type="text" placeholder="Buscar" class="search-input" />
+      <input type="text" placeholder="Buscar..." class="search-input" />
       <div class="banner">
         <img src="src/img/1.png" alt="Banner" class="banner-image" />
       </div>
       <PopularCollections />
       <div class="team-info">
-        <h3 class="team"><span id="team-user-name">{userData.userName}</span> appears in this team</h3>
+        <h3 class="team">
+          <span id="team-user-name">{userData.userName}</span> appears in this team
+        </h3>
         <div class="team-card">
           <h4>ROYAL UI FORCE</h4>
           <p>Formed in 2013</p>
-          <button id="follow-button">UnFollow</button>
+          <button id="follow-button">Follow</button>
           <p>{userData.userName.toUpperCase()} IS A MEMBER SINCE NOV, 2014</p>
         </div>
       </div>
-      
     </div>
 
-    <!-- Sección Derecha -->
+    <!-- 🔹 Sección Derecha -->
     <div class="right-section">
       <Bibliography 
         id="bio-description"
@@ -78,18 +78,18 @@ let error = null;
         website="https://youtube.com/cdecp"
         skills={userData.preferences.interests}
       />
-      <textarea id="bio-editor" class="bio-editor hidden" placeholder="Escribe tu biografía aquí...">{userData.bio}</textarea>
+      <textarea id="bio-editor" class="bio-editor" placeholder="Escribe tu biografía aquí...">{userData.bio}</textarea>
     </div>
   </div>
 
-  <!-- Modal para seguidores -->
+  <!-- 🔹 Modal de seguidores -->
   <div id="followersModal" class="modal hidden">
     <h2>Followers</h2>
     <ul id="followersList"></ul>
     <button onclick="closeModal('followersModal')">Cerrar</button>
   </div>
 
-  <!-- Modal para likes -->
+  <!-- 🔹 Modal de likes -->
   <div id="likesModal" class="modal hidden">
     <h2>Likes</h2>
     <ul id="likesList"></ul>
@@ -99,15 +99,37 @@ let error = null;
   <p id="error-message" style="color: red;"></p>
 </Layout>
 
-<!-- Importar el archivo de script para ejecutarlo en el cliente -->
+<!-- Script que conecta con el backend -->
 <script src="/src/scripts/fetchUserData.js" type="module" defer></script>
 
 <style>
-  /* Estilos CSS */
-  .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+  /* 🔹 Estilos */
+  .modal { 
+    display: none; 
+    position: fixed; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    background: white; 
+    padding: 20px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
   .modal.hidden { display: none; }
-  .logout-button { margin-top: 20px; padding: 10px 20px; background-color: #ff4b4b; color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+  .logout-button { 
+    margin-top: 20px; 
+    padding: 10px 20px; 
+    background-color: #ff4b4b; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+  }
+
   .logout-button:hover { background-color: #e04343; }
+
   .profile-container {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
@@ -115,7 +137,7 @@ let error = null;
     padding: 20px;
     max-width: 1200px;
     margin: auto;
-    margin-top: 200px;
+    margin-top: 100px;
   }
 
   .left-section, .right-section {
@@ -134,9 +156,15 @@ let error = null;
     margin-top: 10px;
   }
 
-  .user-stats p {
-    margin: 5px 0;
+  .status-container {
+    margin-top: 10px;
   }
+
+  .status-label {
+    margin-right: 10px;
+  }
+
+  .user-stats p { margin: 5px 0; }
 
   .user-links a {
     display: block;
@@ -197,12 +225,6 @@ let error = null;
     border-radius: 10px;
     cursor: default;
   }
-
-  /* Colores específicos de habilidades */
-  .skill.Photoshop { background-color: #00baff; }
-  .skill.Cocina { background-color: #ff4b00; }
-  .skill.Musica { background-color: #5aff00; }
-  .skill.Jugar { background-color: #ff00a7; }
 
   .stat { color: white; }
   .team { color: aliceblue; font-size: 30px; }

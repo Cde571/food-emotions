@@ -10,7 +10,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <div class="profile-picture-section">
-      <img src="profile-pic.jpg" alt="Profile Picture" class="profile-pic" />
+      <img src="src/img/Image (4).png" alt="Profile Picture" class="profile-pic" />
       <div class="profile-btns">
         <button class="change-img-btn">Change image</button>
         <button class="reset-img-btn">Reset</button>
@@ -19,42 +19,22 @@ import Layout from '../layouts/Layout.astro';
 
     <form class="profile-form">
       <label for="name">Name</label>
-      <input type="text" id="name" name="name" value="Jenna" />
-
-      <label for="last-name">Last name</label>
-      <input type="text" id="last-name" name="last-name" value="Ortega" />
+      <input type="text" id="name" name="name" value="" />
 
       <label for="email">E-mail</label>
-      <div class="email-modify">
-        <input type="email" id="email" name="email" value="Jenna.ortega29@gmail.com" />
-        <button type="button" class="modify-btn">Modificar</button>
-      </div>
+      <input type="email" id="email" name="email" value="" disabled />
 
       <label for="phone">Phone number</label>
-      <input type="tel" id="phone" name="phone" value="(555) 555-1212" />
-
-      <label>Background color</label>
-      <div class="color-options">
-        <span class="color-circle blue"></span>
-        <span class="color-circle lime"></span>
-        <span class="color-circle pink"></span>
-        <span class="color-circle purple"></span>
-        <span class="color-circle orange"></span>
-        <span class="color-circle green"></span>
-        <span class="color-circle red"></span>
-      </div>
-
-      <label>Mood</label>
-      <div class="mood-options">
-        <label><input type="radio" name="mood" value="default" checked /> Default</label>
-        <label><input type="radio" name="mood" value="light" /> Light</label>
-        <label><input type="radio" name="mood" value="dark" /> Dark</label>
-      </div>
+      <input type="tel" id="phone" name="phone" value="" />
 
       <button type="submit" class="save-changes-btn">Save changes</button>
     </form>
   </section>
+
+  <!-- Script para manejar la carga y guardado -->
+  <script src="/src/scripts/editProfile.js" type="module" defer></script>
 </Layout>
+
 
 <style>
   .edit-profile-container {

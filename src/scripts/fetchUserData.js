@@ -1,37 +1,31 @@
-// Función para obtener los datos del usuario
+// ============================================================
+// 🔹 Obtener datos del usuario desde el backend
+// ============================================================
 async function fetchUserData() {
   try {
     const response = await fetch('http://localhost:3000/profile-data', {
       method: 'GET',
-      credentials: 'include',
+      credentials: 'include', // Necesario para sesiones Google
     });
 
     if (!response.ok) {
       if (response.status === 401) {
         window.location.href = '/login';
-      } else {
-        throw new Error(`Error al obtener datos del perfil: ${response.statusText}`);
+        return;
       }
+      throw new Error(`Error al obtener datos del perfil: ${response.statusText}`);
     }
 
     const userData = await response.json();
 
-    // Actualizar el contenido en el DOM solo si los elementos existen
-    const userNameElement = document.querySelector('#user-name');
-    if (userNameElement) userNameElement.textContent = userData.userName || 'Usuario';
+    // Actualizar el DOM con los datos del usuario
+    document.querySelector('#user-name').textContent = userData.userName || 'Usuario';
+    document.querySelector('#team-user-name').textContent = userData.userName || 'Usuario';
+    document.querySelector('#bio-description').textContent = userData.bio || 'Descripción no disponible';
+    document.querySelector('#profile-pic').src = userData.profilePic || 'src/img/Image (4).png';
 
-    const userStatusElement = document.querySelector('#user-status');
-    if (userStatusElement) userStatusElement.textContent = userData.status || '';
-
-    const teamUserNameElement = document.querySelector('.team h3');
-    if (teamUserNameElement) teamUserNameElement.textContent = `${userData.userName} appears in this team`;
-
-    const profilePicElement = document.querySelector('#profile-pic');
-    if (profilePicElement) profilePicElement.src = userData.profilePic || 'src/img/Image (4).png';
-
-    const bioDescriptionElement = document.querySelector('#bio-description');
-    if (bioDescriptionElement) bioDescriptionElement.textContent = userData.bio || 'Descripción no disponible';
-
+    const statusSelect = document.querySelector('#status-select');
+    if (statusSelect) statusSelect.value = userData.status || 'Online';
   } catch (err) {
     console.error('Error al obtener los datos del perfil:', err.message);
     const errorMessageElement = document.querySelector('#error-message');
@@ -39,92 +33,89 @@ async function fetchUserData() {
   }
 }
 
-
-// Función para cerrar sesión
+// ============================================================
+// 🔹 Cerrar sesión
+// ============================================================
 async function logout() {
   try {
-    const response = await fetch('http://localhost:3000/logout', {
+    await fetch('http://localhost:3000/logout', {
       method: 'POST',
       credentials: 'include',
     });
-
-    if (!response.ok) {
-      throw new Error(`Error al cerrar sesión: ${response.statusText}`);
-    }
-
-    window.location.href = '/';
+    localStorage.removeItem('token');
+    window.location.href = '/login';
   } catch (err) {
     console.error('Error al cerrar sesión:', err.message);
-    const errorMessageElement = document.querySelector('#error-message');
-    if (errorMessageElement) errorMessageElement.textContent = 'Error al cerrar sesión. Inténtelo de nuevo.';
   }
 }
 
-// Cambiar estado entre Online y Ausente
+// ============================================================
+// 🔹 Cambiar estado (próxima funcionalidad backend)
+// ============================================================
 async function handleStatusChange(event) {
   const status = event.target.value;
   try {
-    const response = await fetch('http://localhost:3000/update-status', {
+    const response = await fetch('http://localhost:3000/profile/status', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status }),
     });
-    if (!response.ok) {
-      console.error('Error al actualizar el estado:', await response.json());
-    }
+    if (!response.ok) console.error('Error al actualizar el estado');
   } catch (error) {
     console.error('Error en la solicitud de estado:', error);
   }
 }
 
-// Alternar botón Follow/Unfollow
-let isFollowing = true;
-function toggleFollow() {
-  const button = document.getElementById('follow-button');
-  if (button) {
-    isFollowing = !isFollowing;
-    button.textContent = isFollowing ? 'Unfollow' : 'Follow';
-  }
-}
-
-// Guardar biografía actualizada
+// ============================================================
+// 🔹 Guardar biografía (próxima funcionalidad backend)
+// ============================================================
 async function saveBio() {
   const bioElement = document.getElementById('bio-editor');
-  if (bioElement) {
-    const bio = bioElement.value;
-    try {
-      const response = await fetch('http://localhost:3000/update-profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ bio })
-      });
-      if (!response.ok) {
-        console.error('Error al actualizar la biografía:', await response.json());
-      } else {
-        alert('Biografía actualizada');
-      }
-    } catch (error) {
-      console.error('Error en la solicitud de biografía:', error);
+  if (!bioElement) return;
+  const bio = bioElement.value;
+
+  try {
+    const response = await fetch('http://localhost:3000/profile/bio', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ bio }),
+    });
+
+    if (!response.ok) {
+      console.error('Error al actualizar biografía');
+    } else {
+      alert('Biografía actualizada');
     }
+  } catch (error) {
+    console.error('Error en la solicitud de biografía:', error);
   }
 }
 
-// Abrir modales y cargar datos (seguidores o likes)
+// ============================================================
+// 🔹 Abrir modal de followers o likes (opcional futuro)
+// ============================================================
 async function openModal(modalId) {
   const modalElement = document.getElementById(modalId);
-  if (modalElement) {
-    modalElement.classList.remove('hidden');
-    try {
-      const endpoint = modalId === 'followersModal' ? '/followers' : '/likes';
-      const response = await fetch(`http://localhost:3000${endpoint}`, { credentials: 'include' });
-      const data = await response.json();
-      const listElement = document.getElementById(modalId === 'followersModal' ? 'followersList' : 'likesList');
-      if (listElement) listElement.innerHTML = data.map(item => `<li>${item.username}</li>`).join('');
-    } catch (error) {
-      console.error(`Error al obtener datos para ${modalId}:`, error);
-    }
+  if (!modalElement) return;
+  modalElement.classList.remove('hidden');
+
+  try {
+    const endpoint =
+      modalId === 'followersModal'
+        ? 'http://localhost:3000/profile/followers'
+        : 'http://localhost:3000/profile/likes';
+
+    const response = await fetch(endpoint, { credentials: 'include' });
+    const data = await response.json();
+    const listElement = document.getElementById(
+      modalId === 'followersModal' ? 'followersList' : 'likesList'
+    );
+
+    listElement.innerHTML = data.map(u => `<li>${u.username}</li>`).join('');
+  } catch (error) {
+    console.error(`Error al obtener datos para ${modalId}:`, error);
   }
 }
 
@@ -133,7 +124,9 @@ function closeModal(modalId) {
   if (modalElement) modalElement.classList.add('hidden');
 }
 
-// Inicializar eventos
+// ============================================================
+// 🔹 Inicializar eventos al cargar el documento
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   fetchUserData();
 
@@ -143,9 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusSelect = document.querySelector('#status-select');
   if (statusSelect) statusSelect.addEventListener('change', handleStatusChange);
 
-  const followButton = document.querySelector('#follow-button');
-  if (followButton) followButton.addEventListener('click', toggleFollow);
-
   const bioEditor = document.querySelector('#bio-editor');
   if (bioEditor) bioEditor.addEventListener('blur', saveBio);
 });
+

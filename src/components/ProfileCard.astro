@@ -2,19 +2,20 @@
 export interface Props {
   name: string;
   username: string;
-  notifications: string;
-  messages: string;
-  followers: string;
+  notifications?: string;
+  messages?: string;
+  followers?: string;
 }
-const { name, username, notifications, messages, followers } = Astro.props;
+const { name, username, notifications = "0", messages = "0", followers = "0" } = Astro.props;
 ---
 
-<div>
+<div class="profile-card">
   <h3>{name}</h3>
-  <p>{username}</p>
+  <p>@{username}</p>
   <ul>
     <li>Notifications: {notifications}</li>
     <li>Messages: {messages}</li>
     <li>Followers: {followers}</li>
   </ul>
 </div>
+
