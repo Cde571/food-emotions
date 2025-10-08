@@ -5,7 +5,7 @@ import PopularCollections from '../components/PopularCollections.astro';
 import Bibliography from '../components/Bibliography.astro';
 
 let userData = {
-  profilePic: 'src/img/Image (4).png',
+  profilePic: '',
   userName: 'Cargando...',
   email: '',
   phone: '',
@@ -23,32 +23,66 @@ let error = null;
 <Layout title="Profile">
   <div class="profile-container">
     <!-- 🔹 Sección Izquierda -->
-    <div class="left-section">
-      <ProfilePic src={userData.profilePic} id="profile-pic" alt={userData.userName} />
-      <div class="user-info">
-        <h2 id="user-name">{userData.userName}</h2>
-        <div class="status-container">
-          <label for="status-select" class="status-label">Estado:</label>
-          <select id="status-select" class="mt-4">
-            <option value="Online" selected={userData.status === 'Online'}>Online</option>
-            <option value="Away" selected={userData.status === 'Away'}>Away</option>
-          </select>
-        </div>
-        <div class="user-stats">
-          <p class="stat"><span id="recipes-count">42</span> Recipes</p>
-          <p class="stat" onclick="openModal('followersModal')"><span id="followers-count">0</span> Followers</p>
-          <p class="stat" onclick="openModal('likesModal')"><span id="likes-count">0</span> Likes</p>
-        </div>
-        <div class="user-links">
-          <a href="/blog">Blog</a>
-          <a href="/Archives">Archives</a>
-          <a href="/Recipes">Collections</a>
-          <div id="logout-container">
-            <button id="logout-button" class="logout-button">Cerrar sesión</button>
-          </div>
-        </div>
+  <div class="left-section">
+  <div class="profile-pic-container">
+  <img
+    id="profile-pic"
+    src="https://ui-avatars.com/api/?name=Usuario&background=72B340&color=fff" 
+    alt={userData.userName}
+    class="profile-image"
+  />
+
+    <!-- 🔸 Botón para cambiar la imagen -->
+    <div class="upload-section">
+      <input type="file" id="upload-input" accept="image/*" style="display: none;" />
+      <button id="upload-btn" class="upload-button">Cambiar foto</button>
+    </div>
+  </div>
+
+  <!-- 🔹 Modal para cambiar foto -->
+<div id="photoModal" class="modal hidden">
+  <h2>Cambiar foto de perfil</h2>
+
+  <div class="modal-options">
+    <button id="upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
+    <button id="upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
+  </div>
+
+  <form id="urlForm" class="hidden">
+    <input type="url" id="imageUrl" placeholder="Pega aquí la URL de la imagen..." />
+    <button type="submit" class="modal-btn confirm">Guardar</button>
+  </form>
+
+  <button id="closeModalBtn" class="close-modal">Cancelar</button>
+</div>
+
+  <div class="user-info">
+    <h2 id="user-name">{userData.userName}</h2>
+
+    <div class="status-container">
+      <label for="status-select" class="status-label">Estado:</label>
+      <select id="status-select" class="mt-4">
+        <option value="Online" selected={userData.status === 'Online'}>Online</option>
+        <option value="Away" selected={userData.status === 'Away'}>Away</option>
+      </select>
+    </div>
+
+    <div class="user-stats">
+      <p class="stat"><span id="recipes-count">42</span> Recipes</p>
+      <p class="stat" onclick="openModal('followersModal')"><span id="followers-count">0</span> Followers</p>
+      <p class="stat" onclick="openModal('likesModal')"><span id="likes-count">0</span> Likes</p>
+    </div>
+
+    <div class="user-links">
+      <a href="/blog">Blog</a>
+      <a href="/Archives">Archives</a>
+      <a href="/Recipes">Collections</a>
+      <div id="logout-container">
+        <button id="logout-button" class="logout-button">Cerrar sesión</button>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- 🔹 Sección Principal -->
     <div class="main-section">
@@ -103,7 +137,7 @@ let error = null;
 <script src="/src/scripts/fetchUserData.js" type="module" defer></script>
 
 <style>
-  /* 🔹 Estilos */
+  /* 🔹 MODALES */
   .modal { 
     display: none; 
     position: fixed; 
@@ -115,33 +149,51 @@ let error = null;
     border-radius: 8px; 
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     z-index: 1000;
+    width: 90%;
+    max-width: 400px;
   }
   .modal.hidden { display: none; }
 
-  .logout-button { 
-    margin-top: 20px; 
+  /* 🔹 BOTONES GENERALES */
+  .logout-button, .upload-button {
+    margin-top: 15px; 
     padding: 10px 20px; 
-    background-color: #ff4b4b; 
     color: white; 
     border: none; 
-    border-radius: 5px; 
+    border-radius: 8px; 
     cursor: pointer; 
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .logout-button {
+    background-color: #ff4b4b;
   }
 
   .logout-button:hover { background-color: #e04343; }
 
+  .upload-button {
+    background-color: #72b340;
+  }
+
+  .upload-button:hover {
+    background-color: #5a9332;
+    transform: scale(1.05);
+  }
+
+  /* 🔹 CONTENEDOR PRINCIPAL */
   .profile-container {
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     gap: 20px;
     padding: 20px;
     max-width: 1200px;
-    margin: auto;
-    margin-top: 100px;
+    margin: 100px auto 50px auto;
   }
 
+  /* 🔹 SECCIONES IZQUIERDA Y DERECHA */
   .left-section, .right-section {
-    background-color: #3B432B;
+    background-color: #3b432b;
     padding: 20px;
     color: white;
     border-radius: 10px;
@@ -151,6 +203,27 @@ let error = null;
     padding: 20px;
   }
 
+  /* 🔹 FOTO DE PERFIL */
+  .profile-pic-container img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover; /* 🔥 mantiene proporciones sin deformar */
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  background-color: #ccc;
+}
+
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+
+  /* 🔹 INFO DE USUARIO */
   .user-info h2 {
     font-size: 1.5rem;
     margin-top: 10px;
@@ -164,15 +237,25 @@ let error = null;
     margin-right: 10px;
   }
 
-  .user-stats p { margin: 5px 0; }
+  /* 🔹 ESTADÍSTICAS */
+  .user-stats p { 
+    margin: 5px 0; 
+    font-size: 0.95rem;
+  }
 
   .user-links a {
     display: block;
     color: white;
     text-decoration: none;
     margin-top: 10px;
+    font-weight: 500;
   }
 
+  .user-links a:hover {
+    text-decoration: underline;
+  }
+
+  /* 🔹 BÚSQUEDA */
   .search-input {
     width: 100%;
     padding: 10px;
@@ -181,12 +264,14 @@ let error = null;
     border: none;
   }
 
+  /* 🔹 BANNER */
   .banner-image {
     width: 100%;
     height: auto;
     border-radius: 10px;
   }
 
+  /* 🔹 TARJETA DEL EQUIPO */
   .team-card {
     background-color: white;
     color: #831400;
@@ -197,15 +282,22 @@ let error = null;
   }
 
   .team-card button {
-    background-color: #72B340;
+    background-color: #72b340;
     color: white;
     border: none;
     padding: 10px;
     border-radius: 10px;
     cursor: pointer;
     margin-top: 10px;
+    transition: all 0.2s ease-in-out;
   }
 
+  .team-card button:hover {
+    background-color: #5a9332;
+    transform: scale(1.05);
+  }
+
+  /* 🔹 DERECHA (BIO / HABILIDADES) */
   .right-section {
     display: flex;
     flex-direction: column;
@@ -224,8 +316,154 @@ let error = null;
     display: inline-block;
     border-radius: 10px;
     cursor: default;
+    font-size: 0.9rem;
   }
 
+  /* 🔹 TEXTOS */
   .stat { color: white; }
-  .team { color: aliceblue; font-size: 30px; }
+  .team { color: aliceblue; font-size: 28px; }
+
+  /* 🔹 RESPONSIVE DESIGN */
+  @media (max-width: 992px) {
+    .profile-container {
+      grid-template-columns: 1fr;
+      margin-top: 50px;
+    }
+
+    .left-section, .main-section, .right-section {
+      width: 100%;
+    }
+
+    .profile-pic-container {
+      margin-bottom: 25px;
+    }
+
+    .upload-button {
+      width: 80%;
+      max-width: 250px;
+    }
+
+    .team {
+      font-size: 22px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .user-info h2 {
+      font-size: 1.2rem;
+    }
+
+    .upload-button, .logout-button {
+      font-size: 0.85rem;
+      padding: 8px 14px;
+    }
+
+    .team {
+      font-size: 20px;
+    }
+  }
+
+  /* 🔹 MODAL DE FOTO */
+#photoModal {
+  display: none;
+  background: white;
+  color: #333;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  z-index: 9999;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+#photoModal h2 {
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #2f2f2f;
+}
+
+.modal-options {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-btn {
+  background-color: #72b340;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.modal-btn:hover {
+  background-color: #5a9332;
+}
+
+#imageUrl {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.hidden { display: none; }
+
+.close-modal {
+  background-color: #ccc;
+  color: #333;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  background-color: #bbb;
+}
+
+.profile-pic-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-pic-container img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover; /* 🔥 mantiene proporciones sin deformar */
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.upload-section {
+  margin-top: 10px;
+}
+
+.upload-button {
+  background-color: #72b340;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover {
+  background-color: #5fa62a;
+}
 </style>
+
