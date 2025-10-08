@@ -1,0 +1,69 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  // ✅ Si usas "output: server", puedes eliminar esto
+  // o dejarlo vacío para compatibilidad
+  return [];
+}
+
+const { id } = Astro.params;
+const API_KEY = import.meta.env.PUBLIC_SPOONACULAR_KEY;
+
+// 🔹 Llamada a Spoonacular con manejo de errores
+let recipe = null;
+try {
+  const res = await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${API_KEY}`);
+  if (res.ok) {
+    recipe = await res.json();
+  } else {
+    console.error("Error al obtener receta:", res.status);
+  }
+} catch (err) {
+  console.error("Error al conectar con Spoonacular:", err);
+}
+
+const fallbackImage = "/img/food-fallback.jpg"; // agrega una imagen en /public/img/
+const imageSrc = recipe?.image || fallbackImage;
+---
+
+<Layout title={recipe?.title || "Receta"}>
+  <section class="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-6 py-10">
+    <div class="max-w-5xl mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-lg">
+      {recipe ? (
+        <>
+          <div class="flex flex-col md:flex-row items-center gap-8">
+            <img 
+              src={imageSrc} 
+              alt={recipe.title} 
+              class="rounded-xl w-full md:w-1/2 object-cover shadow-lg shadow-pink-500/20" 
+              loading="lazy"
+            />
+            <div class="flex-1">
+              <h1 class="text-3xl font-bold mb-3">{recipe.title}</h1>
+              <p class="text-gray-300 mb-4">
+                Tiempo: {recipe.readyInMinutes} min | Porciones: {recipe.servings}
+              </p>
+              <div class="text-gray-200 leading-relaxed" set:html={recipe.summary}></div>
+            </div>
+          </div>
+
+          <div class="mt-10">
+            <h2 class="text-2xl font-semibold mb-3 text-pink-400">🧂 Ingredientes</h2>
+            <ul class="grid sm:grid-cols-2 gap-2 text-gray-200">
+              {recipe.extendedIngredients?.map((i) => (
+                <li class="bg-white/5 px-3 py-2 rounded-lg">{i.original}</li>
+              ))}
+            </ul>
+
+            <h2 class="text-2xl font-semibold mt-10 mb-3 text-purple-400">👩‍🍳 Instrucciones</h2>
+            <div class="text-gray-200 leading-relaxed" set:html={recipe.instructions}></div>
+          </div>
+        </>
+      ) : (
+        <p class="text-center text-gray-400">No se pudo cargar la receta. Intenta de nuevo.</p>
+      )}
+    </div>
+  </section>
+</Layout>
+

@@ -1,0 +1,499 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const defaultSongs = [
+  { title: "I Like The Way You Kiss Me", artist: "Artemas" },
+  { title: "Houdini", artist: "Dua Lipa" },
+  { title: "Strangers", artist: "Kenya Grace" },
+  { title: "Overdrive", artist: "Ofenbach" },
+  { title: "My Oh My", artist: "Ava Max" },
+];
+
+const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
+---
+
+<Layout title="Música">
+  <section class="pt-20 min-h-screen flex text-white bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
+    
+    <!-- 🎵 SIDEBAR - Playlists -->
+    <aside class="w-80 bg-black/40 backdrop-blur-md p-6 overflow-y-auto border-r border-white/10">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          <span>📚</span> Mis playlists
+        </h2>
+        
+        <!-- Crear nueva playlist -->
+        <div class="mb-4">
+          <input
+            id="newPlaylistInput"
+            type="text"
+            placeholder="Nueva playlist..."
+            class="w-full p-2 rounded-lg bg-white/10 backdrop-blur-md placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500 transition text-sm"
+          />
+          <button
+            id="createPlaylistBtn"
+            class="w-full mt-2 bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-2 rounded-lg hover:scale-105 transition font-semibold"
+          >
+            + Crear playlist
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de playlists -->
+      <div id="playlistsList" class="space-y-2">
+        <!-- Las playlists se cargarán aquí -->
+      </div>
+    </aside>
+
+    <!-- 🎧 CONTENIDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col px-6 py-10 overflow-y-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold">
+          🎧 <span class="text-purple-400">Music therapy</span>
+        </h1>
+        <p class="mt-3 text-gray-300 max-w-2xl mx-auto">
+          Deja que <strong>Roy</strong> te acompañe con melodías que armonizan tu mente y cuerpo.<br />
+          Busca, elige y disfruta música directamente desde YouTube.
+        </p>
+      </div>
+
+      <!-- 🔹 Buscador -->
+      <div class="flex justify-center w-full mb-6">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Buscar canción en YouTube..."
+          class="w-11/12 sm:w-2/3 md:w-1/2 p-3 rounded-xl bg-white/10 backdrop-blur-md text-center placeholder-gray-300 outline-none focus:ring-2 focus:ring-purple-500 transition"
+        />
+      </div>
+
+      <!-- 🔹 Resultados -->
+      <div id="searchResults" class="w-full max-w-3xl mx-auto space-y-3 mb-8 hidden"></div>
+
+      <!-- 🔹 Lista predeterminada -->
+      <div id="defaultList" class="w-full max-w-3xl mx-auto space-y-3">
+        {defaultSongs.map((song) => (
+          <div
+            class="song-item flex justify-between items-center bg-white/10 backdrop-blur-md p-4 rounded-xl hover:bg-white/20 transition cursor-pointer"
+            data-title={song.title}
+            data-artist={song.artist}
+          >
+            <div>
+              <h3 class="text-lg font-semibold">{song.title}</h3>
+              <p class="text-sm text-gray-300">{song.artist}</p>
+            </div>
+            <button
+              class="btn-play bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-2 rounded-lg hover:scale-110 transition"
+            >
+              ▶
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <!-- 🔹 Reproductor -->
+      <footer class="mt-auto pt-10">
+        <div class="bg-black/30 backdrop-blur-md rounded-2xl px-6 py-4 w-full max-w-3xl mx-auto flex flex-col items-center space-y-3">
+          <div class="text-center">
+            <h3 id="now-title" class="font-semibold text-lg">Selecciona una canción</h3>
+            <p id="now-artist" class="text-sm text-gray-300"></p>
+          </div>
+
+          <div id="playerContainer" class="w-full aspect-video rounded-xl overflow-hidden hidden bg-black"></div>
+
+          <div class="flex justify-center space-x-6 text-3xl">
+            <button id="prevBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Anterior">⏮️</button>
+            <button id="pauseBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Pausar">⏸️</button>
+            <button id="playBtn" class="hover:text-pink-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Reproducir">▶️</button>
+            <button id="nextBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Siguiente">⏭️</button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </section>
+
+  <script define:vars={{ YOUTUBE_API_KEY }}>
+    let player = null;
+    let currentPlaylist = [];
+    let currentIndex = 0;
+    let isAPIReady = false;
+    let playlists = [];
+    let currentPlaylistId = null;
+
+    // Cargar YouTube iFrame API
+    function loadYouTubeAPI() {
+      if (window.YT) {
+        isAPIReady = true;
+        return;
+      }
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    window.onYouTubeIframeAPIReady = function() {
+      console.log('YouTube API Ready');
+      isAPIReady = true;
+    };
+
+    // Cargar playlists desde memoria
+    function loadPlaylists() {
+      const saved = JSON.parse(localStorage.getItem('musicPlaylists') || '[]');
+      playlists = saved;
+      renderPlaylists();
+    }
+
+    // Guardar playlists
+    function savePlaylists() {
+      localStorage.setItem('musicPlaylists', JSON.stringify(playlists));
+    }
+
+    // Renderizar lista de playlists
+    function renderPlaylists() {
+      const container = document.getElementById('playlistsList');
+      
+      if (playlists.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-sm text-center">No hay playlists aún</p>';
+        return;
+      }
+
+      container.innerHTML = playlists.map((pl, index) => `
+        <div class="playlist-item bg-white/5 hover:bg-white/10 rounded-lg p-3 cursor-pointer transition ${currentPlaylistId === pl.id ? 'ring-2 ring-purple-500' : ''}" data-id="${pl.id}">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
+              <h3 class="font-semibold text-sm">${pl.name}</h3>
+              <p class="text-xs text-gray-400">${pl.songs.length} canciones</p>
+            </div>
+            <button class="delete-playlist text-red-400 hover:text-red-300 text-xs" data-id="${pl.id}">🗑️</button>
+          </div>
+          <div class="space-y-1 max-h-40 overflow-y-auto">
+            ${pl.songs.length === 0 ? '<p class="text-xs text-gray-500 italic">Vacía</p>' : 
+              pl.songs.map((song, idx) => `
+                <div class="flex items-center justify-between text-xs bg-black/20 rounded p-1 hover:bg-black/30 transition group">
+                  <span class="truncate flex-1">${idx + 1}. ${song.title}</span>
+                  <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                    <button class="play-song-btn hover:text-purple-400" data-playlist-id="${pl.id}" data-song-index="${idx}">▶️</button>
+                    <button class="remove-song-btn hover:text-red-400" data-playlist-id="${pl.id}" data-song-index="${idx}">✕</button>
+                  </div>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+      `).join('');
+
+      // Eventos para playlists
+      document.querySelectorAll('.playlist-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (!e.target.closest('.delete-playlist') && !e.target.closest('.play-song-btn') && !e.target.closest('.remove-song-btn')) {
+            const id = item.dataset.id;
+            loadPlaylist(id);
+          }
+        });
+      });
+
+      // Eventos para eliminar playlist
+      document.querySelectorAll('.delete-playlist').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          if (confirm('¿Eliminar esta playlist?')) {
+            playlists = playlists.filter(pl => pl.id !== id);
+            savePlaylists();
+            renderPlaylists();
+            if (currentPlaylistId === id) {
+              currentPlaylistId = null;
+            }
+          }
+        });
+      });
+
+      // Eventos para reproducir canción de playlist
+      document.querySelectorAll('.play-song-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const playlistId = btn.dataset.playlistId;
+          const songIndex = parseInt(btn.dataset.songIndex);
+          playSongFromPlaylist(playlistId, songIndex);
+        });
+      });
+
+      // Eventos para eliminar canción
+      document.querySelectorAll('.remove-song-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const playlistId = btn.dataset.playlistId;
+          const songIndex = parseInt(btn.dataset.songIndex);
+          const playlist = playlists.find(pl => pl.id === playlistId);
+          if (playlist) {
+            playlist.songs.splice(songIndex, 1);
+            savePlaylists();
+            renderPlaylists();
+          }
+        });
+      });
+    }
+
+    // Cargar playlist
+    function loadPlaylist(id) {
+      const playlist = playlists.find(pl => pl.id === id);
+      if (!playlist || playlist.songs.length === 0) return;
+      
+      currentPlaylistId = id;
+      currentPlaylist = playlist.songs;
+      currentIndex = 0;
+      renderPlaylists();
+      playVideoByIndex(0);
+    }
+
+    // Reproducir canción desde playlist
+    function playSongFromPlaylist(playlistId, songIndex) {
+      const playlist = playlists.find(pl => pl.id === playlistId);
+      if (!playlist) return;
+      
+      currentPlaylistId = playlistId;
+      currentPlaylist = playlist.songs;
+      currentIndex = songIndex;
+      renderPlaylists();
+      playVideoByIndex(songIndex);
+    }
+
+    // Agregar canción a playlist
+    function addToPlaylist(song) {
+      if (playlists.length === 0) {
+        alert('Primero crea una playlist');
+        return;
+      }
+
+      const playlistNames = playlists.map((pl, i) => `${i + 1}. ${pl.name}`).join('\n');
+      const selection = prompt(`Selecciona una playlist:\n\n${playlistNames}\n\nEscribe el número:`);
+      
+      if (selection) {
+        const index = parseInt(selection) - 1;
+        if (index >= 0 && index < playlists.length) {
+          playlists[index].songs.push(song);
+          savePlaylists();
+          renderPlaylists();
+          alert(`Agregado a "${playlists[index].name}"`);
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const API_KEY = YOUTUBE_API_KEY;
+      const searchInput = document.getElementById("searchInput");
+      const searchResults = document.getElementById("searchResults");
+      const defaultList = document.getElementById("defaultList");
+      const playerContainer = document.getElementById("playerContainer");
+      const nowTitle = document.getElementById("now-title");
+      const nowArtist = document.getElementById("now-artist");
+      const playBtn = document.getElementById("playBtn");
+      const pauseBtn = document.getElementById("pauseBtn");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const newPlaylistInput = document.getElementById("newPlaylistInput");
+      const createPlaylistBtn = document.getElementById("createPlaylistBtn");
+
+      loadYouTubeAPI();
+      loadPlaylists();
+
+      // Crear playlist
+      createPlaylistBtn.addEventListener('click', () => {
+        const name = newPlaylistInput.value.trim();
+        if (!name) {
+          alert('Escribe un nombre para la playlist');
+          return;
+        }
+        
+        playlists.push({
+          id: Date.now().toString(),
+          name: name,
+          songs: []
+        });
+        
+        savePlaylists();
+        renderPlaylists();
+        newPlaylistInput.value = '';
+      });
+
+      // Enter para crear playlist
+      newPlaylistInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          createPlaylistBtn.click();
+        }
+      });
+
+      function updateButtons() {
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= currentPlaylist.length - 1;
+      }
+
+      async function searchYouTube(query) {
+        if (!query) return;
+        defaultList.classList.add("hidden");
+        searchResults.classList.remove("hidden");
+        searchResults.innerHTML = "<p class='text-center text-gray-400'>Buscando...</p>";
+
+        try {
+          const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=6&q=${encodeURIComponent(query)}&key=${API_KEY}`;
+          
+          const res = await fetch(url);
+          
+          if (!res.ok) {
+            const errorData = await res.json();
+            console.error('Error de API:', errorData);
+            searchResults.innerHTML = `<p class='text-red-400 text-center'>Error: ${errorData.error?.message || 'Error al buscar'}</p>`;
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!data.items || data.items.length === 0) {
+            searchResults.innerHTML = "<p class='text-center text-gray-400'>Sin resultados.</p>";
+            return;
+          }
+
+          currentPlaylist = data.items.map(v => ({
+            id: v.id.videoId,
+            title: v.snippet.title,
+            channel: v.snippet.channelTitle
+          }));
+
+          searchResults.innerHTML = currentPlaylist
+            .map((v, index) => `
+              <div class="result-item flex items-center bg-white/10 backdrop-blur-md p-3 rounded-xl hover:bg-white/20 transition" data-index="${index}">
+                <img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" class="w-24 h-16 rounded-lg mr-4 object-cover"/>
+                <div class="flex-1">
+                  <h3 class="text-base font-semibold line-clamp-2">${v.title}</h3>
+                  <p class="text-sm text-gray-300">${v.channel}</p>
+                </div>
+                <div class="flex gap-2">
+                  <button class="add-to-playlist-btn bg-purple-600/50 hover:bg-purple-600 px-3 py-2 rounded-lg transition text-sm" data-index="${index}" title="Agregar a playlist">➕</button>
+                  <button class="play-result-btn bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-2 rounded-lg hover:scale-110 transition ml-2">▶</button>
+                </div>
+              </div>`)
+            .join("");
+
+          document.querySelectorAll(".result-item").forEach((item) => {
+            const playBtn = item.querySelector(".play-result-btn");
+            const addBtn = item.querySelector(".add-to-playlist-btn");
+            
+            playBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const index = parseInt(item.dataset.index);
+              playVideoByIndex(index);
+            });
+
+            addBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const index = parseInt(item.dataset.index);
+              addToPlaylist(currentPlaylist[index]);
+            });
+          });
+        } catch (err) {
+          console.error('Error de búsqueda:', err);
+          searchResults.innerHTML = "<p class='text-red-400 text-center'>Error de conexión.</p>";
+        }
+      }
+
+      function playVideoByIndex(index) {
+        if (index < 0 || index >= currentPlaylist.length) return;
+        currentIndex = index;
+        const video = currentPlaylist[index];
+        playVideo(video.id, video.title, video.channel);
+        updateButtons();
+      }
+
+      function playVideo(videoId, title, channel = "YouTube Music") {
+        playerContainer.classList.remove("hidden");
+        nowTitle.textContent = title;
+        nowArtist.textContent = channel;
+
+        const initPlayer = () => {
+          if (player && player.loadVideoById) {
+            player.loadVideoById(videoId);
+          } else {
+            player = new YT.Player('playerContainer', {
+              videoId: videoId,
+              playerVars: {
+                autoplay: 1,
+                controls: 1,
+                modestbranding: 1,
+                rel: 0,
+              },
+              events: {
+                'onStateChange': onPlayerStateChange
+              }
+            });
+          }
+        };
+
+        if (isAPIReady) {
+          initPlayer();
+        } else {
+          setTimeout(() => {
+            if (isAPIReady) {
+              initPlayer();
+            }
+          }, 1000);
+        }
+      }
+
+      function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+          if (currentIndex < currentPlaylist.length - 1) {
+            playVideoByIndex(currentIndex + 1);
+          }
+        }
+      }
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const value = e.target.value.trim();
+          if (value) searchYouTube(value);
+        }
+      });
+
+      document.querySelectorAll(".song-item").forEach((item) => {
+        const title = item.dataset.title;
+        const artist = item.dataset.artist;
+        const btn = item.querySelector(".btn-play");
+
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          searchYouTube(`${title} ${artist}`);
+        });
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (player && player.pauseVideo) {
+          player.pauseVideo();
+        }
+      });
+      
+      playBtn.addEventListener("click", () => {
+        if (player && player.playVideo) {
+          player.playVideo();
+        }
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (currentIndex > 0) {
+          playVideoByIndex(currentIndex - 1);
+        }
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (currentIndex < currentPlaylist.length - 1) {
+          playVideoByIndex(currentIndex + 1);
+        }
+      });
+
+      updateButtons();
+    });
+  </script>
+</Layout>
+
+
+

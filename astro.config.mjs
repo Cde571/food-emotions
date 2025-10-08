@@ -11,9 +11,13 @@ dotenv.config();
 
 // Configuración de Astro
 export default defineConfig({
+  output: 'server',
   integrations: [
     tailwind(), // Integración de Tailwind CSS
     preact(),   // Integración de Preact
     react()     // Integración de React
+    
   ],
 });
+
+

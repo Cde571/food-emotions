@@ -1,106 +1,135 @@
 ---
-import { onMount } from 'astro/jsx-runtime';
-
-// Definimos si el usuario está autenticado
-let isAuthenticated = false;
-
-// Verificamos si hay una sesión activa en el backend
-try {
-  const res = await fetch('http://localhost:3000/auth/status', {
-    credentials: 'include',
-  });
-  const data = await res.json();
-  isAuthenticated = data.loggedIn;
-} catch (error) {
-  console.error('Error verificando sesión:', error);
-}
+// Header.astro - Componente dinámico con autenticación
 ---
 
 <header id="header-nav" class="fixed w-screen py-1 z-40 top-0 px-8 lg:px-0">
   <div class="grid grid-cols-3 max-w-7xl mx-auto items-center justify-between">
     <!-- 🔹 Logo -->
     <a href="/" class="col-span-1">
-      <img class="w-auto mx-20" src="src/img/Robot Icon.png" alt="Logo Bot" />
+      <img class="w-auto mx-20" src="/img/Robot Icon.png" alt="Logo Bot" />
     </a>
 
     <!-- 🔹 Navegación dinámica -->
     <nav class="col-span-1 justify-self-center">
-      <ul class="flex gap-4 items-center text-white font-medium">
-        {
-          isAuthenticated
-            ? (
-              <>
-                <li><a class="hover:underline" href="/Music">🎵 Music</a></li>
-                <li><a class="hover:underline" href="/Food">🍽️ Food Section</a></li>
-                <li><a class="hover:underline" href="/Books">📚 Book Section</a></li>
-                <li><a class="hover:underline" href="/Chatbot">🤖 Chatbot</a></li>
-              </>
-            )
-            : (
-              <>
-                <li><a class="hover:underline" href="/Social">Social</a></li>
-                <li><a class="hover:underline" href="/Testimonials">Testimonials</a></li>
-                <li><a class="hover:underline" href="/FAQ">FAQ</a></li>
-                <li><a class="hover:underline" href="/Contact">Contact</a></li>
-              </>
-            )
-        }
+      <ul id="nav-menu" class="flex gap-4 items-center text-white font-medium">
+        <!-- Se llena dinámicamente con JavaScript -->
       </ul>
     </nav>
 
-    <!-- 🔹 Botón derecho -->
-    {
-      isAuthenticated
-        ? (
-          <button
-            id="logout-btn"
-            class="border rounded-full inline-block border-white px-4 py-2 justify-self-end hover:bg-white hover:text-black duration-300"
-          >
-            Logout
-          </button>
-        )
-        : (
+    <!-- 🔹 Sección de autenticación (botón o perfil) -->
+    <div id="auth-section" class="justify-self-end">
+      <!-- Se llena dinámicamente -->
+    </div>
+  </div>
+</header>
+
+<script>
+  // ✅ Esta función actualiza el header según el estado de autenticación
+  async function updateHeader() {
+    const navMenu = document.getElementById('nav-menu');
+    const authSection = document.getElementById('auth-section');
+    if (!navMenu || !authSection) return;
+
+    try {
+      const res = await fetch('http://localhost:3000/auth/status', { credentials: 'include' });
+      const data = await res.json();
+
+      if (data.loggedIn) {
+        // ✅ Usuario autenticado
+        navMenu.innerHTML = `
+          <li><a class="hover:underline" href="/Musica">🎵 Music</a></li>
+          <li><a class="hover:underline" href="/Comida">🍽️ Food Section</a></li>
+          <li><a class="hover:underline" href="/Libros">📚 Book Section</a></li>
+          <li><a class="hover:underline" href="/Chatbot">🤖 Chatbot</a></li>
+        `;
+
+        authSection.innerHTML = `
+          <div class="flex items-center gap-4">
+            <a href="/Profile" class="flex items-center gap-2 hover:opacity-80 transition">
+              <img 
+                src="${data.user?.profilePic || 'https://ui-avatars.com/api/?name=Usuario&background=72B340&color=fff'}" 
+                alt="Profile" 
+                class="w-10 h-10 rounded-full object-cover border-2 border-white"
+              />
+              <span class="text-white font-medium hidden md:inline">${data.user?.username || 'Usuario'}</span>
+            </a>
+            <button
+              id="logout-btn"
+              class="border rounded-full border-white px-4 py-2 hover:bg-white hover:text-black duration-300 transition"
+            >
+              Logout
+            </button>
+          </div>
+        `;
+
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            try {
+              await fetch('http://localhost:3000/logout', {
+                method: 'POST',
+                credentials: 'include',
+              });
+              window.location.href = '/';
+            } catch (error) {
+              console.error('Error cerrando sesión:', error);
+              alert('Error cerrando sesión');
+            }
+          });
+        }
+      } else {
+        // ❌ Usuario NO autenticado
+        navMenu.innerHTML = `
+          <li><a class="hover:underline" href="/Social">Social</a></li>
+          <li><a class="hover:underline" href="/Testimonials">Testimonials</a></li>
+          <li><a class="hover:underline" href="/FAQ">FAQ</a></li>
+          <li><a class="hover:underline" href="/Contact">Contact</a></li>
+        `;
+
+        authSection.innerHTML = `
           <a
-            id="header-vip"
             href="/Register"
-            class="border rounded-full inline-block border-white px-4 py-2 justify-self-end hover:bg-white hover:text-black duration-300"
+            class="border rounded-full inline-block border-white px-4 py-2 hover:bg-white hover:text-black duration-300 transition"
           >
             Login
           </a>
-        )
-    }
-  </div>
-
-  <!-- 🔹 Efecto de scroll -->
-  <script>
-    window.addEventListener('scroll', function () {
-      const header = document.getElementById('header-nav');
-      if (header) {
-        if (window.scrollY > 50) {
-          header.classList.add('fixed-blur');
-        } else {
-          header.classList.remove('fixed-blur');
-        }
+        `;
       }
-    });
+    } catch (error) {
+      console.error('Error verificando sesión:', error);
+      navMenu.innerHTML = `
+        <li><a class="hover:underline" href="/Social">Social</a></li>
+        <li><a class="hover:underline" href="/Testimonials">Testimonials</a></li>
+        <li><a class="hover:underline" href="/FAQ">FAQ</a></li>
+        <li><a class="hover:underline" href="/Contact">Contact</a></li>
+      `;
 
-    // 🔹 Cierre de sesión sin recargar
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', async () => {
-        try {
-          await fetch('http://localhost:3000/logout', {
-            method: 'POST',
-            credentials: 'include',
-          });
-          window.location.href = '/';
-        } catch (error) {
-          alert('Error cerrando sesión');
-        }
-      });
+      authSection.innerHTML = `
+        <a
+          href="/Register"
+          class="border rounded-full inline-block border-white px-4 py-2 hover:bg-white hover:text-black duration-300 transition"
+        >
+          Login
+        </a>
+      `;
     }
-  </script>
-</header>
+  }
+
+  updateHeader();
+  document.addEventListener('astro:page-load', updateHeader);
+
+  // 🔹 Efecto de scroll (blur en el header)
+  window.addEventListener('scroll', function () {
+    const header = document.getElementById('header-nav');
+    if (header) {
+      if (window.scrollY > 50) {
+        header.classList.add('fixed-blur');
+      } else {
+        header.classList.remove('fixed-blur');
+      }
+    }
+  });
+</script>
 
 <style>
   header {
@@ -116,5 +145,19 @@ try {
 
   .hover\:underline:hover {
     text-decoration: underline;
+  }
+
+  img[alt="Profile"] {
+    transition: transform 0.2s ease;
+  }
+
+  img[alt="Profile"]:hover {
+    transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    .hidden.md\:inline {
+      display: none;
+    }
   }
 </style>
