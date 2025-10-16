@@ -1,93 +1,818 @@
 ---
-import { AiFillHeart, AiFillStar, AiOutlineComment } from 'react-icons/ai';
-
-interface Post {
-  id: number;
-  user: string;
-  type: "Book" | "Music" | "Recipe";
-  title: string;
-  description: string;
-  image: string;
-  liked: boolean;
-  favorite: boolean;
-  comments: string[];
-}
-
-let posts: Post[] = [
-  {
-    id: 1,
-    user: "Carolina García",
-    type: "Book",
-    title: "Atomic Habits",
-    description: "Great book to build healthy routines.",
-    image: "/img/atomichabits.jpg",
-    liked: false,
-    favorite: false,
-    comments: [],
-  },
-  {
-    id: 2,
-    user: "Luis López",
-    type: "Recipe",
-    title: "Avocado Toast",
-    description: "Quick and healthy breakfast idea.",
-    image: "/img/avocadotoast.jpg",
-    liked: false,
-    favorite: false,
-    comments: [],
-  },
-  {
-    id: 3,
-    user: "Camila Henao",
-    type: "Music",
-    title: "Rainforest Vibes",
-    description: "Relax with nature-inspired music.",
-    image: "/img/rainforest_vibes.jpg",
-    liked: false,
-    favorite: false,
-    comments: [],
-  }
-]
+// src/pages/Social.astro
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/shared/Navigation.astro';
+import Stories from '../components/social/Stories.astro';
+import Post from '../components/social/Post.astro';
+import SuggestedUsers from '../components/social/SuggestedUsers.astro';
+import PostModal from '../components/social/PostModal.astro';
 ---
 
-<section class="max-w-5xl mx-auto px-4 py-16">
-  <h1 class="text-4xl font-bold text-green-800 text-center mb-12">
-    Social Feed - Wellness Community
-  </h1>
-
-  <div class="grid gap-10">
-    {posts.map((post) => (
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
-        <img src={post.image} alt={post.title} class="w-full h-64 object-cover" />
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-2xl font-semibold text-green-700">{post.title}</h2>
-            <span class="px-3 py-1 bg-green-100 text-green-600 text-sm rounded-full">{post.type}</span>
-          </div>
-          <p class="text-gray-700 mb-4">{post.description}</p>
-          <p class="text-sm text-gray-400 mb-4">Posted by <strong>{post.user}</strong></p>
-
-          <div class="flex items-center gap-6">
-            <!-- Icono de Like -->
-            <button class="flex items-center gap-1 text-pink-600 hover:text-pink-800 transition">
-              <AiFillHeart className="h-6 w-6" />
-              <span class="text-sm">{post.liked ? "Liked" : "Like"}</span>
-            </button>
-
-            <!-- Icono de Favorite -->
-            <button class="flex items-center gap-1 text-yellow-600 hover:text-yellow-800 transition">
-              <AiFillStar className="h-6 w-6" />
-              <span class="text-sm">{post.favorite ? "Favorited" : "Favorite"}</span>
-            </button>
-
-            <!-- Icono de Comentarios -->
-            <button class="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition">
-              <AiOutlineComment className="h-6 w-6" />
-              <span class="text-sm">Comment</span>
-            </button>
-          </div>
+<Layout title="Social Feed">
+  <Navigation />
+  
+  <div class="social-container">
+    <!-- Columna Izquierda: Perfil rápido -->
+    <aside class="left-sidebar">
+      <div class="quick-profile">
+        <img id="sidebar-profile-pic" src="" alt="Profile" class="sidebar-avatar" />
+        <div class="sidebar-info">
+          <h3 id="sidebar-username">Usuario</h3>
+          <p id="sidebar-email" class="text-sm">email@example.com</p>
         </div>
       </div>
-    ))}
+      
+      <nav class="sidebar-nav">
+        <a href="/Profile" class="nav-item">
+          <span class="icon">👤</span>
+          Mi Perfil
+        </a>
+        <a href="/Messages" class="nav-item">
+          <span class="icon">💬</span>
+          Mensajes
+          <span id="unread-messages" class="badge hidden">0</span>
+        </a>
+        <a href="/Notifications" class="nav-item">
+          <span class="icon">🔔</span>
+          Notificaciones
+          <span id="unread-notifs" class="badge hidden">0</span>
+        </a>
+        <a href="/Explore" class="nav-item">
+          <span class="icon">🔍</span>
+          Explorar
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Columna Central: Feed -->
+    <main class="feed-container">
+      <!-- Stories -->
+      <Stories />
+
+      <!-- Botón crear post -->
+      <div class="create-post-section">
+        <img id="create-post-avatar" src="" alt="Tu foto" class="avatar-small" />
+        <button id="open-post-modal" class="create-post-input">
+          ¿Qué estás pensando?
+        </button>
+        <button id="upload-photo-btn" class="upload-icon-btn" title="Subir foto">
+          📷
+        </button>
+      </div>
+
+      <!-- Feed de posts -->
+      <div id="posts-feed" class="posts-feed">
+        <!-- Los posts se cargarán dinámicamente -->
+        <div class="loading">Cargando publicaciones...</div>
+      </div>
+
+      <!-- Infinite scroll trigger -->
+      <div id="scroll-trigger" class="scroll-trigger"></div>
+    </main>
+
+    <!-- Columna Derecha: Usuarios sugeridos -->
+    <aside class="right-sidebar">
+      <SuggestedUsers />
+      
+      <div class="trending-section">
+        <h3>Tendencias</h3>
+        <div id="trending-topics"></div>
+      </div>
+
+      <div class="footer-links">
+        <a href="/about">Acerca de</a>
+        <a href="/privacy">Privacidad</a>
+        <a href="/terms">Términos</a>
+      </div>
+    </aside>
   </div>
-</section>
+
+  <!-- Modal para crear post -->
+  <PostModal />
+
+  <!-- Notificación Toast -->
+  <div id="toast" class="toast hidden"></div>
+</Layout>
+
+<script>
+  import socketClient from '../scripts/websocket/socketClient.js';
+  import { fetchFeed, createPost, likePost } from '../scripts/api/posts.js';
+
+  let currentPage = 1;
+  let isLoading = false;
+  let hasMore = true;
+
+  // Inicializar WebSocket
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    socketClient.connect(token);
+  }
+
+  // Cargar datos del usuario
+  async function loadUserData() {
+    try {
+      const response = await fetch('/api/user/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const user = await response.json();
+      
+      document.getElementById('sidebar-profile-pic').src = user.profilePic || 'https://ui-avatars.com/api/?name=' + user.username;
+      document.getElementById('sidebar-username').textContent = user.username;
+      document.getElementById('sidebar-email').textContent = user.email;
+      document.getElementById('create-post-avatar').src = user.profilePic || 'https://ui-avatars.com/api/?name=' + user.username;
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    }
+  }
+
+  // Cargar feed
+  async function loadFeed(page = 1) {
+    if (isLoading || !hasMore) return;
+    
+    isLoading = true;
+    const loading = document.querySelector('.loading');
+    if (loading) loading.style.display = 'block';
+
+    try {
+      const posts = await fetchFeed(page, 10);
+      
+      if (posts.length === 0) {
+        hasMore = false;
+        if (page === 1) {
+          document.getElementById('posts-feed').innerHTML = '<p class="no-posts">No hay publicaciones aún. ¡Sigue a más personas!</p>';
+        }
+        return;
+      }
+
+      const feedContainer = document.getElementById('posts-feed');
+      if (page === 1) feedContainer.innerHTML = '';
+
+      posts.forEach(post => {
+        feedContainer.appendChild(createPostElement(post));
+      });
+
+    } catch (error) {
+      console.error('Error al cargar feed:', error);
+      showToast('Error al cargar publicaciones', 'error');
+    } finally {
+      isLoading = false;
+      if (loading) loading.style.display = 'none';
+    }
+  }
+
+  // Crear elemento de post
+  function createPostElement(post) {
+    const article = document.createElement('article');
+    article.className = 'post-card';
+    article.dataset.postId = post._id;
+
+    const isLiked = post.likes.includes(localStorage.getItem('userId'));
+    const likeIcon = isLiked ? '❤️' : '🤍';
+
+    article.innerHTML = `
+      <div class="post-header">
+        <img src="${post.author.profilePic || 'https://ui-avatars.com/api/?name=' + post.author.username}" 
+             alt="${post.author.username}" class="post-avatar" />
+        <div class="post-author-info">
+          <h4>${post.author.username}</h4>
+          <span class="post-time">${formatTime(post.createdAt)}</span>
+        </div>
+        <button class="post-options">⋯</button>
+      </div>
+
+      ${post.caption ? `<p class="post-caption">${post.caption}</p>` : ''}
+
+      ${post.images.length > 0 ? `
+        <div class="post-images">
+          ${post.images.map(img => `<img src="${img}" alt="Post image" />`).join('')}
+        </div>
+      ` : ''}
+
+      <div class="post-actions">
+        <button class="action-btn like-btn" data-post-id="${post._id}">
+          <span class="like-icon">${likeIcon}</span>
+          <span class="like-count">${post.likes.length}</span>
+        </button>
+        <button class="action-btn comment-btn" data-post-id="${post._id}">
+          💬 <span>${post.comments.length}</span>
+        </button>
+        <button class="action-btn share-btn">
+          📤 Compartir
+        </button>
+      </div>
+
+      <div class="comments-section" id="comments-${post._id}">
+        <!-- Comentarios se cargan al hacer clic -->
+      </div>
+    `;
+
+    // Event listeners
+    const likeBtn = article.querySelector('.like-btn');
+    likeBtn.addEventListener('click', () => handleLike(post._id, post.author._id));
+
+    const commentBtn = article.querySelector('.comment-btn');
+    commentBtn.addEventListener('click', () => toggleComments(post._id));
+
+    return article;
+  }
+
+  // Manejar like
+  async function handleLike(postId, authorId) {
+    try {
+      const result = await likePost(postId);
+      
+      // Actualizar UI localmente
+      const postCard = document.querySelector(`[data-post-id="${postId}"]`).closest('.post-card');
+      const likeIcon = postCard.querySelector('.like-icon');
+      const likeCount = postCard.querySelector('.like-count');
+      
+      likeIcon.textContent = result.liked ? '❤️' : '🤍';
+      likeCount.textContent = result.likesCount;
+
+      // Enviar notificación por WebSocket
+      if (result.liked && authorId !== localStorage.getItem('userId')) {
+        socketClient.likePost(postId, authorId);
+      }
+
+    } catch (error) {
+      console.error('Error al dar like:', error);
+      showToast('Error al dar like', 'error');
+    }
+  }
+
+  // Toggle comentarios
+  async function toggleComments(postId) {
+    const commentsSection = document.getElementById(`comments-${postId}`);
+    
+    if (commentsSection.innerHTML.trim() !== '') {
+      commentsSection.innerHTML = '';
+      return;
+    }
+
+    // Cargar comentarios
+    try {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const comments = await response.json();
+
+      commentsSection.innerHTML = `
+        <div class="comments-list">
+          ${comments.map(c => `
+            <div class="comment">
+              <img src="${c.author.profilePic || 'https://ui-avatars.com/api/?name=' + c.author.username}" 
+                   alt="${c.author.username}" class="comment-avatar" />
+              <div class="comment-content">
+                <strong>${c.author.username}</strong>
+                <p>${c.text}</p>
+                <span class="comment-time">${formatTime(c.createdAt)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="comment-input-container">
+          <input type="text" 
+                 class="comment-input" 
+                 placeholder="Escribe un comentario..." 
+                 data-post-id="${postId}" />
+          <button class="send-comment-btn" data-post-id="${postId}">Enviar</button>
+        </div>
+      `;
+
+      // Event listener para enviar comentario
+      const sendBtn = commentsSection.querySelector('.send-comment-btn');
+      sendBtn.addEventListener('click', () => sendComment(postId));
+
+      const input = commentsSection.querySelector('.comment-input');
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendComment(postId);
+      });
+
+    } catch (error) {
+      console.error('Error al cargar comentarios:', error);
+    }
+  }
+
+  // Enviar comentario
+  async function sendComment(postId) {
+    const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
+    const text = input.value.trim();
+    
+    if (!text) return;
+
+    try {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text })
+      });
+
+      const comment = await response.json();
+
+      // Enviar por WebSocket
+      socketClient.addComment(postId, text);
+
+      // Limpiar input
+      input.value = '';
+
+      // Recargar comentarios
+      toggleComments(postId);
+      toggleComments(postId);
+
+    } catch (error) {
+      console.error('Error al enviar comentario:', error);
+      showToast('Error al enviar comentario', 'error');
+    }
+  }
+
+  // Formatear tiempo
+  function formatTime(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}d`;
+    return date.toLocaleDateString();
+  }
+
+  // Toast notifications
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    toast.classList.remove('hidden');
+
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 3000);
+  }
+
+  // Infinite scroll
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !isLoading && hasMore) {
+      currentPage++;
+      loadFeed(currentPage);
+    }
+  }, { threshold: 0.5 });
+
+  const scrollTrigger = document.getElementById('scroll-trigger');
+  if (scrollTrigger) observer.observe(scrollTrigger);
+
+  // WebSocket listeners
+  socketClient.on('post-liked', (data) => {
+    const postCard = document.querySelector(`[data-post-id="${data.postId}"]`);
+    if (postCard) {
+      const likeCount = postCard.querySelector('.like-count');
+      likeCount.textContent = parseInt(likeCount.textContent) + 1;
+    }
+  });
+
+  socketClient.on('comment-added', (data) => {
+    const postCard = document.querySelector(`[data-post-id="${data.postId}"]`);
+    if (postCard) {
+      const commentCount = postCard.querySelector('.comment-btn span');
+      commentCount.textContent = parseInt(commentCount.textContent) + 1;
+    }
+  });
+
+  socketClient.on('notification', (notification) => {
+    const badge = document.getElementById('unread-notifs');
+    const count = parseInt(badge.textContent || '0') + 1;
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  });
+
+  socketClient.on('message-received', () => {
+    const badge = document.getElementById('unread-messages');
+    const count = parseInt(badge.textContent || '0') + 1;
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  });
+
+  // Abrir modal crear post
+  document.getElementById('open-post-modal').addEventListener('click', () => {
+    document.getElementById('post-modal').classList.remove('hidden');
+  });
+
+  document.getElementById('upload-photo-btn').addEventListener('click', () => {
+    document.getElementById('post-modal').classList.remove('hidden');
+    document.getElementById('modal-upload-input').click();
+  });
+
+  // Inicializar
+  loadUserData();
+  loadFeed();
+</script>
+
+<style>
+  .social-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 80px auto 20px;
+    padding: 0 20px;
+  }
+
+  /* ===== LEFT SIDEBAR ===== */
+  .left-sidebar {
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+  }
+
+  .quick-profile {
+    background: #3b432b;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    margin-bottom: 15px;
+  }
+
+  .sidebar-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .sidebar-info h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .sidebar-nav {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .nav-item:hover {
+    background: #f8f8f8;
+  }
+
+  .nav-item .icon {
+    font-size: 1.3rem;
+  }
+
+  .badge {
+    position: absolute;
+    right: 15px;
+    background: #ff4b4b;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+  }
+
+  .badge.hidden {
+    display: none;
+  }
+
+  /* ===== FEED CONTAINER ===== */
+  .feed-container {
+    max-width: 600px;
+  }
+
+  .create-post-section {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .create-post-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    background: #f5f5f5;
+    cursor: pointer;
+    text-align: left;
+    color: #666;
+    transition: all 0.2s;
+  }
+
+  .create-post-input:hover {
+    background: #ebebeb;
+  }
+
+  .upload-icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .upload-icon-btn:hover {
+    transform: scale(1.1);
+  }
+
+  /* ===== POSTS ===== */
+  .posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .post-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .post-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .post-author-info {
+    flex: 1;
+  }
+
+  .post-author-info h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .post-time {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  .post-options {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+  }
+
+  .post-caption {
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  .post-images {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .post-images img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.2s;
+  }
+
+  .action-btn:hover {
+    color: #72b340;
+  }
+
+  .like-icon {
+    font-size: 1.2rem;
+  }
+
+  /* ===== COMMENTS ===== */
+  .comments-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .comment-content {
+    flex: 1;
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 12px;
+  }
+
+  .comment-content strong {
+    font-size: 0.9rem;
+  }
+
+  .comment-content p {
+    margin: 3px 0;
+    font-size: 0.9rem;
+  }
+
+  .comment-time {
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  .comment-input-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .comment-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  .send-comment-btn {
+    padding: 8px 16px;
+    background: #72b340;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+
+  .send-comment-btn:hover {
+    background: #5a9332;
+  }
+
+  /* ===== RIGHT SIDEBAR ===== */
+  .right-sidebar {
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+  }
+
+  .trending-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .trending-section h3 {
+    margin-top: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+
+  .footer-links a {
+    color: #888;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  }
+
+  .toast.success {
+    background: #72b340;
+  }
+
+  .toast.error {
+    background: #ff4b4b;
+  }
+
+  .toast.hidden {
+    display: none;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* ===== LOADING ===== */
+  .loading {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+  }
+
+  .no-posts {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+  }
+
+  .scroll-trigger {
+    height: 20px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1200px) {
+    .social-container {
+      grid-template-columns: 1fr;
+    }
+
+    .left-sidebar,
+    .right-sidebar {
+      display: none;
+    }
+
+    .feed-container {
+      max-width: 100%;
+    }
+  }
+</style>
