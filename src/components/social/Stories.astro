@@ -1,0 +1,217 @@
+---
+ // src/components/social/Stories.astro
+ import.meta.env.PUBLIC_API_URL; // ✅ Asegura acceso a la variable del entorno
+ const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api";
+---
+
+<div class="stories-container">
+  <div class="story-item add-story">
+    <div class="story-avatar">
+      <img id="current-user-story-avatar" src="" alt="Tu historia" />
+      <div class="add-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="white" stroke="white" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
+    </div>
+    <span class="story-name">Tu Historia</span>
+  </div>
+
+  <div id="stories-list" class="stories-list"></div>
+</div>
+
+<script>
+  // ✅ Ya no usamos localStorage para el token, usamos sesión (cookies)
+  const API_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api";
+
+  async function loadStories() {
+    try {
+      // ============================
+      // 🧩 Cargar avatar del usuario actual
+      // ============================
+      const userResponse = await fetch(`${API_URL}/user/me`, {
+        credentials: "include", // ✅ usa cookies de sesión
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("No se pudo obtener el usuario actual");
+      }
+
+      const user = await userResponse.json();
+      const avatarUrl =
+        user.profilePic ||
+        `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`;
+      document.getElementById("current-user-story-avatar").src = avatarUrl;
+
+      // ============================
+      // 🧩 Cargar historias de otros usuarios
+      // ============================
+      const response = await fetch(`${API_URL}/stories`, {
+        credentials: "include", // ✅ mantiene sesión
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudieron cargar las historias");
+      }
+
+      const stories = await response.json();
+      const storiesList = document.getElementById("stories-list");
+
+      if (!stories || stories.length === 0) {
+        storiesList.innerHTML = `<p class="no-stories">No hay historias disponibles</p>`;
+        return;
+      }
+
+      storiesList.innerHTML = stories
+        .map(
+          (story) => `
+        <div class="story-item" data-story-id="${story._id}">
+          <div class="story-avatar ${story.seen ? "" : "unseen"}">
+            <img src="${
+              story.user.profilePic ||
+              `https://ui-avatars.com/api/?name=${story.user.username}`
+            }" alt="${story.user.username}" />
+          </div>
+          <span class="story-name">${story.user.username}</span>
+        </div>
+      `
+        )
+        .join("");
+
+      // ✅ Event listeners de historias
+      document
+        .querySelectorAll(".story-item[data-story-id]")
+        .forEach((item) => {
+          item.addEventListener("click", () => {
+            const storyId = item.dataset.storyId;
+            openStory(storyId);
+          });
+        });
+    } catch (error) {
+      console.error("Error al cargar historias:", error);
+      showToast("No se pudieron cargar las historias.", "error");
+    }
+  }
+
+  function openStory(storyId) {
+    console.log("Abrir historia:", storyId);
+    showToast("Función de historias en desarrollo", "info");
+  }
+
+  document.querySelector(".add-story")?.addEventListener("click", () => {
+    showToast("Función de crear historia en desarrollo", "info");
+  });
+
+  function showToast(message, type) {
+    const event = new CustomEvent("show-toast", {
+      detail: { message, type },
+    });
+    document.dispatchEvent(event);
+  }
+
+  // ✅ Cargar automáticamente al renderizar
+  loadStories();
+</script>
+
+<style>
+  /* 🔹 Igual que antes, sin cambios de diseño */
+  .stories-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+  }
+  .stories-container::-webkit-scrollbar { height: 6px; }
+  .stories-container::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+  }
+  .stories-container::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+  .stories-container::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+  .stories-list { display: flex; gap: 12px; }
+
+  .story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    min-width: 70px;
+  }
+
+  .story-item:hover { transform: translateY(-4px); }
+
+  .story-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 50%, #FADA7A 100%);
+    position: relative;
+  }
+
+  .story-avatar.unseen {
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
+  }
+
+  .story-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid white;
+    object-fit: cover;
+  }
+
+  .add-story .story-avatar {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  }
+
+  .add-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+  }
+
+  .story-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    text-align: center;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .add-story .story-name {
+    color: #667BC6;
+    font-weight: 600;
+  }
+
+  .no-stories {
+    padding: 20px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .story-avatar { width: 56px; height: 56px; }
+    .story-name { font-size: 11px; }
+  }
+</style>

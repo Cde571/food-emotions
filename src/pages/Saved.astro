@@ -1,0 +1,148 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navigation from "../components/shared/Navigation.astro";
+import { getCurrentUser } from "../scripts/api/users.js";
+import { fetchSavedPosts, unsavePost } from "../scripts/api/posts.js";
+
+let user = null;
+let savedPosts = [];
+let error = null;
+
+try {
+  user = await getCurrentUser();
+  if (user) {
+    savedPosts = await fetchSavedPosts();
+  }
+} catch (err) {
+  console.error("❌ Error cargando página de guardados:", err);
+  error = err.message;
+}
+---
+
+<Layout title="Guardados">
+  <Navigation />
+
+  <section class="saved-section">
+    <h2>📁 Publicaciones guardadas</h2>
+
+    {error && <p class="error-text">⚠️ {error}</p>}
+
+    {savedPosts.length === 0 && !error ? (
+      <p class="empty-text">Aún no has guardado ninguna publicación.</p>
+    ) : (
+      <div class="saved-grid">
+        {savedPosts.map((post) => (
+          <article class="saved-card">
+            <img
+              src={post.images?.[0] || "/img/placeholder.jpg"}
+              alt={post.caption}
+              class="saved-img"
+            />
+            <div class="saved-info">
+              <p class="saved-caption">{post.caption || "Sin descripción"}</p>
+              <button
+                class="unsave-btn"
+                onClick={`handleUnsave('${post._id}')`}
+              >
+                ❌ Quitar
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+  </section>
+</Layout>
+
+<script type="module">
+  import { unsavePost } from "/src/scripts/api/posts.js";
+
+  async function handleUnsave(postId) {
+    try {
+      const confirmUnsave = confirm("¿Deseas eliminar esta publicación de tus guardados?");
+      if (!confirmUnsave) return;
+      await unsavePost(postId);
+      location.reload();
+    } catch (err) {
+      console.error("❌ Error al quitar guardado:", err);
+      alert("No se pudo eliminar el guardado.");
+    }
+  }
+</script>
+
+<style>
+.saved-section {
+  max-width: 1000px;
+  margin: 100px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.saved-section h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.error-text {
+  color: #ff4b4b;
+  background: #ffe5e5;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.empty-text {
+  color: #666;
+  font-style: italic;
+  margin-top: 30px;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.saved-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+}
+
+.saved-card:hover {
+  transform: translateY(-3px);
+}
+
+.saved-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.saved-info {
+  padding: 10px;
+}
+
+.saved-caption {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.unsave-btn {
+  background-color: #ff4b4b;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.unsave-btn:hover {
+  background-color: #d93737;
+}
+</style>

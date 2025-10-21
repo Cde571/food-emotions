@@ -1,0 +1,759 @@
+---
+// src/components/social/FollowersModal.astro
+---
+
+<div id="followers-modal" class="followers-modal-overlay hidden">
+  <div class="followers-modal-container">
+    <div class="followers-modal-header">
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="followers">
+          Seguidores
+          <span class="tab-count" id="followers-count">0</span>
+        </button>
+        <button class="modal-tab" data-tab="following">
+          Siguiendo
+          <span class="tab-count" id="following-count">0</span>
+        </button>
+      </div>
+      <button class="followers-modal-close" id="close-followers-modal">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="followers-modal-search">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input 
+        type="text" 
+        id="followers-search" 
+        class="followers-search-input" 
+        placeholder="Buscar..."
+      />
+    </div>
+
+    <div class="followers-modal-body">
+      <!-- Tab: Seguidores -->
+      <div class="tab-content active" id="followers-tab">
+        <div class="followers-list" id="followers-list">
+          <div class="loading-users">
+            <div class="loader"></div>
+            <p>Cargando seguidores...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Siguiendo -->
+      <div class="tab-content" id="following-tab">
+        <div class="followers-list" id="following-list">
+          <div class="loading-users">
+            <div class="loader"></div>
+            <p>Cargando...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { 
+    getFollowers, 
+    getFollowing, 
+    followUser, 
+    unfollowUser,
+    removeFollower 
+  } from '../../scripts/api/followers.js';
+
+  let currentTab = 'followers';
+  let currentUserId = null;
+  let isCurrentUser = false;
+
+  // Abrir modal
+  export function openFollowersModal(userId, tab = 'followers', isSelf = false) {
+    currentUserId = userId;
+    currentTab = tab;
+    isCurrentUser = isSelf;
+
+    const modal = document.getElementById('followers-modal');
+    modal?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    // Activar tab correspondiente
+    document.querySelectorAll('.modal-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(c => {
+      c.classList.toggle('active', c.id === `${tab}-tab`);
+    });
+
+    // Cargar datos
+    if (tab === 'followers') {
+      loadFollowers();
+    } else {
+      loadFollowing();
+    }
+  }
+
+  // Cerrar modal
+  function closeModal() {
+    const modal = document.getElementById('followers-modal');
+    modal?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Cargar seguidores
+  async function loadFollowers() {
+    if (!currentUserId) return;
+
+    try {
+      const followers = await getFollowers(currentUserId);
+      const container = document.getElementById('followers-list');
+      
+      document.getElementById('followers-count').textContent = followers.length;
+
+      if (followers.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+            <h3>Sin seguidores</h3>
+            <p>Este usuario aún no tiene seguidores</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = followers.map(user => createUserItem(user, 'follower')).join('');
+      setupUserActions();
+
+    } catch (error) {
+      console.error('Error al cargar seguidores:', error);
+      document.getElementById('followers-list').innerHTML = `
+        <div class="error-state">
+          <p>Error al cargar seguidores</p>
+        </div>
+      `;
+    }
+  }
+
+  // Cargar siguiendo
+  async function loadFollowing() {
+    if (!currentUserId) return;
+
+    try {
+      const following = await getFollowing(currentUserId);
+      const container = document.getElementById('following-list');
+      
+      document.getElementById('following-count').textContent = following.length;
+
+      if (following.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+            <h3>No sigue a nadie</h3>
+            <p>Este usuario aún no sigue a nadie</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = following.map(user => createUserItem(user, 'following')).join('');
+      setupUserActions();
+
+    } catch (error) {
+      console.error('Error al cargar siguiendo:', error);
+      document.getElementById('following-list').innerHTML = `
+        <div class="error-state">
+          <p>Error al cargar datos</p>
+        </div>
+      `;
+    }
+  }
+
+  // Crear item de usuario
+  function createUserItem(user, type) {
+    const currentUser = localStorage.getItem('userId');
+    const isFollowing = user.isFollowing || false;
+    const isSelf = user._id === currentUser;
+
+    let actionButton = '';
+    
+    if (!isSelf) {
+      if (type === 'follower' && isCurrentUser) {
+        // Si es mi lista de seguidores, mostrar "Eliminar"
+        actionButton = `
+          <button class="action-btn remove-btn" data-action="remove" data-user-id="${user._id}">
+            Eliminar
+          </button>
+        `;
+      } else {
+        // Mostrar Seguir/Siguiendo
+        actionButton = `
+          <button class="action-btn ${isFollowing ? 'following-btn' : 'follow-btn'}" 
+                  data-action="follow" 
+                  data-user-id="${user._id}"
+                  data-following="${isFollowing}">
+            ${isFollowing ? 'Siguiendo' : 'Seguir'}
+          </button>
+        `;
+      }
+    }
+
+    return `
+      <div class="user-item" data-user-id="${user._id}">
+        <a href="/profile/${user.username}" class="user-link">
+          <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`}" 
+               alt="${user.username}" 
+               class="user-avatar" />
+          <div class="user-info">
+            <h4 class="user-name">${user.fullName || user.username}</h4>
+            <p class="user-username">@${user.username}</p>
+            ${user.bio ? `<p class="user-bio">${user.bio}</p>` : ''}
+          </div>
+        </a>
+        ${actionButton}
+      </div>
+    `;
+  }
+
+  // Setup acciones de usuario
+  function setupUserActions() {
+    document.querySelectorAll('[data-action="follow"]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await handleFollowToggle(btn);
+      });
+    });
+
+    document.querySelectorAll('[data-action="remove"]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await handleRemoveFollower(btn);
+      });
+    });
+  }
+
+  // Manejar seguir/dejar de seguir
+  async function handleFollowToggle(button) {
+    const userId = button.dataset.userId;
+    const isFollowing = button.dataset.following === 'true';
+
+    try {
+      button.disabled = true;
+      button.textContent = '...';
+
+      if (isFollowing) {
+        await unfollowUser(userId);
+        button.dataset.following = 'false';
+        button.textContent = 'Seguir';
+        button.className = 'action-btn follow-btn';
+      } else {
+        await followUser(userId);
+        button.dataset.following = 'true';
+        button.textContent = 'Siguiendo';
+        button.className = 'action-btn following-btn';
+      }
+
+      showToast(isFollowing ? 'Dejaste de seguir' : 'Ahora sigues a este usuario', 'success');
+
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al actualizar', 'error');
+      button.disabled = false;
+      button.textContent = isFollowing ? 'Siguiendo' : 'Seguir';
+    }
+  }
+
+  // Eliminar seguidor
+  async function handleRemoveFollower(button) {
+    const userId = button.dataset.userId;
+
+    if (!confirm('¿Eliminar este seguidor?')) return;
+
+    try {
+      button.disabled = true;
+      button.textContent = '...';
+
+      await removeFollower(userId);
+      
+      // Remover de la UI
+      button.closest('.user-item').remove();
+      
+      // Actualizar contador
+      const count = document.getElementById('followers-count');
+      count.textContent = parseInt(count.textContent) - 1;
+
+      showToast('Seguidor eliminado', 'success');
+
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Error al eliminar seguidor', 'error');
+      button.disabled = false;
+      button.textContent = 'Eliminar';
+    }
+  }
+
+  // Tabs
+  document.querySelectorAll('.modal-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      
+      // Actualizar tabs
+      document.querySelectorAll('.modal-tab').forEach(t => {
+        t.classList.toggle('active', t === tab);
+      });
+      
+      // Actualizar contenido
+      document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.toggle('active', c.id === `${tabName}-tab`);
+      });
+
+      currentTab = tabName;
+
+      // Cargar datos
+      if (tabName === 'followers') {
+        loadFollowers();
+      } else {
+        loadFollowing();
+      }
+    });
+  });
+
+  // Buscar
+  document.getElementById('followers-search')?.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const activeList = currentTab === 'followers' ? 
+      document.getElementById('followers-list') : 
+      document.getElementById('following-list');
+
+    activeList.querySelectorAll('.user-item').forEach(item => {
+      const name = item.querySelector('.user-name')?.textContent.toLowerCase() || '';
+      const username = item.querySelector('.user-username')?.textContent.toLowerCase() || '';
+      const match = name.includes(query) || username.includes(query);
+      item.style.display = match ? 'flex' : 'none';
+    });
+  });
+
+  // Cerrar modal
+  document.getElementById('close-followers-modal')?.addEventListener('click', closeModal);
+
+  document.getElementById('followers-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'followers-modal') {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('followers-modal');
+      if (!modal?.classList.contains('hidden')) {
+        closeModal();
+      }
+    }
+  });
+
+  function showToast(message, type) {
+    const event = new CustomEvent('show-toast', {
+      detail: { message, type }
+    });
+    document.dispatchEvent(event);
+  }
+
+  // Exponer función global
+  window.openFollowersModal = openFollowersModal;
+</script>
+
+<style>
+  .followers-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .followers-modal-overlay.hidden {
+    display: none;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .followers-modal-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .followers-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .modal-tab {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .modal-tab:hover {
+    background: #f3f4f6;
+    color: #2d2d2d;
+  }
+
+  .modal-tab.active {
+    background: #667BC6;
+    color: white;
+  }
+
+  .tab-count {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .modal-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .followers-modal-close {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s;
+  }
+
+  .followers-modal-close:hover {
+    background: #f3f4f6;
+  }
+
+  .followers-modal-search {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+  }
+
+  .followers-search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    background: #f3f4f6;
+  }
+
+  .followers-search-input:focus {
+    border-color: #667BC6;
+    background: white;
+  }
+
+  .followers-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .followers-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .loading-users,
+  .empty-state,
+  .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: #6b7280;
+  }
+
+  .loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #667BC6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .empty-state svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d2d2d;
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  .error-state p {
+    color: #ef4444;
+  }
+
+  .user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    transition: background 0.2s;
+  }
+
+  .user-item:hover {
+    background: #f9fafb;
+  }
+
+  .user-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #e5e7eb;
+  }
+
+  .user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2d2d2d;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-username {
+    font-size: 13px;
+    color: #6b7280;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-bio {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .action-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .follow-btn {
+    background: #667BC6;
+    color: white;
+  }
+
+  .follow-btn:hover {
+    background: #5568b8;
+    transform: translateY(-1px);
+  }
+
+  .following-btn {
+    background: #e5e7eb;
+    color: #6b7280;
+  }
+
+  .following-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .remove-btn {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .remove-btn:hover {
+    background: #ef4444;
+    color: white;
+  }
+
+  .action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .followers-modal-container {
+      max-height: 90vh;
+      border-radius: 16px 16px 0 0;
+      margin-top: auto;
+    }
+
+    .followers-modal-header {
+      padding: 16px;
+    }
+
+    .modal-tab {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    .followers-modal-search {
+      padding: 12px 16px;
+    }
+
+    .user-item {
+      padding: 10px 16px;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+    }
+
+    .user-name {
+      font-size: 14px;
+    }
+
+    .user-username {
+      font-size: 12px;
+    }
+
+    .action-btn {
+      padding: 6px 16px;
+      font-size: 12px;
+    }
+  }
+
+  /* ===== SCROLLBAR ===== */
+  .followers-modal-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .followers-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .followers-modal-body::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 3px;
+  }
+
+  .followers-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+  }
+</style>
