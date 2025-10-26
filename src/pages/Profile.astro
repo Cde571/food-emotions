@@ -3,21 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/shared/Navigation.astro';
 import PopularCollections from '../components/PopularCollections.astro';
 import Bibliography from '../components/Bibliography.astro';
-
-let userData = {
-  profilePic: '',
-  userName: 'Cargando...',
-  email: '',
-  phone: '',
-  status: 'Online',
-  bio: '',
-  preferences: {
-    interests: [],
-    notifications: false,
-    language: '',
-  },
-};
-let error = null;
 ---
 
 <Layout title="Perfil">
@@ -30,7 +15,7 @@ let error = null;
         <img
           id="profile-pic"
           src="https://ui-avatars.com/api/?name=Usuario&background=72B340&color=fff"
-          alt={userData.userName}
+          alt="Usuario"
           class="profile-image"
         />
         <div class="upload-section">
@@ -54,15 +39,17 @@ let error = null;
       </div>
 
       <div class="user-info">
-        <h2 id="user-name">{userData.userName}</h2>
+        <h2 id="user-name">Cargando...</h2>
         <label for="status-select" class="status-label">Estado:</label>
         <select id="status-select">
-          <option value="Online" selected={userData.status === 'Online'}>Online</option>
-          <option value="Away" selected={userData.status === 'Away'}>Away</option>
+          <option value="Online">Online</option>
+          <option value="Away">Away</option>
+          <option value="Busy">Ocupado</option>
+          <option value="Offline">Offline</option>
         </select>
 
         <div class="user-stats">
-          <p><span id="recipes-count">42</span> Recetas</p>
+          <p><span id="recipes-count">0</span> Recetas</p>
           <p id="followers-count">0 Seguidores</p>
           <p id="likes-count">0 Likes</p>
         </div>
@@ -79,20 +66,27 @@ let error = null;
 
     <!-- 🔹 CENTRO -->
     <main class="main-section">
-      <input type="text" placeholder="Buscar usuarios..." class="search-input" />
+      <input 
+        type="text" 
+        id="profile-search" 
+        placeholder="Buscar usuarios..." 
+        class="search-input" 
+      />
+      <div id="profile-search-results" class="search-results hidden"></div>
+
       <div class="banner">
-        <img src="src/img/1.png" alt="Banner" class="banner-image" />
+        <img src="/src/img/1.png" alt="Banner" class="banner-image" />
       </div>
 
       <PopularCollections />
 
       <div class="team-info">
-        <h3 class="team"><span id="team-user-name">{userData.userName}</span> aparece en este equipo</h3>
+        <h3 class="team"><span id="team-user-name">Usuario</span> aparece en este equipo</h3>
         <div class="team-card">
           <h4>ROYAL UI FORCE</h4>
           <p>Formado en 2013</p>
-          <button id="follow-button">Seguir</button>
-          <p>{userData.userName.toUpperCase()} es miembro desde nov, 2014</p>
+          <button id="follow-team-button">Seguir Equipo</button>
+          <p><span id="team-member-name">USUARIO</span> es miembro desde nov, 2014</p>
         </div>
       </div>
     </main>
@@ -101,39 +95,455 @@ let error = null;
     <aside class="right-section">
       <Bibliography
         id="bio-description"
-        description={userData.bio || 'Descripción no disponible'}
+        description="Descripción no disponible"
         website="https://youtube.com/cdecp"
-        skills={userData.preferences.interests}
+        skills={[]}
       />
       <textarea
         id="bio-editor"
         class="bio-editor"
         placeholder="Escribe tu biografía aquí..."
-      >{userData.bio}</textarea>
+      ></textarea>
+      <button id="save-bio-btn" class="save-bio-btn">Guardar biografía</button>
     </aside>
   </div>
 
+  <!-- Modal de Seguidores -->
   <div id="followersModal" class="modal hidden">
-    <h2>Seguidores</h2>
-    <ul id="followersList"></ul>
-    <button onclick="closeModal('followersModal')">Cerrar</button>
+    <div class="modal-content">
+      <button class="close-modal" onclick="document.getElementById('followersModal').classList.add('hidden')">×</button>
+      <h2>Seguidores</h2>
+      <div id="followersList" class="followers-list"></div>
+    </div>
   </div>
 
+  <!-- Modal de Likes -->
   <div id="likesModal" class="modal hidden">
-    <h2>Likes</h2>
-    <ul id="likesList"></ul>
-    <button onclick="closeModal('likesModal')">Cerrar</button>
+    <div class="modal-content">
+      <button class="close-modal" onclick="document.getElementById('likesModal').classList.add('hidden')">×</button>
+      <h2>Likes</h2>
+      <div id="likesList" class="likes-list"></div>
+    </div>
   </div>
 
+  <div id="notification" class="notification hidden"></div>
   <p id="error-message" class="error-text"></p>
 </Layout>
 
-<script type="module">
-  import '/src/scripts/fetchUserData.js';
+<script>
+  // ============================================================
+  // 🎯 PROFILE.ASTRO - SCRIPT COMPLETO
+  // ============================================================
 
+  let currentUser = null;
+
+  // Función para mostrar notificaciones
+  function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.remove('hidden');
+    
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 3000);
+  }
+
+  // Cargar datos del perfil
+  async function loadProfileData() {
+    try {
+      console.log('🔄 Cargando perfil del usuario...');
+      
+      const response = await fetch('http://localhost:3000/api/user/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const user = await response.json();
+      console.log('✅ Usuario cargado:', user);
+
+      if (!user.loggedIn) {
+        window.location.href = '/login';
+        return;
+      }
+
+      currentUser = user;
+
+      // Actualizar imagen de perfil
+      const profilePic = document.getElementById('profile-pic');
+      if (profilePic) {
+        profilePic.src = user.profilePic || 
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=72B340&color=fff`;
+      }
+      
+      // Actualizar nombre de usuario
+      const userName = document.getElementById('user-name');
+      const teamUserName = document.getElementById('team-user-name');
+      const teamMemberName = document.getElementById('team-member-name');
+      
+      if (userName) userName.textContent = user.username || 'Usuario';
+      if (teamUserName) teamUserName.textContent = user.username || 'Usuario';
+      if (teamMemberName) teamMemberName.textContent = (user.username || 'USUARIO').toUpperCase();
+
+      // Actualizar estado
+      const statusSelect = document.getElementById('status-select');
+      if (statusSelect && user.status) {
+        statusSelect.value = user.status;
+      }
+
+      // Actualizar biografía
+      const bioEditor = document.getElementById('bio-editor');
+      const bioDescription = document.getElementById('bio-description');
+      if (bioEditor) bioEditor.value = user.bio || '';
+      if (bioDescription) bioDescription.textContent = user.bio || 'Sin biografía';
+
+      // ⭐ ACTUALIZAR ESTADÍSTICAS
+      if (user.stats) {
+        console.log('📊 Actualizando estadísticas:', user.stats);
+        
+        const recipesCount = document.getElementById('recipes-count');
+        const followersCount = document.getElementById('followers-count');
+        const likesCount = document.getElementById('likes-count');
+        
+        if (recipesCount) recipesCount.textContent = user.stats.recipesLiked || 0;
+        if (followersCount) followersCount.textContent = `${user.stats.followers || 0} Seguidores`;
+        if (likesCount) likesCount.textContent = `${user.stats.totalLikes || 0} Likes`;
+
+        console.log('✅ Estadísticas actualizadas');
+      }
+
+      return user;
+    } catch (error) {
+      console.error('❌ Error cargando perfil:', error);
+      showNotification('Error al cargar el perfil', 'error');
+      return null;
+    }
+  }
+
+  // Cambiar estado del usuario
+  document.getElementById('status-select')?.addEventListener('change', async (e) => {
+    try {
+      const newStatus = e.target.value;
+      console.log('🔄 Cambiando estado a:', newStatus);
+
+      const response = await fetch('http://localhost:3000/profile/status', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) throw new Error('Error al cambiar estado');
+
+      const data = await response.json();
+      console.log('✅ Estado actualizado:', data);
+      showNotification('Estado actualizado correctamente', 'success');
+    } catch (error) {
+      console.error('❌ Error cambiando estado:', error);
+      showNotification('Error al cambiar el estado', 'error');
+    }
+  });
+
+  // Guardar biografía
+  document.getElementById('save-bio-btn')?.addEventListener('click', async () => {
+    try {
+      const bioEditor = document.getElementById('bio-editor');
+      const newBio = bioEditor.value.trim();
+
+      console.log('💾 Guardando biografía:', newBio);
+
+      const response = await fetch('http://localhost:3000/profile/bio', {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ bio: newBio })
+      });
+
+      if (!response.ok) throw new Error('Error al guardar biografía');
+
+      const data = await response.json();
+      console.log('✅ Biografía guardada:', data);
+      
+      const bioDescription = document.getElementById('bio-description');
+      if (bioDescription) bioDescription.textContent = newBio || 'Sin biografía';
+      
+      showNotification('Biografía actualizada correctamente', 'success');
+    } catch (error) {
+      console.error('❌ Error guardando biografía:', error);
+      showNotification('Error al guardar la biografía', 'error');
+    }
+  });
+
+  // Modal de cambio de foto
+  const photoModal = document.getElementById('photoModal');
+  const uploadBtn = document.getElementById('upload-btn');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const uploadFileBtn = document.getElementById('upload-file-btn');
+  const uploadUrlBtn = document.getElementById('upload-url-btn');
+  const uploadInput = document.getElementById('upload-input');
+  const urlForm = document.getElementById('urlForm');
+
+  uploadBtn?.addEventListener('click', () => {
+    photoModal?.classList.remove('hidden');
+  });
+
+  closeModalBtn?.addEventListener('click', () => {
+    photoModal?.classList.add('hidden');
+    urlForm?.classList.add('hidden');
+  });
+
+  uploadFileBtn?.addEventListener('click', () => {
+    uploadInput?.click();
+  });
+
+  uploadUrlBtn?.addEventListener('click', () => {
+    urlForm?.classList.remove('hidden');
+  });
+
+  // Subir imagen desde archivo
+  uploadInput?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      console.log('📤 Subiendo imagen:', file.name);
+      
+      const formData = new FormData();
+      formData.append('profilePic', file);
+
+      const response = await fetch('http://localhost:3000/profile/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Error al subir imagen');
+
+      const data = await response.json();
+      console.log('✅ Imagen subida:', data);
+
+      const profilePic = document.getElementById('profile-pic');
+      if (profilePic && data.profilePic) {
+        profilePic.src = data.profilePic;
+      }
+
+      photoModal?.classList.add('hidden');
+      urlForm?.classList.add('hidden');
+      showNotification('Foto de perfil actualizada', 'success');
+    } catch (error) {
+      console.error('❌ Error subiendo imagen:', error);
+      showNotification('Error al subir la imagen', 'error');
+    }
+  });
+
+  // Subir imagen desde URL
+  urlForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const imageUrlInput = document.getElementById('imageUrl');
+    const imageUrl = imageUrlInput.value.trim();
+
+    if (!imageUrl) {
+      showNotification('Por favor ingresa una URL válida', 'error');
+      return;
+    }
+
+    try {
+      console.log('🌐 Guardando URL de imagen:', imageUrl);
+
+      // Aquí podrías validar la URL o guardarla directamente
+      const profilePic = document.getElementById('profile-pic');
+      if (profilePic) {
+        profilePic.src = imageUrl;
+      }
+
+      // Opcional: guardar en el servidor
+      // await fetch('http://localhost:3000/profile/update-pic-url', { ... });
+
+      photoModal?.classList.add('hidden');
+      urlForm?.classList.add('hidden');
+      imageUrlInput.value = '';
+      showNotification('Foto de perfil actualizada', 'success');
+    } catch (error) {
+      console.error('❌ Error con URL:', error);
+      showNotification('Error al cargar la imagen desde URL', 'error');
+    }
+  });
+
+  // Buscar usuarios en el profile
+  let searchTimeout;
+  const profileSearch = document.getElementById('profile-search');
+  const profileSearchResults = document.getElementById('profile-search-results');
+
+  profileSearch?.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+
+    if (query.length < 2) {
+      profileSearchResults?.classList.add('hidden');
+      return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/search?q=${encodeURIComponent(query)}`, {
+          credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Error en búsqueda');
+
+        const users = await response.json();
+        
+        if (users.length === 0) {
+          profileSearchResults.innerHTML = '<div class="no-results">No se encontraron usuarios</div>';
+        } else {
+          profileSearchResults.innerHTML = users.map(user => `
+            <div class="search-result-item" data-user-id="${user._id}">
+              <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}`}" alt="${user.username}" />
+              <div>
+                <strong>${user.username}</strong>
+                <p>${user.email || ''}</p>
+              </div>
+            </div>
+          `).join('');
+
+          document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', () => {
+              window.location.href = `/Profile?user=${item.dataset.userId}`;
+            });
+          });
+        }
+        
+        profileSearchResults?.classList.remove('hidden');
+      } catch (error) {
+        console.error('❌ Error en búsqueda:', error);
+      }
+    }, 300);
+  });
+
+  // Ver seguidores
+  document.getElementById('followers-count')?.addEventListener('click', async () => {
+    try {
+      if (!currentUser) return;
+
+      console.log('👥 Cargando seguidores...');
+
+      const response = await fetch(`http://localhost:3000/api/users/${currentUser._id}/followers`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Error al cargar seguidores');
+
+      const followers = await response.json();
+      console.log('✅ Seguidores:', followers);
+
+      const followersList = document.getElementById('followersList');
+      if (followersList) {
+        followersList.innerHTML = followers.length > 0
+          ? followers.map(f => `
+              <div class="follower-item">
+                <img src="${f.profilePic || `https://ui-avatars.com/api/?name=${f.username}`}" alt="${f.username}" />
+                <span>${f.username}</span>
+              </div>
+            `).join('')
+          : '<p>No tienes seguidores aún</p>';
+      }
+
+      document.getElementById('followersModal')?.classList.remove('hidden');
+    } catch (error) {
+      console.error('❌ Error cargando seguidores:', error);
+      showNotification('Error al cargar seguidores', 'error');
+    }
+  });
+
+  // Ver likes (posts con likes)
+  document.getElementById('likes-count')?.addEventListener('click', async () => {
+    try {
+      if (!currentUser) return;
+
+      console.log('❤️ Cargando posts con likes...');
+
+      const response = await fetch(`http://localhost:3000/api/users/${currentUser._id}/liked-posts`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Error al cargar likes');
+
+      const likedPosts = await response.json();
+      console.log('✅ Posts con likes:', likedPosts);
+
+      const likesList = document.getElementById('likesList');
+      if (likesList) {
+        likesList.innerHTML = likedPosts.length > 0
+          ? likedPosts.map(post => `
+              <div class="like-item">
+                <img src="${post.images?.[0] || '/placeholder.jpg'}" alt="Post" />
+                <div>
+                  <p>${post.caption || 'Sin descripción'}</p>
+                  <span>${post.likes?.length || 0} likes</span>
+                </div>
+              </div>
+            `).join('')
+          : '<p>No has dado likes aún</p>';
+      }
+
+      document.getElementById('likesModal')?.classList.remove('hidden');
+    } catch (error) {
+      console.error('❌ Error cargando likes:', error);
+      showNotification('Error al cargar likes', 'error');
+    }
+  });
+
+  // Ir al feed
   document.getElementById('go-to-feed')?.addEventListener('click', () => {
     window.location.href = '/Social';
   });
+
+  // Cerrar sesión
+  document.getElementById('logout-button')?.addEventListener('click', async () => {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+      try {
+        await fetch('http://localhost:3000/logout', { 
+          method: 'POST',
+          credentials: 'include' 
+        });
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('❌ Error cerrando sesión:', error);
+      }
+    }
+  });
+
+  // Cerrar modales al hacer clic fuera
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+      e.target.classList.add('hidden');
+    }
+  });
+
+  // Inicializar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadProfileData);
+  } else {
+    loadProfileData();
+  }
 </script>
 
 <style>
@@ -285,6 +695,123 @@ let error = null;
       grid-template-columns: 1fr;
       margin-top: 70px;
     }
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 9999;
+    animation: slideIn 0.3s ease;
+  }
+
+  .notification.success {
+    background: #10b981;
+  }
+
+  .notification.error {
+    background: #ef4444;
+  }
+
+  .notification.hidden {
+    display: none;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .save-bio-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .save-bio-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-top: 8px;
+  }
+
+  .search-results.hidden {
+    display: none;
+  }
+
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .search-result-item:hover {
+    background: #f9fafb;
+  }
+
+  .search-result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .followers-list, .likes-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .follower-item, .like-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .follower-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .like-item img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
   }
 </style>
 

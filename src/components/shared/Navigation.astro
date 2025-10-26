@@ -1,5 +1,14 @@
 ---
 // src/components/shared/Navigation.astro
+
+// Obtener la ruta actual
+const currentPath = Astro.url.pathname;
+const showNavigation = currentPath === '/Social' || currentPath === '/Social/';
+
+// Si no estamos en /Social, no renderizar nada
+if (!showNavigation) {
+  return null;
+}
 ---
 
 <nav class="top-navbar">
@@ -24,7 +33,7 @@
           type="text" 
           id="global-search" 
           class="search-input" 
-          placeholder="Buscar usuarios, hashtags..." 
+          placeholder="Buscar usuarios..." 
           autocomplete="off"
         />
         <div id="search-results" class="search-results hidden"></div>
@@ -117,32 +126,120 @@
   </div>
 </nav>
 
-<script>
-  import { searchUsers } from '../../scripts/api/users.js';
-  import { logout } from '../../scripts/api/auth.js';
-  import socketClient from '../../scripts/websocket/socketClient.js';
+<!-- Modal de perfil de usuario -->
+<div id="user-profile-modal" class="modal-overlay hidden">
+  <div class="modal-content user-modal">
+    <button class="modal-close" id="close-user-modal">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
 
-  // Cargar datos del usuario
+    <div class="user-modal-header">
+      <img id="modal-user-avatar" src="" alt="User" class="modal-user-avatar" />
+      <div class="modal-user-info">
+        <h3 id="modal-user-name">Usuario</h3>
+        <p id="modal-user-email">email@example.com</p>
+        <p id="modal-user-bio">Sin biografía</p>
+      </div>
+    </div>
+
+    <div class="user-modal-stats">
+      <div class="modal-stat">
+        <span class="modal-stat-number" id="modal-user-followers">0</span>
+        <span class="modal-stat-label">Seguidores</span>
+      </div>
+      <div class="modal-stat">
+        <span class="modal-stat-number" id="modal-user-following">0</span>
+        <span class="modal-stat-label">Siguiendo</span>
+      </div>
+    </div>
+
+    <div class="user-modal-actions">
+      <button class="modal-btn primary" id="modal-follow-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <line x1="20" y1="8" x2="20" y2="14"/>
+          <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+        Seguir
+      </button>
+      <button class="modal-btn secondary" id="modal-message-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+        Mensaje
+      </button>
+      <button class="modal-btn secondary" id="modal-profile-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Ver Perfil
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Estado global del modal
+  let currentSelectedUser = null;
+
+  // Cargar datos del usuario actual
   async function loadUserData() {
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/users/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const user = await response.json();
-
-      const avatarUrl = user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`;
+      console.log('🔄 Cargando datos del usuario...');
       
-      document.getElementById('nav-user-avatar').src = avatarUrl;
-      document.getElementById('dropdown-avatar').src = avatarUrl;
-      document.getElementById('dropdown-username').textContent = user.username;
-      document.getElementById('dropdown-email').textContent = user.email;
+      const response = await fetch('http://localhost:3000/api/user/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('📡 Response status:', response.status);
+      
+      if (!response.ok) {
+        console.error('❌ Error en la respuesta:', response.statusText);
+        if (response.status === 401) {
+          console.log('🔐 No autenticado, redirigiendo...');
+          window.location.href = '/login';
+        }
+        return;
+      }
+
+      const user = await response.json();
+      console.log('✅ Usuario cargado:', user);
+
+      if (!user.loggedIn) {
+        console.log('🔐 Usuario no logueado, redirigiendo...');
+        window.location.href = '/login';
+        return;
+      }
+
+      const avatarUrl = user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667BC6&color=fff`;
+      
+      const navAvatar = document.getElementById('nav-user-avatar');
+      const dropdownAvatar = document.getElementById('dropdown-avatar');
+      const dropdownUsername = document.getElementById('dropdown-username');
+      const dropdownEmail = document.getElementById('dropdown-email');
+
+      if (navAvatar) navAvatar.src = avatarUrl;
+      if (dropdownAvatar) dropdownAvatar.src = avatarUrl;
+      if (dropdownUsername) dropdownUsername.textContent = user.username;
+      if (dropdownEmail) dropdownEmail.textContent = user.email;
+
+      console.log('✅ UI actualizada con datos del usuario');
     } catch (error) {
-      console.error('Error al cargar usuario:', error);
+      console.error('❌ Error crítico al cargar usuario:', error);
     }
   }
 
-  // Búsqueda global
+  // Búsqueda de usuarios
   const searchInput = document.getElementById('global-search');
   const searchResults = document.getElementById('search-results');
   let searchTimeout;
@@ -158,25 +255,56 @@
 
     searchTimeout = setTimeout(async () => {
       try {
-        const users = await searchUsers(query);
+        console.log('🔍 Buscando:', query);
+        
+        const response = await fetch(`http://localhost:3000/api/users/search?q=${encodeURIComponent(query)}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📡 Búsqueda response:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const users = await response.json();
+        console.log('✅ Usuarios encontrados:', users.length);
         
         if (users.length === 0) {
-          searchResults.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
+          searchResults.innerHTML = '<div class="no-results">No se encontraron usuarios</div>';
         } else {
           searchResults.innerHTML = users.map(user => `
-            <a href="/Profile/${user._id}" class="search-result-item">
-              <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}`}" alt="${user.username}" />
+            <div class="search-result-item" data-user-id="${user._id}">
+              <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`}" 
+                   alt="${user.username}" 
+                   class="search-result-avatar" />
               <div class="search-result-info">
                 <strong>${user.username}</strong>
-                <p>${user.bio || 'Sin biografía'}</p>
+                <p>${user.email || 'Sin email'}</p>
               </div>
-            </a>
+              <span class="search-result-status ${user.status === 'Online' ? 'online' : 'offline'}"></span>
+            </div>
           `).join('');
+
+          // Agregar eventos a cada resultado
+          document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', async () => {
+              const userId = item.dataset.userId;
+              await showUserProfile(userId);
+            });
+          });
         }
         
         searchResults.classList.remove('hidden');
       } catch (error) {
-        console.error('Error en búsqueda:', error);
+        console.error('❌ Error en búsqueda:', error);
+        searchResults.innerHTML = '<div class="no-results">Error al buscar usuarios</div>';
+        searchResults.classList.remove('hidden');
       }
     }, 300);
   });
@@ -186,6 +314,170 @@
     if (!e.target.closest('.search-container')) {
       searchResults?.classList.add('hidden');
     }
+  });
+
+  // Mostrar perfil de usuario en modal
+  async function showUserProfile(userId) {
+    try {
+      console.log('👤 Cargando perfil de usuario:', userId);
+      
+      const response = await fetch(`http://localhost:3000/api/users/${userId}/profile`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const user = await response.json();
+      console.log('✅ Perfil cargado:', user);
+      currentSelectedUser = user;
+
+      // Llenar modal con datos
+      document.getElementById('modal-user-avatar').src = 
+        user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`;
+      document.getElementById('modal-user-name').textContent = user.username;
+      document.getElementById('modal-user-email').textContent = user.email || '';
+      document.getElementById('modal-user-bio').textContent = user.bio || 'Sin biografía';
+      document.getElementById('modal-user-followers').textContent = user.followers?.length || 0;
+      document.getElementById('modal-user-following').textContent = user.following?.length || 0;
+
+      // Actualizar botón de seguir
+      const followBtn = document.getElementById('modal-follow-btn');
+      if (user.alreadyFollowing) {
+        followBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="18" y1="8" x2="23" y2="8"/>
+          </svg>
+          Siguiendo
+        `;
+        followBtn.classList.add('following');
+      } else {
+        followBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Seguir
+        `;
+        followBtn.classList.remove('following');
+      }
+
+      // Mostrar modal
+      document.getElementById('user-profile-modal').classList.remove('hidden');
+      searchResults?.classList.add('hidden');
+    } catch (error) {
+      console.error('❌ Error mostrando perfil:', error);
+      alert('Error al cargar el perfil del usuario');
+    }
+  }
+
+  // Cerrar modal
+  document.getElementById('close-user-modal')?.addEventListener('click', () => {
+    document.getElementById('user-profile-modal').classList.add('hidden');
+    currentSelectedUser = null;
+  });
+
+  // Cerrar modal al hacer clic fuera
+  document.getElementById('user-profile-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'user-profile-modal') {
+      document.getElementById('user-profile-modal').classList.add('hidden');
+      currentSelectedUser = null;
+    }
+  });
+
+  // Seguir/Dejar de seguir
+  document.getElementById('modal-follow-btn')?.addEventListener('click', async () => {
+    if (!currentSelectedUser) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${currentSelectedUser._id}/follow`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) throw new Error('Error al seguir/dejar de seguir');
+
+      const data = await response.json();
+      console.log('✅ Follow response:', data);
+      
+      const followBtn = document.getElementById('modal-follow-btn');
+      if (data.following) {
+        followBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="18" y1="8" x2="23" y2="8"/>
+          </svg>
+          Siguiendo
+        `;
+        followBtn.classList.add('following');
+      } else {
+        followBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Seguir
+        `;
+        followBtn.classList.remove('following');
+      }
+
+      // Actualizar contador de seguidores
+      const currentFollowers = parseInt(document.getElementById('modal-user-followers').textContent);
+      document.getElementById('modal-user-followers').textContent = 
+        data.following ? currentFollowers + 1 : currentFollowers - 1;
+
+    } catch (error) {
+      console.error('❌ Error:', error);
+      alert('Error al seguir/dejar de seguir usuario');
+    }
+  });
+
+  // Enviar mensaje
+  document.getElementById('modal-message-btn')?.addEventListener('click', async () => {
+    if (!currentSelectedUser) return;
+
+    try {
+      const response = await fetch('http://localhost:3000/api/messages/start', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ userId: currentSelectedUser._id })
+      });
+
+      if (!response.ok) throw new Error('Error iniciando conversación');
+
+      const data = await response.json();
+      window.location.href = `/Messages?user=${currentSelectedUser._id}`;
+    } catch (error) {
+      console.error('❌ Error:', error);
+      alert('Error al iniciar conversación');
+    }
+  });
+
+  // Ver perfil completo
+  document.getElementById('modal-profile-btn')?.addEventListener('click', () => {
+    if (!currentSelectedUser) return;
+    window.location.href = `/Profile?user=${currentSelectedUser._id}`;
   });
 
   // Profile dropdown
@@ -206,36 +498,34 @@
   // Logout
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      await logout();
+      try {
+        await fetch('http://localhost:3000/logout', { 
+          method: 'POST',
+          credentials: 'include' 
+        });
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('❌ Error cerrando sesión:', error);
+      }
     }
   });
 
   // Create button
   document.getElementById('create-nav-btn')?.addEventListener('click', () => {
-    document.getElementById('post-modal')?.classList.remove('hidden');
-  });
-
-  // WebSocket badges
-  socketClient.on('notification', () => {
-    const badge = document.getElementById('notif-badge-nav');
-    if (badge) {
-      const count = parseInt(badge.textContent || '0') + 1;
-      badge.textContent = count;
-      badge.classList.remove('hidden');
+    const postModal = document.getElementById('post-modal');
+    if (postModal) {
+      postModal.classList.remove('hidden');
+    } else {
+      console.warn('⚠️ Modal de crear post no encontrado');
     }
   });
 
-  socketClient.on('message-received', () => {
-    const badge = document.getElementById('messages-badge-nav');
-    if (badge) {
-      const count = parseInt(badge.textContent || '0') + 1;
-      badge.textContent = count;
-      badge.classList.remove('hidden');
-    }
-  });
-
-  // Inicializar
-  loadUserData();
+  // Inicializar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadUserData);
+  } else {
+    loadUserData();
+  }
 </script>
 
 <style>
@@ -345,10 +635,10 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    text-decoration: none;
-    color: inherit;
+    cursor: pointer;
     transition: background 0.2s;
     border-bottom: 1px solid #f3f4f6;
+    position: relative;
   }
 
   .search-result-item:last-child {
@@ -359,7 +649,7 @@
     background: #f9fafb;
   }
 
-  .search-result-item img {
+  .search-result-avatar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -385,6 +675,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: 2px;
+  }
+
+  .search-result-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #6b7280;
+  }
+
+  .search-result-status.online {
+    background: #10b981;
   }
 
   .no-results {
@@ -556,6 +857,181 @@
     background: #fee2e2;
   }
 
+  /* Modal de perfil de usuario */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-overlay.hidden {
+    display: none;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+
+  .modal-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: rotate(90deg);
+  }
+
+  .user-modal-header {
+    padding: 40px 24px 24px;
+    text-align: center;
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
+    color: white;
+    position: relative;
+  }
+
+  .modal-user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    margin-bottom: 16px;
+  }
+
+  .modal-user-info h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+
+  .modal-user-info p {
+    font-size: 14px;
+    opacity: 0.9;
+    margin: 4px 0;
+  }
+
+  .user-modal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 24px;
+    background: #f9fafb;
+  }
+
+  .modal-stat {
+    text-align: center;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .modal-stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #667BC6;
+    margin-bottom: 4px;
+  }
+
+  .modal-stat-label {
+    font-size: 13px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .user-modal-actions {
+    display: flex;
+    gap: 12px;
+    padding: 24px;
+  }
+
+  .modal-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .modal-btn.primary {
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
+    color: white;
+  }
+
+  .modal-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
+  }
+
+  .modal-btn.primary.following {
+    background: #10b981;
+  }
+
+  .modal-btn.secondary {
+    background: #f3f4f6;
+    color: #2d2d2d;
+    border: 1px solid #e5e7eb;
+  }
+
+  .modal-btn.secondary:hover {
+    background: #e5e7eb;
+  }
+
   @media (max-width: 640px) {
     .navbar-container {
       padding: 0 16px;
@@ -563,7 +1039,7 @@
     }
 
     .search-container {
-      display: none;
+      max-width: 200px;
     }
 
     .navbar-right {
@@ -574,5 +1050,95 @@
       width: 40px;
       height: 40px;
     }
+
+    .user-modal-actions {
+      flex-direction: column;
+    }
+
+    .modal-btn {
+      width: 100%;
+    }
+  }
+
+  /* Scrollbar personalizado para el modal */
+  .modal-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-content::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .modal-btn.primary.following {
+    background: #10b981;
+  }
+
+  @media (max-width: 640px) {
+    .navbar-container {
+      padding: 0 16px;
+      gap: 12px;
+    }
+
+    .search-container {
+      max-width: 200px;
+    }
+
+    .navbar-right {
+      gap: 8px;
+    }
+
+    .nav-icon-btn {
+      width: 40px;
+      height: 40px;
+    }
+
+    .user-modal-actions {
+      flex-direction: column;
+    }
+
+    .modal-btn {
+      width: 100%;
+    }
+  }
+
+  .modal-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-content::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .top-navbar {
+    z-index: 50; /* Menor que los modales pero mayor que el contenido */
+  }
+
+  .modal-overlay {
+    z-index: 100; /* por encima del header */
+  }
+
+  /* === CORRECCIÓN DE INTERFERENCIAS CON OTROS HEADERS === */
+  body:has(.top-navbar) main,
+  body:has(.top-navbar) section,
+  body:has(.top-navbar) .messages-layout {
+    margin-top: 70px; /* evitar que el contenido quede tapado */
   }
 </style>

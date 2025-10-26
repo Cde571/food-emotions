@@ -1,0 +1,164 @@
+<script>
+  const input = document.getElementById('user-search-input');
+  const resultsBox = document.getElementById('search-results');
+  const token = localStorage.getItem('authToken');
+
+  const API_URL = '/api/users/search';
+  let timeout;
+
+  async function searchUsers(query) {
+    if (!query) {
+      resultsBox.classList.add('hidden');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        resultsBox.innerHTML = `<p class="no-results">Error en la búsqueda</p>`;
+        resultsBox.classList.remove('hidden');
+        return;
+      }
+
+      const users = await res.json();
+
+      if (!users.length) {
+        resultsBox.innerHTML = `<p class="no-results">Sin resultados</p>`;
+      } else {
+        resultsBox.innerHTML = users
+          .map(
+            (u) => `
+            <div class="result-item" data-id="${u._id}">
+              <img src="${u.profilePic || `https://ui-avatars.com/api/?name=${u.username}`}" alt="${u.username}" />
+              <div class="user-info">
+                <h4>${u.username}</h4>
+                <p>${u.status || 'Offline'}</p>
+              </div>
+            </div>
+          `
+          )
+          .join('');
+      }
+      resultsBox.classList.remove('hidden');
+    } catch (err) {
+      console.error('Error en búsqueda:', err);
+      resultsBox.innerHTML = `<p class="no-results">Error de conexión</p>`;
+      resultsBox.classList.remove('hidden');
+    }
+  }
+
+  // 🔹 Buscar mientras se escribe
+  input.addEventListener('input', () => {
+    clearTimeout(timeout);
+    const query = input.value.trim();
+    timeout = setTimeout(() => searchUsers(query), 400);
+  });
+
+  // 🔹 Buscar al presionar Enter
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const query = input.value.trim();
+      searchUsers(query);
+    }
+  });
+
+  // 🔹 Abrir perfil al hacer clic en un resultado
+  resultsBox.addEventListener('click', (e) => {
+    const item = e.target.closest('.result-item');
+    if (item) {
+      const userId = item.dataset.id;
+      window.location.href = `/Profile/${userId}`;
+    }
+  });
+
+  // 🔹 Ocultar lista si se hace clic fuera
+  document.addEventListener('click', (e) => {
+    if (!resultsBox.contains(e.target) && e.target !== input) {
+      resultsBox.classList.add('hidden');
+    }
+  });
+</script>
+
+<style>
+  .search-bar {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  #user-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    background: var(--gray-light);
+    color: var(--dark);
+  }
+
+  #user-search-input:focus {
+    border-color: var(--primary);
+    background: white;
+    outline: none;
+  }
+
+  .search-results {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+
+  .search-results.hidden {
+    display: none;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .result-item:hover {
+    background: var(--gray-light);
+  }
+
+  .result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .user-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+  }
+
+  .user-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .no-results {
+    padding: 12px;
+    text-align: center;
+    color: var(--gray);
+  }
+</style>

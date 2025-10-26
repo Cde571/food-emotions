@@ -8,17 +8,22 @@ import SuggestedUsers from '../components/social/SuggestedUsers.astro';
 import PostModal from '../components/social/PostModal.astro';
 import { savePost, sharePost, deletePost } from '../scripts/api/posts.js';
 import { toggleLike } from '../scripts/api/likes.js';
+import SearchBar from '../components/social/SearchBar.astro';
+
+// Obtener la ruta actual
+const currentPath = Astro.url.pathname;
+const showNavigation = currentPath === '/Social' || currentPath === '/Social/';
 ---
 
 <Layout title="Social Feed">
-  <Navigation />
+  {showNavigation && <Navigation />}
   
-  <div class="social-layout">
+  <div class="social-layout" data-show-nav={showNavigation}>
     <!-- Sidebar Izquierda: Navegación -->
     <aside class="sidebar-left">
       <div class="user-profile-card">
         <div class="profile-header">
-          <img id="user-avatar" src="" alt="Profile" class="profile-avatar" />
+          <img id="profile-pic" src="" alt="Profile" class="profile-avatar" />
           <div class="profile-badge"></div>
         </div>
         <h3 id="user-name" class="profile-name">Cargando...</h3>
@@ -134,6 +139,11 @@ import { toggleLike } from '../scripts/api/likes.js';
           </button>
         </div>
       </div>
+
+      <!-- Search Users -->
+      <section class="search-section">
+        <SearchBar />
+      </section>
 
       <!-- Filter Tabs -->
       <div class="filter-tabs">
@@ -1031,6 +1041,11 @@ import { toggleLike } from '../scripts/api/likes.js';
     padding: 0 24px;
   }
 
+  /* Ajuste cuando el header NO está visible */
+  .social-layout[data-show-nav="false"] {
+    margin-top: 40px;
+  }
+
   /* ===== SIDEBAR LEFT ===== */
   .sidebar-left {
     position: sticky;
@@ -1039,6 +1054,11 @@ import { toggleLike } from '../scripts/api/likes.js';
     display: flex;
     flex-direction: column;
     gap: 20px;
+  }
+
+  /* Ajuste cuando el header NO está visible */
+  .social-layout[data-show-nav="false"] .sidebar-left {
+    top: 40px;
   }
 
   .user-profile-card {
@@ -1678,6 +1698,11 @@ import { toggleLike } from '../scripts/api/likes.js';
     gap: 20px;
   }
 
+  /* Ajuste cuando el header NO está visible */
+  .social-layout[data-show-nav="false"] .sidebar-right {
+    top: 40px;
+  }
+
   .widget {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -1967,6 +1992,10 @@ import { toggleLike } from '../scripts/api/likes.js';
       padding: 0 16px;
     }
 
+    .social-layout[data-show-nav="false"] {
+      margin-top: 20px;
+    }
+
     .sidebar-left {
       display: none;
     }
@@ -1990,6 +2019,10 @@ import { toggleLike } from '../scripts/api/likes.js';
       padding: 0;
       gap: 16px;
       margin-top: 60px;
+    }
+
+    .social-layout[data-show-nav="false"] {
+      margin-top: 0;
     }
 
     .quick-post-card {

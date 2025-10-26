@@ -130,7 +130,7 @@ import Navigation from '../components/shared/Navigation.astro';
       </div>
     </main>
 
-    <!-- Panel de información del usuario (opcional) -->
+    <!-- Panel de información del usuario -->
     <aside class="user-info-panel hidden" id="user-info-panel">
       <div class="panel-header">
         <h3>Información</h3>
@@ -174,7 +174,7 @@ import Navigation from '../components/shared/Navigation.astro';
             </svg>
             Bloquear usuario
           </button>
-          <button class="panel-action-btn delete-btn">
+          <button class="panel-action-btn delete-btn" id="delete-conversation-panel">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -226,7 +226,33 @@ import Navigation from '../components/shared/Navigation.astro';
   const API_URL = "http://localhost:3000";
   const currentUserId = localStorage.getItem("userId");
   let currentRecipientId = null;
+  let currentRecipientUsername = '';
   let conversations = [];
+
+  // 🔹 Verificar conexión de WebSocket
+  console.log('🔌 Socket conectado:', socketClient.connected);
+  console.log('👤 Usuario actual:', currentUserId);
+
+  // Conectar usuario al socket
+  if (currentUserId && socketClient.connected) {
+    socketClient.emit('user-connected', currentUserId);
+  }
+
+  // Verificar eventos del socket
+  socketClient.on('connect', () => {
+    console.log('✅ Socket conectado exitosamente');
+    if (currentUserId) {
+      socketClient.emit('user-connected', currentUserId);
+    }
+  });
+
+  socketClient.on('disconnect', () => {
+    console.log('❌ Socket desconectado');
+  });
+
+  socketClient.on('error', (error) => {
+    console.error('⚠️ Error en socket:', error);
+  });
 
   // 🔹 Cargar todas las conversaciones
   async function loadConversations() {
@@ -245,9 +271,11 @@ import Navigation from '../components/shared/Navigation.astro';
         const { user, lastMessage, timestamp } = conv;
         const item = document.createElement("div");
         item.classList.add("conversation-item");
+        item.dataset.userId = user._id;
+        
         item.innerHTML = `
           <div class="conversation-avatar-wrapper">
-            <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}`}" 
+            <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`}" 
                  alt="${user.username}" class="conversation-avatar" />
           </div>
           <div class="conversation-info">
@@ -270,11 +298,35 @@ import Navigation from '../components/shared/Navigation.astro';
 
   // 🔹 Abrir conversación con un usuario
   async function openConversation(userId, username, avatar) {
+    // Salir del chat anterior si existe
+    if (currentRecipientId) {
+      socketClient.emit('leave-chat', { 
+        userId: currentUserId, 
+        recipientId: currentRecipientId 
+      });
+    }
+
     currentRecipientId = userId;
+    currentRecipientUsername = username;
+    
+    // Unirse al nuevo chat
+    socketClient.emit('join-chat', { 
+      userId: currentUserId, 
+      recipientId: userId 
+    });
+
+    // Actualizar estado visual
     document.getElementById("empty-chat").classList.add("hidden");
     document.getElementById("active-chat").classList.remove("hidden");
 
-    document.getElementById("chat-avatar").src = avatar || `https://ui-avatars.com/api/?name=${username}`;
+    // Marcar conversación activa
+    document.querySelectorAll('.conversation-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    document.querySelector(`[data-user-id="${userId}"]`)?.classList.add('active');
+
+    // Actualizar header del chat
+    document.getElementById("chat-avatar").src = avatar || `https://ui-avatars.com/api/?name=${username}&background=667BC6&color=fff`;
     document.getElementById("chat-name").textContent = username;
     document.getElementById("chat-status").textContent = "En línea";
 
@@ -290,18 +342,18 @@ import Navigation from '../components/shared/Navigation.astro';
       const container = document.getElementById("messages-list");
       container.innerHTML = "";
 
-      messages.forEach(msg => {
-        const div = document.createElement("div");
-        const isMine = msg.sender === currentUserId;
-        div.classList.add("message", isMine ? "mine" : "theirs");
-        div.innerHTML = `
-          ${!isMine ? `<img src="https://ui-avatars.com/api/?name=${msg.senderName || 'Usuario'}" class="message-avatar" />` : ""}
-          <div class="message-content">
-            <div class="message-bubble"><p class="message-text">${msg.text}</p></div>
-            <span class="message-time">${new Date(msg.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="no-messages">
+            <p>No hay mensajes aún. ¡Inicia la conversación!</p>
           </div>
         `;
-        container.appendChild(div);
+        return;
+      }
+
+      messages.forEach(msg => {
+        const isMine = msg.sender === currentUserId;
+        appendMessage(msg.text, isMine, msg.createdAt, msg.senderName, msg._id);
       });
 
       scrollToBottom();
@@ -310,27 +362,97 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  socketClient.on('new-message', (msg) => {
-  if (msg.recipientId === currentUserId && msg.senderId === currentRecipientId) {
+  // 🔹 Función para agregar un mensaje al DOM
+  function appendMessage(text, isMine, timestamp = new Date(), senderName = '', messageId = null) {
     const container = document.getElementById("messages-list");
-    container.insertAdjacentHTML("beforeend", `
-      <div class="message theirs">
-        <div class="message-content">
-          <div class="message-bubble">
-            <p class="message-text">${msg.text}</p>
-          </div>
-          <span class="message-time">${new Date(msg.createdAt).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})}</span>
+    const div = document.createElement("div");
+    div.classList.add("message", isMine ? "mine" : "theirs");
+    if (messageId) div.dataset.messageId = messageId;
+    
+    const avatarUrl = isMine 
+      ? `https://ui-avatars.com/api/?name=${localStorage.getItem('username') || 'Tú'}&background=667BC6&color=fff`
+      : `https://ui-avatars.com/api/?name=${senderName || currentRecipientUsername}&background=DA7297&color=fff`;
+    
+    div.innerHTML = `
+      ${!isMine ? `<img src="${avatarUrl}" alt="${senderName}" class="message-avatar" />` : ""}
+      <div class="message-content">
+        <div class="message-bubble">
+          <p class="message-text">${escapeHtml(text)}</p>
+          ${isMine ? `
+            <button class="delete-message-btn" data-message-id="${messageId}" title="Eliminar mensaje">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          ` : ''}
         </div>
+        <span class="message-time">${formatMessageTime(timestamp)}</span>
       </div>
-    `);
-    scrollToBottom();
+      ${isMine ? `<img src="${avatarUrl}" alt="Tú" class="message-avatar" />` : ""}
+    `;
+    
+    container.appendChild(div);
+
+    // Agregar evento de eliminar si es mensaje propio
+    if (isMine && messageId) {
+      const deleteBtn = div.querySelector('.delete-message-btn');
+      deleteBtn?.addEventListener('click', () => deleteMessage(messageId));
+    }
   }
-});
+
+  // 🔹 Escuchar mensajes nuevos en tiempo real
+  socketClient.on('new-message', (msg) => {
+    console.log('📩 Mensaje recibido:', msg);
+    console.log('Current User ID:', currentUserId);
+    console.log('Current Recipient ID:', currentRecipientId);
+    
+    // Verificar si el mensaje es para el usuario actual
+    const isForMe = msg.recipientId === currentUserId || msg.recipient === currentUserId;
+    const isFromCurrentChat = msg.senderId === currentRecipientId || msg.sender === currentRecipientId;
+    
+    if (isForMe && isFromCurrentChat) {
+      appendMessage(msg.text, false, msg.createdAt, msg.senderName || 'Usuario', msg._id);
+      scrollToBottom();
+      
+      // Actualizar la lista de conversaciones
+      loadConversations();
+    } else if (isForMe) {
+      // Si el mensaje es para mí pero de otra conversación, solo actualizar la lista
+      loadConversations();
+      showToast(`Nuevo mensaje de ${msg.senderName || 'Usuario'}`);
+    }
+  });
+
+  // 🔹 Escuchar eliminación de mensajes
+  socketClient.on('message-deleted', (data) => {
+    console.log('🗑️ Mensaje eliminado:', data);
+    const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
+    if (messageElement) {
+      messageElement.style.animation = 'fadeOut 0.3s ease';
+      setTimeout(() => messageElement.remove(), 300);
+    }
+  });
+
+  // 🔹 Escuchar eliminación de conversación completa
+  socketClient.on('conversation-deleted', (data) => {
+    console.log('🗑️ Conversación eliminada:', data);
+    if (data.userId1 === currentUserId || data.userId2 === currentUserId) {
+      loadConversations();
+      if (currentRecipientId === data.userId1 || currentRecipientId === data.userId2) {
+        document.getElementById("active-chat").classList.add("hidden");
+        document.getElementById("empty-chat").classList.remove("hidden");
+        currentRecipientId = null;
+        showToast('Conversación eliminada');
+      }
+    }
+  });
 
   // 🔹 Enviar mensaje
   async function sendMessage() {
     const input = document.getElementById("message-input");
     const text = input.value.trim();
+    
     if (!text || !currentRecipientId) return;
 
     try {
@@ -345,27 +467,89 @@ import Navigation from '../components/shared/Navigation.astro';
         }),
       });
 
-      const data = await res.json();
-      const container = document.getElementById("messages-list");
-      container.insertAdjacentHTML("beforeend", `
-        <div class="message mine">
-          <div class="message-content">
-            <div class="message-bubble"><p class="message-text">${text}</p></div>
-            <span class="message-time">${new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
-          </div>
-        </div>
-      `);
-      input.value = "";
-      scrollToBottom();
+      if (res.ok) {
+        const data = await res.json();
+        console.log('✅ Mensaje enviado:', data);
+        
+        // Agregar el mensaje visualmente con su ID
+        appendMessage(text, true, new Date(), '', data.data._id);
+        input.value = "";
+        scrollToBottom();
+        
+        // Actualizar última conversación
+        loadConversations();
+      } else {
+        console.error('❌ Error en respuesta:', await res.text());
+        showToast("Error al enviar el mensaje");
+      }
     } catch (err) {
       console.error("❌ Error enviando mensaje:", err);
+      showToast("Error al enviar el mensaje");
+    }
+  }
+
+  // 🔹 Eliminar mensaje individual
+  async function deleteMessage(messageId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/messages/${messageId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      if (res.ok) {
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+          messageElement.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => messageElement.remove(), 300);
+        }
+        showToast('Mensaje eliminado');
+      } else {
+        showToast('Error al eliminar el mensaje');
+      }
+    } catch (err) {
+      console.error("❌ Error eliminando mensaje:", err);
+      showToast('Error al eliminar el mensaje');
+    }
+  }
+
+  // 🔹 Eliminar conversación completa
+  async function deleteConversation(userId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar toda esta conversación? Esta acción no se puede deshacer.')) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/messages/conversation/${userId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Conversación eliminada (${data.deletedCount} mensajes)`);
+        
+        // Volver a la vista vacía
+        document.getElementById("active-chat").classList.add("hidden");
+        document.getElementById("empty-chat").classList.remove("hidden");
+        currentRecipientId = null;
+        
+        // Recargar conversaciones
+        loadConversations();
+      } else {
+        showToast('Error al eliminar la conversación');
+      }
+    } catch (err) {
+      console.error("❌ Error eliminando conversación:", err);
+      showToast('Error al eliminar la conversación');
     }
   }
 
   // 🔹 Scroll automático
   function scrollToBottom() {
     const container = document.getElementById("messages-container");
-    container.scrollTop = container.scrollHeight;
+    setTimeout(() => {
+      container.scrollTop = container.scrollHeight;
+    }, 100);
   }
 
   // 🔹 Buscar conversaciones
@@ -380,16 +564,90 @@ import Navigation from '../components/shared/Navigation.astro';
   // 🔹 Envío con botón o Enter
   document.getElementById("send-btn")?.addEventListener("click", sendMessage);
   document.getElementById("message-input")?.addEventListener("keypress", e => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   });
 
-  // 🔹 Utilidad: formato de tiempo
+  // 🔹 Botón de volver (mobile)
+  document.getElementById("back-btn")?.addEventListener("click", () => {
+    document.getElementById("active-chat").classList.add("hidden");
+    document.getElementById("empty-chat").classList.remove("hidden");
+    currentRecipientId = null;
+  });
+
+  // 🔹 Botón de menú del chat (eliminar conversación)
+  document.getElementById("chat-menu-btn")?.addEventListener("click", () => {
+    if (currentRecipientId) {
+      const menu = document.createElement('div');
+      menu.className = 'chat-dropdown-menu';
+      menu.innerHTML = `
+        <button class="dropdown-item delete-conversation-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+          Eliminar conversación
+        </button>
+      `;
+      
+      // Posicionar el menú
+      const btn = document.getElementById("chat-menu-btn");
+      const rect = btn.getBoundingClientRect();
+      menu.style.position = 'fixed';
+      menu.style.top = `${rect.bottom + 8}px`;
+      menu.style.right = `${window.innerWidth - rect.right}px`;
+      
+      document.body.appendChild(menu);
+      
+      // Evento de eliminar
+      menu.querySelector('.delete-conversation-btn').addEventListener('click', () => {
+        deleteConversation(currentRecipientId);
+        menu.remove();
+      });
+      
+      // Cerrar al hacer clic fuera
+      setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+          if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+          }
+        });
+      }, 100);
+    }
+  });
+
+  // 🔹 Utilidades
   function formatTime(ts) {
     const date = new Date(ts);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) return "Ahora";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
+    if (diff < 86400000) return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  }
+
+  function formatMessageTime(ts) {
+    const date = new Date(ts);
     return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    const messageEl = toast.querySelector(".toast-message");
+    messageEl.textContent = message;
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
   }
 
   // 🔹 Inicialización
@@ -550,10 +808,7 @@ import Navigation from '../components/shared/Navigation.astro';
 
   .conversation-item.active {
     background: #e8eaf6;
-  }
-
-  .conversation-item.unread {
-    background: #f0f4ff;
+    border-left: 3px solid var(--primary);
   }
 
   .conversation-avatar-wrapper {
@@ -566,17 +821,6 @@ import Navigation from '../components/shared/Navigation.astro';
     height: 52px;
     border-radius: 50%;
     object-fit: cover;
-  }
-
-  .online-indicator {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 14px;
-    height: 14px;
-    background: var(--success);
-    border: 3px solid var(--card-bg);
-    border-radius: 50%;
   }
 
   .conversation-info {
@@ -603,6 +847,7 @@ import Navigation from '../components/shared/Navigation.astro';
   .conversation-time {
     font-size: 12px;
     color: var(--gray);
+    flex-shrink: 0;
   }
 
   .conversation-preview {
@@ -621,17 +866,6 @@ import Navigation from '../components/shared/Navigation.astro';
     flex: 1;
   }
 
-  .unread-badge {
-    background: var(--primary);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    min-width: 20px;
-    text-align: center;
-  }
-
   .no-conversations {
     display: flex;
     flex-direction: column;
@@ -640,28 +874,6 @@ import Navigation from '../components/shared/Navigation.astro';
     padding: 60px 20px;
     text-align: center;
     color: var(--gray);
-  }
-
-  .no-conversations svg {
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  .btn-start-chat {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 16px;
-    transition: all 0.2s;
-  }
-
-  .btn-start-chat:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
   }
 
   /* ===== CHAT AREA ===== */
@@ -715,6 +927,7 @@ import Navigation from '../components/shared/Navigation.astro';
     justify-content: space-between;
     align-items: center;
     background: var(--card-bg);
+    flex-shrink: 0;
   }
 
   .chat-user-info {
@@ -797,19 +1010,51 @@ import Navigation from '../components/shared/Navigation.astro';
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-height: 100%;
   }
 
+  .no-messages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--gray);
+    font-size: 14px;
+  }
+
+  /* Estructura de mensaje individual */
   .message {
     display: flex;
+    align-items: flex-end;
     gap: 8px;
-    max-width: 70%;
+    max-width: 75%;
+    animation: messageSlide 0.3s ease;
   }
 
+  @keyframes messageSlide {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mensajes del usuario actual (derecha) */
   .message.mine {
     margin-left: auto;
     flex-direction: row-reverse;
   }
 
+  /* Mensajes del otro usuario (izquierda) */
+  .message.theirs {
+    margin-right: auto;
+    flex-direction: row;
+  }
+
+  /* Avatar del mensaje */
   .message-avatar {
     width: 32px;
     height: 32px;
@@ -818,42 +1063,151 @@ import Navigation from '../components/shared/Navigation.astro';
     flex-shrink: 0;
   }
 
+  /* Contenedor de contenido del mensaje */
   .message-content {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    max-width: 100%;
   }
 
   .message.mine .message-content {
     align-items: flex-end;
   }
 
+  .message.theirs .message-content {
+    align-items: flex-start;
+  }
+
+  /* Burbuja del mensaje */
   .message-bubble {
     padding: 12px 16px;
     border-radius: 18px;
     word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    position: relative;
   }
 
   .message.theirs .message-bubble {
     background: white;
     border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
   }
 
   .message.mine .message-bubble {
     background: var(--primary);
     color: white;
+    border-bottom-right-radius: 4px;
   }
 
+  /* Botón de eliminar mensaje */
+  .delete-message-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+  }
+
+  .delete-message-btn svg {
+    stroke: white;
+  }
+
+  .message.mine .message-bubble:hover .delete-message-btn {
+    display: flex;
+  }
+
+  .delete-message-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+    transform: scale(1.1);
+  }
+
+  /* Menú desplegable del chat */
+  .chat-dropdown-menu {
+    background: white;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 8px;
+    min-width: 200px;
+    z-index: 1000;
+    animation: slideDown 0.2s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-item {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--dark);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .dropdown-item:hover {
+    background: var(--gray-light);
+  }
+
+  .dropdown-item.delete-conversation-btn {
+    color: #ef4444;
+  }
+
+  .dropdown-item.delete-conversation-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  /* Animación de fadeOut */
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
+
+  /* Texto del mensaje */
   .message-text {
     font-size: 14px;
     line-height: 1.5;
     margin: 0;
+    white-space: pre-wrap;
   }
 
+  /* Hora del mensaje */
   .message-time {
     font-size: 11px;
     color: var(--gray);
     padding: 0 4px;
+    white-space: nowrap;
   }
 
   /* ===== MESSAGE INPUT ===== */
@@ -864,6 +1218,7 @@ import Navigation from '../components/shared/Navigation.astro';
     align-items: center;
     gap: 12px;
     background: var(--card-bg);
+    flex-shrink: 0;
   }
 
   .attach-btn,
@@ -879,6 +1234,7 @@ import Navigation from '../components/shared/Navigation.astro';
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
 
   .attach-btn:hover,
@@ -895,8 +1251,8 @@ import Navigation from '../components/shared/Navigation.astro';
     font-size: 14px;
     outline: none;
     background: var(--gray-light);
-    resize: none;
-    max-height: 120px;
+    font-family: inherit;
+    min-height: 44px;
   }
 
   .message-input:focus {
@@ -916,11 +1272,16 @@ import Navigation from '../components/shared/Navigation.astro';
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
 
   .send-btn:hover {
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
+  }
+
+  .send-btn:active {
+    transform: scale(0.95);
   }
 
   /* ===== USER INFO PANEL ===== */
@@ -955,6 +1316,12 @@ import Navigation from '../components/shared/Navigation.astro';
     cursor: pointer;
     color: var(--gray);
     padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  .close-panel-btn:hover {
+    background: var(--gray-light);
   }
 
   .panel-content {
@@ -1016,6 +1383,13 @@ import Navigation from '../components/shared/Navigation.astro';
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
+  }
+
+  .no-files {
+    font-size: 14px;
+    color: var(--gray);
+    text-align: center;
+    padding: 20px;
   }
 
   .panel-action-btn {
@@ -1204,14 +1578,20 @@ import Navigation from '../components/shared/Navigation.astro';
     .messages-layout {
       grid-template-columns: 1fr;
       margin-top: 60px;
+      height: calc(100vh - 60px);
     }
 
     .conversations-sidebar {
       display: flex;
     }
 
-    .active-chat:not(.hidden) ~ .conversations-sidebar {
-      display: none;
+    .active-chat:not(.hidden) {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
     }
 
     .back-btn {
@@ -1278,32 +1658,84 @@ import Navigation from '../components/shared/Navigation.astro';
 
     .message-input-wrapper {
       padding: 12px 16px;
+      gap: 8px;
+    }
+
+    .attach-btn,
+    .emoji-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    .send-btn {
+      width: 40px;
+      height: 40px;
     }
 
     .message {
       max-width: 90%;
     }
+
+    .message-avatar {
+      width: 28px;
+      height: 28px;
+    }
+
+    .message-bubble {
+      padding: 10px 14px;
+      border-radius: 16px;
+    }
+
+    .message-text {
+      font-size: 13px;
+    }
   }
 
   /* ===== SCROLLBAR ===== */
   .conversations-list::-webkit-scrollbar,
-  .messages-container::-webkit-scrollbar {
+  .messages-container::-webkit-scrollbar,
+  .panel-content::-webkit-scrollbar {
     width: 6px;
   }
 
   .conversations-list::-webkit-scrollbar-track,
-  .messages-container::-webkit-scrollbar-track {
+  .messages-container::-webkit-scrollbar-track,
+  .panel-content::-webkit-scrollbar-track {
     background: transparent;
   }
 
   .conversations-list::-webkit-scrollbar-thumb,
-  .messages-container::-webkit-scrollbar-thumb {
+  .messages-container::-webkit-scrollbar-thumb,
+  .panel-content::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 3px;
   }
 
   .conversations-list::-webkit-scrollbar-thumb:hover,
-  .messages-container::-webkit-scrollbar-thumb:hover {
+  .messages-container::-webkit-scrollbar-thumb:hover,
+  .panel-content::-webkit-scrollbar-thumb:hover {
     background: var(--gray);
+  }
+
+  /* ===== ESTADOS ADICIONALES ===== */
+  .hidden {
+    display: none !important;
+  }
+
+  .message-input:disabled {
+    background: var(--gray-light);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .send-btn:disabled {
+    background: var(--gray);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .send-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
   }
 </style>
