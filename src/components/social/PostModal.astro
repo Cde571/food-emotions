@@ -6,7 +6,7 @@
   <div class="modal-container">
     <div class="modal-header">
       <h2 class="modal-title">Crear Publicación</h2>
-      <button class="modal-close" id="close-modal-btn">
+      <button class="modal-close" id="close-modal-btn" type="button">
         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -14,12 +14,12 @@
       </button>
     </div>
 
-    <div class="modal-body">
+    <form id="create-post-form" class="modal-body">
       <div class="user-info">
         <img id="modal-user-avatar" src="" alt="Avatar" class="modal-avatar" />
         <div class="user-details">
-          <span id="modal-username" class="username">Username</span>
-          <select id="post-privacy" class="privacy-select">
+          <span id="modal-username" class="username">Usuario</span>
+          <select id="post-visibility" name="visibility" class="privacy-select">
             <option value="public">🌍 Público</option>
             <option value="followers">👥 Seguidores</option>
             <option value="private">🔒 Privado</option>
@@ -30,19 +30,21 @@
       <div class="post-input-wrapper">
         <textarea 
           id="post-caption" 
+          name="caption"
           class="post-textarea" 
           placeholder="¿Qué estás pensando?"
           maxlength="2000"
+          rows="6"
         ></textarea>
         <div class="char-counter">
           <span id="char-count">0</span> / 2000
         </div>
       </div>
 
-      <div class="media-preview" id="media-preview"></div>
+      <div id="image-preview-container" class="media-preview"></div>
 
       <div class="post-actions-bar">
-        <button class="action-btn" id="upload-image-btn" title="Agregar foto/video">
+        <button type="button" class="action-btn" id="upload-image-btn" title="Agregar foto/video">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -51,7 +53,7 @@
           <span>Foto/Video</span>
         </button>
 
-        <button class="action-btn" id="add-emoji-btn" title="Agregar emoji">
+        <button type="button" class="action-btn" id="add-emoji-btn" title="Agregar emoji">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
@@ -61,7 +63,7 @@
           <span>Emoji</span>
         </button>
 
-        <button class="action-btn" id="add-location-btn" title="Agregar ubicación">
+        <button type="button" class="action-btn" id="add-location-btn" title="Agregar ubicación">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
             <circle cx="12" cy="10" r="3"/>
@@ -69,7 +71,7 @@
           <span>Ubicación</span>
         </button>
 
-        <button class="action-btn" id="add-tags-btn" title="Agregar etiquetas">
+        <button type="button" class="action-btn" id="add-tags-btn" title="Agregar etiquetas">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
             <line x1="7" y1="7" x2="7.01" y2="7"/>
@@ -80,7 +82,8 @@
 
       <input 
         type="file" 
-        id="file-input" 
+        id="post-images" 
+        name="images"
         accept="image/*,video/*" 
         multiple 
         style="display: none;"
@@ -90,10 +93,11 @@
         <input 
           type="text" 
           id="location-text" 
+          name="location"
           class="location-field" 
           placeholder="¿Dónde estás?"
         />
-        <button class="remove-location" id="remove-location">×</button>
+        <button type="button" class="remove-location" id="remove-location">×</button>
       </div>
 
       <div class="tags-input hidden" id="tags-input">
@@ -105,185 +109,243 @@
           placeholder="Agregar etiqueta (presiona Enter)"
         />
       </div>
-    </div>
 
-    <div class="modal-footer">
-      <button class="btn-cancel" id="cancel-post-btn">Cancelar</button>
-      <button class="btn-publish" id="publish-post-btn" disabled>
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-        Publicar
-      </button>
-    </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="cancel-post-btn">Cancelar</button>
+        <button type="submit" class="btn-publish" id="publish-post-btn" disabled>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Publicar
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
-  import { createPost } from '../../scripts/api/posts.js';
-
-  let selectedFiles = [];
-  let selectedLocation = '';
+  const API_URL = 'http://localhost:3000';
   let selectedTags = [];
 
+  // ============================================================
+  // 🔧 ELEMENTOS DEL DOM
+  // ============================================================
   const modal = document.getElementById('post-modal');
+  const form = document.getElementById('create-post-form');
   const closeBtn = document.getElementById('close-modal-btn');
   const cancelBtn = document.getElementById('cancel-post-btn');
   const publishBtn = document.getElementById('publish-post-btn');
   const captionInput = document.getElementById('post-caption');
   const charCount = document.getElementById('char-count');
-  const fileInput = document.getElementById('file-input');
+  const fileInput = document.getElementById('post-images');
   const uploadBtn = document.getElementById('upload-image-btn');
-  const mediaPreview = document.getElementById('media-preview');
+  const mediaPreview = document.getElementById('image-preview-container');
   const locationBtn = document.getElementById('add-location-btn');
   const locationInput = document.getElementById('location-input');
   const locationText = document.getElementById('location-text');
   const removeLocationBtn = document.getElementById('remove-location');
   const tagsBtn = document.getElementById('add-tags-btn');
-  const tagsInput = document.getElementById('tags-input');
+  const tagsInputDiv = document.getElementById('tags-input');
   const tagText = document.getElementById('tag-text');
   const tagsContainer = document.getElementById('tags-container');
 
-  // Cargar datos del usuario
-  async function loadUserData() {
-    const token = localStorage.getItem('authToken');
+  // ============================================================
+  // 👤 CARGAR DATOS DEL USUARIO
+  // ============================================================
+  async function loadModalUserData() {
     try {
-      const response = await fetch('/api/user/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const user = await response.json();
+      console.log('🔄 Cargando datos para modal...');
       
-      const avatarUrl = user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`;
-      document.getElementById('modal-user-avatar').src = avatarUrl;
-      document.getElementById('modal-username').textContent = user.username;
+      const response = await fetch(`${API_URL}/api/user/me`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Error cargando usuario');
+
+      const user = await response.json();
+      console.log('✅ Usuario cargado para modal:', user);
+
+      const avatarUrl = user.profilePic || 
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667BC6&color=fff&size=48`;
+      
+      const modalAvatar = document.getElementById('modal-user-avatar');
+      const modalUsername = document.getElementById('modal-username');
+      
+      if (modalAvatar) modalAvatar.src = avatarUrl;
+      if (modalUsername) modalUsername.textContent = user.username;
+
     } catch (error) {
-      console.error('Error al cargar usuario:', error);
+      console.error('❌ Error cargando usuario en modal:', error);
     }
   }
 
-  // Abrir/Cerrar modal
+  // ============================================================
+  // 🎯 FUNCIONES DEL MODAL
+  // ============================================================
   function openModal() {
+    if (!modal) return;
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    loadUserData();
+    loadModalUserData();
+    console.log('✅ Modal abierto');
   }
 
   function closeModal() {
+    if (!modal) return;
     modal.classList.add('hidden');
     document.body.style.overflow = '';
     resetForm();
+    console.log('✅ Modal cerrado');
   }
 
-  // Resetear formulario
   function resetForm() {
-    captionInput.value = '';
-    charCount.textContent = '0';
-    selectedFiles = [];
-    selectedLocation = '';
+    if (form) form.reset();
+    if (charCount) charCount.textContent = '0';
+    if (mediaPreview) mediaPreview.innerHTML = '';
+    if (locationInput) locationInput.classList.add('hidden');
+    if (tagsInputDiv) tagsInputDiv.classList.add('hidden');
+    if (tagsContainer) tagsContainer.innerHTML = '';
+    if (locationText) locationText.value = '';
     selectedTags = [];
-    mediaPreview.innerHTML = '';
-    locationInput.classList.add('hidden');
-    tagsInput.classList.add('hidden');
-    locationText.value = '';
-    tagsContainer.innerHTML = '';
-    publishBtn.disabled = true;
+    if (publishBtn) publishBtn.disabled = true;
+    console.log('🧹 Formulario reseteado');
   }
 
-  // Contador de caracteres
+  // ============================================================
+  // 📝 CONTADOR DE CARACTERES
+  // ============================================================
   captionInput?.addEventListener('input', (e) => {
     const length = e.target.value.length;
-    charCount.textContent = length;
+    if (charCount) {
+      charCount.textContent = length;
+      charCount.style.color = length > 1900 ? '#ef4444' : '#6b7280';
+    }
     validateForm();
   });
 
-  // Validar formulario
+  // ============================================================
+  // ✅ VALIDAR FORMULARIO
+  // ============================================================
   function validateForm() {
-    const hasContent = captionInput.value.trim().length > 0 || selectedFiles.length > 0;
-    publishBtn.disabled = !hasContent;
+    const hasCaption = captionInput?.value.trim().length > 0;
+    const hasFiles = fileInput?.files.length > 0;
+    const hasContent = hasCaption || hasFiles;
+    
+    if (publishBtn) {
+      publishBtn.disabled = !hasContent;
+    }
   }
 
-  // Upload de archivos
-  uploadBtn?.addEventListener('click', () => fileInput?.click());
+  // ============================================================
+  // 📷 MANEJO DE IMÁGENES
+  // ============================================================
+  uploadBtn?.addEventListener('click', () => {
+    fileInput?.click();
+  });
 
   fileInput?.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
     
-    if (files.length + selectedFiles.length > 10) {
+    console.log(`📸 ${files.length} archivos seleccionados`);
+
+    if (files.length > 10) {
       showToast('Máximo 10 archivos por publicación', 'error');
       return;
     }
 
-    files.forEach(file => {
+    if (!mediaPreview) return;
+
+    // Limpiar preview anterior
+    mediaPreview.innerHTML = '';
+
+    files.forEach((file, index) => {
       if (file.size > 10 * 1024 * 1024) {
-        showToast('Archivo muy grande (máx 10MB)', 'error');
+        showToast(`Archivo ${file.name} muy grande (máx 10MB)`, 'error');
         return;
       }
 
-      selectedFiles.push(file);
-      addMediaPreview(file);
+      addMediaPreview(file, index);
     });
 
     validateForm();
   });
 
-  // Preview de media
-  function addMediaPreview(file) {
+  function addMediaPreview(file, index) {
     const reader = new FileReader();
     
     reader.onload = (e) => {
       const preview = document.createElement('div');
       preview.className = 'media-item';
+      preview.dataset.index = index;
+      
       preview.innerHTML = `
-        <img src="${e.target.result}" alt="Preview" />
-        <button class="remove-media" data-file="${file.name}">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <line x1="18" y1="6" x2="6" y2="18" stroke="white" stroke-width="2"/>
-            <line x1="6" y1="6" x2="18" y2="18" stroke="white" stroke-width="2"/>
+        <img src="${e.target.result}" alt="Preview ${index + 1}" loading="lazy" />
+        <button type="button" class="remove-media" data-index="${index}" title="Eliminar">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="white" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
+        <div class="media-number">${index + 1}</div>
       `;
       
-      preview.querySelector('.remove-media').addEventListener('click', () => {
-        removeMedia(file.name);
-        preview.remove();
+      const removeBtn = preview.querySelector('.remove-media');
+      removeBtn?.addEventListener('click', () => {
+        removeMedia(index);
       });
 
-      mediaPreview.appendChild(preview);
+      mediaPreview?.appendChild(preview);
     };
 
     reader.readAsDataURL(file);
   }
 
-  function removeMedia(fileName) {
-    selectedFiles = selectedFiles.filter(f => f.name !== fileName);
-    validateForm();
+  function removeMedia(indexToRemove) {
+    const dt = new DataTransfer();
+    const files = Array.from(fileInput?.files || []);
+    
+    files.forEach((file, i) => {
+      if (i !== indexToRemove) {
+        dt.items.add(file);
+      }
+    });
+    
+    if (fileInput) fileInput.files = dt.files;
+    
+    // Recargar preview
+    const changeEvent = new Event('change', { bubbles: true });
+    fileInput?.dispatchEvent(changeEvent);
+    
+    console.log(`🗑️ Imagen ${indexToRemove + 1} eliminada`);
   }
 
-  // Ubicación
+  // ============================================================
+  // 📍 UBICACIÓN
+  // ============================================================
   locationBtn?.addEventListener('click', () => {
-    locationInput.classList.toggle('hidden');
-  });
-
-  locationText?.addEventListener('input', (e) => {
-    selectedLocation = e.target.value;
+    locationInput?.classList.toggle('hidden');
   });
 
   removeLocationBtn?.addEventListener('click', () => {
-    locationInput.classList.add('hidden');
-    locationText.value = '';
-    selectedLocation = '';
+    locationInput?.classList.add('hidden');
+    if (locationText) locationText.value = '';
   });
 
-  // Etiquetas
+  // ============================================================
+  // 🏷️ ETIQUETAS
+  // ============================================================
   tagsBtn?.addEventListener('click', () => {
-    tagsInput.classList.toggle('hidden');
+    tagsInputDiv?.classList.toggle('hidden');
+    tagText?.focus();
   });
 
   tagText?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && e.target.value.trim()) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      const tag = e.target.value.trim();
+      const tag = e.target.value.trim().replace(/^#/, '');
+      
+      if (!tag) return;
       
       if (selectedTags.length >= 10) {
         showToast('Máximo 10 etiquetas', 'error');
@@ -294,6 +356,7 @@
         selectedTags.push(tag);
         addTagChip(tag);
         e.target.value = '';
+        console.log('🏷️ Tag agregado:', tag);
       }
     }
   });
@@ -301,22 +364,33 @@
   function addTagChip(tag) {
     const chip = document.createElement('span');
     chip.className = 'tag-chip';
+    chip.dataset.tag = tag;
+    
     chip.innerHTML = `
       #${tag}
-      <button class="remove-tag" data-tag="${tag}">×</button>
+      <button type="button" class="remove-tag" data-tag="${tag}">×</button>
     `;
     
-    chip.querySelector('.remove-tag').addEventListener('click', () => {
+    const removeBtn = chip.querySelector('.remove-tag');
+    removeBtn?.addEventListener('click', () => {
       selectedTags = selectedTags.filter(t => t !== tag);
       chip.remove();
+      console.log('🗑️ Tag removido:', tag);
     });
 
-    tagsContainer.appendChild(chip);
+    tagsContainer?.appendChild(chip);
   }
 
-  // Publicar
-  publishBtn?.addEventListener('click', async () => {
+  // ============================================================
+  // 📤 PUBLICAR POST
+  // ============================================================
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!publishBtn) return;
+    
     publishBtn.disabled = true;
+    const originalHTML = publishBtn.innerHTML;
     publishBtn.innerHTML = `
       <svg class="spinner" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10" opacity="0.25"/>
@@ -326,39 +400,75 @@
     `;
 
     try {
-      const postData = {
-        caption: captionInput.value.trim(),
-        images: selectedFiles,
-        location: selectedLocation,
-        tags: selectedTags
-      };
+      console.log('📤 Enviando publicación...');
 
-      const result = await createPost(postData);
+      const formData = new FormData();
       
-      showToast('¡Publicación creada con éxito!', 'success');
+      // Caption
+      const caption = captionInput?.value.trim();
+      if (caption) formData.append('caption', caption);
+      
+      // Visibility
+      const visibility = document.getElementById('post-visibility')?.value || 'public';
+      formData.append('visibility', visibility);
+      
+      // Images
+      const files = fileInput?.files;
+      if (files) {
+        Array.from(files).forEach(file => {
+          formData.append('images', file);
+        });
+      }
+      
+      // Location
+      const location = locationText?.value.trim();
+      if (location) formData.append('location', location);
+      
+      // Tags
+      if (selectedTags.length > 0) {
+        formData.append('tags', JSON.stringify(selectedTags));
+      }
+
+      // Log para debug
+      console.log('📦 Datos a enviar:');
+      for (let pair of formData.entries()) {
+        console.log(`  ${pair[0]}:`, pair[1]);
+      }
+
+      const response = await fetch(`${API_URL}/api/posts`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al crear publicación');
+      }
+
+      const result = await response.json();
+      console.log('✅ Post creado:', result);
+
+      showToast('¡Publicación creada exitosamente!', 'success');
       closeModal();
       
-      // Recargar el feed
+      // Recargar feed después de 1 segundo
       setTimeout(() => {
         window.location.reload();
       }, 1000);
 
     } catch (error) {
-      console.error('Error al publicar:', error);
+      console.error('❌ Error al publicar:', error);
       showToast(error.message || 'Error al crear publicación', 'error');
       
       publishBtn.disabled = false;
-      publishBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-        Publicar
-      `;
+      publishBtn.innerHTML = originalHTML;
     }
   });
 
-  // Event listeners
+  // ============================================================
+  // 🎨 EVENT LISTENERS
+  // ============================================================
   closeBtn?.addEventListener('click', closeModal);
   cancelBtn?.addEventListener('click', closeModal);
 
@@ -367,20 +477,46 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
       closeModal();
     }
   });
 
-  function showToast(message, type) {
-    const event = new CustomEvent('show-toast', {
-      detail: { message, type }
-    });
-    document.dispatchEvent(event);
+  // ============================================================
+  // 🔔 MOSTRAR TOAST
+  // ============================================================
+  function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastIcon = toast?.querySelector('.toast-icon');
+    const toastMessage = toast?.querySelector('.toast-message');
+    
+    if (!toast || !toastIcon || !toastMessage) {
+      console.log(`Toast: [${type}] ${message}`);
+      return;
+    }
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      info: 'ℹ'
+    };
+    
+    toastIcon.textContent = icons[type] || icons.info;
+    toastMessage.textContent = message;
+    toast.className = `toast-notification ${type}`;
+    toast.classList.remove('hidden');
+    
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 4000);
   }
 
-  // Escuchar evento global para abrir el modal
+  // ============================================================
+  // 🌍 EXPONER FUNCIÓN GLOBAL
+  // ============================================================
   window.openPostModal = openModal;
+  
+  console.log('✅ PostModal script cargado');
 </script>
 
 <style>
@@ -390,30 +526,18 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     padding: 20px;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.2s ease;
   }
 
   .modal-overlay.hidden {
     display: none;
-  }
-
-  .modal-container {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.3s ease;
   }
 
   @keyframes fadeIn {
@@ -421,14 +545,27 @@
     to { opacity: 1; }
   }
 
+  .modal-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    max-width: 620px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+
   @keyframes slideUp {
     from {
       opacity: 0;
-      transform: translateY(50px);
+      transform: translateY(40px) scale(0.96);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
 
@@ -438,12 +575,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
   }
 
   .modal-title {
     font-size: 20px;
     font-weight: 700;
-    color: #2d2d2d;
+    color: #1f2937;
+    margin: 0;
   }
 
   .modal-close {
@@ -462,7 +601,7 @@
 
   .modal-close:hover {
     background: #f3f4f6;
-    color: #2d2d2d;
+    color: #1f2937;
   }
 
   .modal-body {
@@ -484,6 +623,7 @@
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #667BC6;
+    flex-shrink: 0;
   }
 
   .user-details {
@@ -495,17 +635,28 @@
   .username {
     font-weight: 600;
     font-size: 15px;
-    color: #2d2d2d;
+    color: #1f2937;
   }
 
   .privacy-select {
     background: #f3f4f6;
     border: 1px solid #e5e7eb;
-    padding: 4px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
     outline: none;
+    transition: all 0.2s;
+    width: fit-content;
+  }
+
+  .privacy-select:hover {
+    border-color: #d1d5db;
+  }
+
+  .privacy-select:focus {
+    border-color: #667BC6;
+    box-shadow: 0 0 0 3px rgba(102, 123, 198, 0.1);
   }
 
   .post-input-wrapper {
@@ -515,12 +666,15 @@
 
   .post-textarea {
     width: 100%;
-    min-height: 150px;
+    min-height: 120px;
+    max-height: 300px;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 16px;
+    padding-bottom: 36px;
     font-size: 15px;
     font-family: inherit;
+    line-height: 1.5;
     resize: vertical;
     outline: none;
     transition: all 0.2s;
@@ -531,39 +685,57 @@
     box-shadow: 0 0 0 3px rgba(102, 123, 198, 0.1);
   }
 
+  .post-textarea::placeholder {
+    color: #9ca3af;
+  }
+
   .char-counter {
     position: absolute;
     bottom: 12px;
-    right: 12px;
+    right: 16px;
     font-size: 12px;
     color: #6b7280;
+    font-weight: 500;
+    pointer-events: none;
   }
 
   .media-preview {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 12px;
     margin-bottom: 16px;
+  }
+
+  .media-preview:empty {
+    display: none;
   }
 
   .media-item {
     position: relative;
     aspect-ratio: 1;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    transition: transform 0.2s;
+  }
+
+  .media-item:hover {
+    transform: scale(1.02);
+    border-color: #667BC6;
   }
 
   .media-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
   .remove-media {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 8px;
+    right: 8px;
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -574,11 +746,24 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    z-index: 10;
   }
 
   .remove-media:hover {
     background: rgba(239, 68, 68, 0.9);
     transform: scale(1.1);
+  }
+
+  .media-number {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
   }
 
   .post-actions-bar {
@@ -589,10 +774,10 @@
   }
 
   .action-btn {
-    background: #f3f4f6;
+    background: #f9fafb;
     border: 1px solid #e5e7eb;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -608,21 +793,26 @@
     background: white;
     border-color: #667BC6;
     color: #667BC6;
+    transform: translateY(-1px);
+  }
+
+  .action-btn svg {
+    flex-shrink: 0;
   }
 
   .location-input,
   .tags-input {
     margin-bottom: 16px;
-    padding: 12px;
+    padding: 16px;
     background: #f9fafb;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #e5e7eb;
   }
 
   .location-input {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
 
   .location-field,
@@ -630,45 +820,53 @@
     flex: 1;
     background: white;
     border: 1px solid #e5e7eb;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
     font-size: 14px;
     outline: none;
+    transition: all 0.2s;
   }
 
   .location-field:focus,
   .tag-field:focus {
     border-color: #667BC6;
+    box-shadow: 0 0 0 3px rgba(102, 123, 198, 0.1);
   }
 
   .remove-location {
-    background: none;
+    background: #e5e7eb;
     border: none;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    font-size: 24px;
+    font-size: 20px;
     color: #6b7280;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
   }
 
   .remove-location:hover {
-    background: #e5e7eb;
-    color: #2d2d2d;
+    background: #d1d5db;
+    color: #1f2937;
   }
 
   .tags-container {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .tags-container:empty {
+    margin-bottom: 0;
   }
 
   .tag-chip {
-    background: #667BC6;
+    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
     color: white;
     padding: 6px 12px;
     border-radius: 16px;
@@ -677,25 +875,32 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: transform 0.2s;
+  }
+
+  .tag-chip:hover {
+    transform: translateY(-1px);
   }
 
   .remove-tag {
-    background: none;
+    background: rgba(255, 255, 255, 0.3);
     border: none;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     line-height: 1;
     padding: 0;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s;
   }
 
   .remove-tag:hover {
-    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.5);
   }
 
   .modal-footer {
@@ -704,13 +909,15 @@
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    background: #f9fafb;
+    flex-shrink: 0;
   }
 
   .btn-cancel {
-    background: none;
+    background: white;
     border: 1px solid #e5e7eb;
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     color: #6b7280;
@@ -720,14 +927,15 @@
 
   .btn-cancel:hover {
     background: #f3f4f6;
-    color: #2d2d2d;
+    border-color: #d1d5db;
+    color: #1f2937;
   }
 
   .btn-publish {
     background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
     border: none;
     padding: 10px 24px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 14px;
     color: white;
@@ -736,16 +944,22 @@
     align-items: center;
     gap: 8px;
     transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
   }
 
   .btn-publish:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 123, 198, 0.3);
+    box-shadow: 0 8px 20px rgba(102, 123, 198, 0.4);
+  }
+
+  .btn-publish:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   .btn-publish:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   .spinner {
@@ -758,17 +972,50 @@
   }
 
   .hidden {
-    display: none;
+    display: none !important;
   }
 
+  /* ===== SCROLLBAR ===== */
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-body::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+  }
+
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  /* ===== RESPONSIVE ===== */
   @media (max-width: 640px) {
+    .modal-overlay {
+      padding: 0;
+    }
+
     .modal-container {
       max-height: 100vh;
+      max-width: 100%;
       border-radius: 0;
     }
 
+    .modal-header {
+      padding: 16px 20px;
+    }
+
     .modal-body {
-      padding: 16px;
+      padding: 20px;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
     }
 
     .post-actions-bar {
@@ -778,5 +1025,117 @@
     .action-btn span {
       display: inline;
     }
+
+    .media-preview {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+  }
+
+  /* ===== DARK MODE ===== */
+  @media (prefers-color-scheme: dark) {
+    .modal-container {
+      background: #1f2937;
+    }
+
+    .modal-title,
+    .username {
+      color: #f9fafb;
+    }
+
+    .modal-close {
+      color: #9ca3af;
+    }
+
+    .modal-close:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    .modal-header,
+    .modal-footer {
+      border-color: #374151;
+    }
+
+    .modal-footer {
+      background: #111827;
+    }
+
+    .post-textarea {
+      background: #111827;
+      border-color: #374151;
+      color: #f9fafb;
+    }
+
+    .post-textarea::placeholder {
+      color: #6b7280;
+    }
+
+    .privacy-select,
+    .location-field,
+    .tag-field {
+      background: #111827;
+      border-color: #374151;
+      color: #f9fafb;
+    }
+
+    .action-btn {
+      background: #111827;
+      border-color: #374151;
+      color: #9ca3af;
+    }
+
+    .action-btn:hover {
+      background: #1f2937;
+      border-color: #667BC6;
+      color: #667BC6;
+    }
+
+    .location-input,
+    .tags-input {
+      background: #111827;
+      border-color: #374151;
+    }
+
+    .btn-cancel {
+      background: #1f2937;
+      border-color: #374151;
+      color: #9ca3af;
+    }
+
+    .btn-cancel:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+  }
+
+  /* ===== ANIMACIONES ADICIONALES ===== */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .btn-publish:disabled .spinner {
+    animation: rotate 1s linear infinite, pulse 2s ease-in-out infinite;
+  }
+
+  /* ===== FOCUS VISIBLE ===== */
+  .modal-close:focus-visible,
+  .btn-cancel:focus-visible,
+  .btn-publish:focus-visible,
+  .action-btn:focus-visible {
+    outline: 3px solid rgba(102, 123, 198, 0.5);
+    outline-offset: 2px;
+  }
+
+  /* ===== TRANSICIONES SUAVES ===== */
+  * {
+    transition-property: background-color, border-color, color, transform, box-shadow, opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
   }
 </style>

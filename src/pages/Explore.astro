@@ -104,240 +104,269 @@ import Navigation from '../components/shared/Navigation.astro';
 </Layout>
 
 <script>
-  const token = localStorage.getItem('authToken');
-  let currentTab = 'trending';
+  const API_URL = "http://localhost:3000";
+  let currentTab = "trending";
 
-  // Cargar contenido trending
-  async function loadTrending(filter = 'today') {
+  // ============================================================
+  // 🔥 CARGAR PUBLICACIONES TRENDING
+  // ============================================================
+  async function loadTrending(filter = "today") {
+    const grid = document.getElementById("posts-grid");
+    grid.innerHTML = `<div class="loading-grid"><div class="spinner"></div><p>Cargando publicaciones...</p></div>`;
+
     try {
-      const response = await fetch(`/api/posts/trending?filter=${filter}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const res = await fetch(`${API_URL}/api/explore/trending?filter=${filter}`, {
+        credentials: "include",
       });
-      const posts = await response.json();
+      if (!res.ok) throw new Error("Error al obtener tendencias");
 
-      const grid = document.getElementById('posts-grid');
-      
-      if (posts.length === 0) {
-        grid.innerHTML = '<div class="empty-msg">No hay publicaciones trending</div>';
+      const posts = await res.json();
+      if (!posts.length) {
+        grid.innerHTML = `<div class="empty-msg">No hay publicaciones populares.</div>`;
         return;
       }
 
-      grid.innerHTML = posts.map(post => `
+      grid.innerHTML = posts
+        .map(
+          (post) => `
         <div class="masonry-item" onclick="window.location.href='/Post/${post._id}'">
-          <img src="${post.images[0]}" alt="Post" loading="lazy" />
+          <img src="${post.images?.[0] || '/placeholder.jpg'}" alt="Post" loading="lazy" />
           <div class="masonry-overlay">
             <div class="overlay-stats">
               <span>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                </svg>
-                ${formatNumber(post.likes.length)}
+                ❤️ ${formatNumber(post.likes?.length || 0)}
               </span>
               <span>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                </svg>
-                ${formatNumber(post.comments.length)}
+                💬 ${formatNumber(post.comments?.length || 0)}
               </span>
             </div>
-            ${post.caption ? `<p class="overlay-caption">${truncate(post.caption, 80)}</p>` : ''}
+            ${
+              post.caption
+                ? `<p class="overlay-caption">${truncate(post.caption, 80)}</p>`
+                : ""
+            }
           </div>
-        </div>
-      `).join('');
-
-    } catch (error) {
-      console.error('Error:', error);
+        </div>`
+        )
+        .join("");
+    } catch (err) {
+      console.error("❌ Error cargando tendencias:", err);
+      grid.innerHTML = `<div class="empty-msg">Error al cargar publicaciones.</div>`;
     }
   }
 
-  // Cargar personas
+  // ============================================================
+  // 👥 CARGAR PERSONAS CERCANAS
+  // ============================================================
   async function loadPeople() {
-    try {
-      const response = await fetch('/api/users/suggestions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const users = await response.json();
+    const grid = document.getElementById("people-grid");
+    grid.innerHTML = `<div class="loading-grid"><div class="spinner"></div><p>Buscando personas...</p></div>`;
 
-      const grid = document.getElementById('people-grid');
-      grid.innerHTML = users.map(user => `
+    try {
+      const res = await fetch(`${API_URL}/api/users/nearby`, { credentials: "include" });
+      if (!res.ok) throw new Error("Error al cargar personas");
+      const users = await res.json();
+
+      if (!users.length) {
+        grid.innerHTML = `<div class="empty-msg">No se encontraron usuarios cercanos.</div>`;
+        return;
+      }
+
+      grid.innerHTML = users
+        .map(
+          (user) => `
         <div class="user-card">
-          <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}`}" 
-               alt="${user.username}" 
-               class="user-card-avatar" />
+          <img src="${
+            user.profilePic ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`
+          }" alt="${user.username}" class="user-card-avatar" />
           <div class="user-card-info">
             <h3>${user.username}</h3>
-            <p>${user.bio || 'Sin biografía'}</p>
+            <p>${user.bio || "Sin biografía"}</p>
             <div class="user-stats">
               <span>${formatNumber(user.stats?.followers || 0)} seguidores</span>
               <span>${formatNumber(user.stats?.posts || 0)} posts</span>
             </div>
           </div>
-          <button class="follow-user-btn" data-user-id="${user._id}">
-            Seguir
-          </button>
-        </div>
-      `).join('');
+          <button class="follow-user-btn" data-user-id="${user._id}">Seguir</button>
+        </div>`
+        )
+        .join("");
 
-      // Event listeners para seguir
-      document.querySelectorAll('.follow-user-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
+      grid.querySelectorAll(".follow-user-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
           try {
-            await fetch(`/api/users/${btn.dataset.userId}/follow`, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` }
+            const followRes = await fetch(`${API_URL}/api/users/${btn.dataset.userId}/follow`, {
+              method: "POST",
+              credentials: "include",
             });
-            btn.textContent = 'Siguiendo';
-            btn.disabled = true;
-            btn.style.background = '#10b981';
-          } catch (error) {
-            console.error('Error:', error);
+            if (followRes.ok) {
+              btn.textContent = "Siguiendo";
+              btn.disabled = true;
+              btn.style.background = "#10b981";
+            }
+          } catch (err) {
+            console.error("❌ Error al seguir:", err);
           }
         });
       });
-
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      console.error("❌ Error al cargar personas:", err);
+      grid.innerHTML = `<div class="empty-msg">Error al cargar usuarios.</div>`;
     }
   }
 
-  // Cargar hashtags
+  // ============================================================
+  // #️⃣ CARGAR HASHTAGS POPULARES
+  // ============================================================
   async function loadTags() {
-    try {
-      const response = await fetch('/api/tags/trending', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const tags = await response.json();
+    const grid = document.getElementById("tags-grid");
+    grid.innerHTML = `<div class="loading-grid"><div class="spinner"></div><p>Cargando hashtags...</p></div>`;
 
-      const grid = document.getElementById('tags-grid');
-      grid.innerHTML = tags.map((tag, index) => `
-        <div class="tag-card" onclick="window.location.href='/explore/tags/${tag.name}'">
-          <div class="tag-rank">#${index + 1}</div>
+    try {
+      const res = await fetch(`${API_URL}/api/tags/trending`, { credentials: "include" });
+      if (!res.ok) throw new Error("Error al obtener hashtags");
+
+      const tags = await res.json();
+      if (!tags.length) {
+        grid.innerHTML = `<div class="empty-msg">No hay hashtags populares.</div>`;
+        return;
+      }
+
+      grid.innerHTML = tags
+        .map(
+          (tag, i) => `
+        <div class="tag-card" onclick="window.location.href='/Explore?tag=${tag.name}'">
+          <div class="tag-rank">#${i + 1}</div>
           <div class="tag-content">
             <h3>#${tag.name}</h3>
             <p>${formatNumber(tag.count)} publicaciones</p>
             <div class="tag-preview">
-              ${tag.preview.slice(0, 3).map(img => `
-                <img src="${img}" alt="Preview" />
-              `).join('')}
+              ${tag.preview
+                ?.slice(0, 3)
+                .map((img) => `<img src="${img}" alt="Preview" />`)
+                .join("") || ""}
             </div>
           </div>
-        </div>
-      `).join('');
-
-    } catch (error) {
-      console.error('Error:', error);
+        </div>`
+        )
+        .join("");
+    } catch (err) {
+      console.error("❌ Error hashtags:", err);
+      grid.innerHTML = `<div class="empty-msg">Error al cargar hashtags.</div>`;
     }
   }
 
-  // Cargar lugares
+  // ============================================================
+  // 📍 CARGAR LUGARES POPULARES
+  // ============================================================
   async function loadPlaces() {
-    try {
-      const response = await fetch('/api/places/popular', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const places = await response.json();
+    const grid = document.getElementById("places-grid");
+    grid.innerHTML = `<div class="loading-grid"><div class="spinner"></div><p>Cargando lugares...</p></div>`;
 
-      const grid = document.getElementById('places-grid');
-      grid.innerHTML = places.map(place => `
-        <div class="place-card" onclick="window.location.href='/explore/places/${place.id}'">
-          <img src="${place.thumbnail}" alt="${place.name}" class="place-thumbnail" />
+    try {
+      const res = await fetch(`${API_URL}/api/places/popular`, { credentials: "include" });
+      if (!res.ok) throw new Error("Error lugares");
+      const places = await res.json();
+
+      if (!places.length) {
+        grid.innerHTML = `<div class="empty-msg">No hay lugares populares.</div>`;
+        return;
+      }
+
+      grid.innerHTML = places
+        .map(
+          (place) => `
+        <div class="place-card" onclick="window.location.href='/Explore?place=${place.id}'">
+          <img src="${place.thumbnail || '/placeholder.jpg'}" alt="${place.name}" class="place-thumbnail" />
           <div class="place-info">
             <h3>${place.name}</h3>
             <p>📍 ${place.location}</p>
             <span class="place-count">${formatNumber(place.posts)} publicaciones</span>
           </div>
-        </div>
-      `).join('');
-
-    } catch (error) {
-      console.error('Error:', error);
+        </div>`
+        )
+        .join("");
+    } catch (err) {
+      console.error("❌ Error lugares:", err);
+      grid.innerHTML = `<div class="empty-msg">Error al cargar lugares.</div>`;
     }
   }
 
-  // Cambiar tabs
-  document.querySelectorAll('.explore-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.explore-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+  // ============================================================
+  // 🔍 BÚSQUEDA GLOBAL
+  // ============================================================
+  let searchTimeout;
+  document.getElementById("explore-search")?.addEventListener("input", (e) => {
+    clearTimeout(searchTimeout);
+    const query = e.target.value.trim();
+    if (query.length < 2) return;
 
+    searchTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(query)}`, {
+          credentials: "include",
+        });
+        const results = await res.json();
+        console.log("🔍 Resultados de búsqueda:", results);
+        // Aquí podrías implementar un modal o dropdown para mostrar resultados
+      } catch (err) {
+        console.error("❌ Error en búsqueda:", err);
+      }
+    }, 500);
+  });
+
+  // ============================================================
+  // 🧭 MANEJO DE TABS
+  // ============================================================
+  document.querySelectorAll(".explore-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".explore-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
       const tabName = tab.dataset.tab;
       currentTab = tabName;
 
-      // Ocultar todas las secciones
-      document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-
-      // Mostrar sección correspondiente
+      document.querySelectorAll(".content-section").forEach((s) => s.classList.add("hidden"));
       const section = document.getElementById(`${tabName}-section`);
-      section.classList.remove('hidden');
+      section.classList.remove("hidden");
 
-      // Cargar contenido si no está cargado
       switch (tabName) {
-        case 'trending':
-          if (!document.getElementById('posts-grid').querySelector('.masonry-item')) {
-            loadTrending();
-          }
+        case "trending":
+          loadTrending();
           break;
-        case 'people':
-          if (!document.getElementById('people-grid').innerHTML) {
-            loadPeople();
-          }
+        case "people":
+          loadPeople();
           break;
-        case 'tags':
-          if (!document.getElementById('tags-grid').innerHTML) {
-            loadTags();
-          }
+        case "tags":
+          loadTags();
           break;
-        case 'places':
-          if (!document.getElementById('places-grid').innerHTML) {
-            loadPlaces();
-          }
+        case "places":
+          loadPlaces();
           break;
       }
     });
   });
 
-  // Filtro trending
-  document.getElementById('trending-filter')?.addEventListener('change', (e) => {
-    loadTrending(e.target.value);
-  });
-
-  // Búsqueda
-  let searchTimeout;
-  document.getElementById('explore-search')?.addEventListener('input', (e) => {
-    clearTimeout(searchTimeout);
-    const query = e.target.value.trim();
-
-    if (query.length < 2) return;
-
-    searchTimeout = setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const results = await response.json();
-
-        // Mostrar resultados
-        console.log('Resultados:', results);
-        // Implementar UI de resultados
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }, 500);
-  });
-
-  // Utilidades
+  // ============================================================
+  // ⚙️ UTILIDADES
+  // ============================================================
   function formatNumber(num) {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-    return num.toString();
+    if (!num) return 0;
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+    if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
+    return num;
   }
 
   function truncate(text, length) {
-    return text.length > length ? text.substring(0, length) + '...' : text;
+    return text?.length > length ? text.substring(0, length) + "..." : text;
   }
 
-  // Inicializar
-  loadTrending();
+  // ============================================================
+  // 🚀 INICIALIZAR
+  // ============================================================
+  document.addEventListener("DOMContentLoaded", () => {
+    loadTrending();
+  });
 </script>
 
 <style>
