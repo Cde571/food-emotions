@@ -14,9 +14,7 @@ import Navigation from '../components/shared/Navigation.astro';
         <h2 class="sidebar-title">Mensajes</h2>
         <button class="new-message-btn" id="new-message-btn" title="Nuevo mensaje">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 3h18v18H3z"/>
-            <line x1="9" y1="12" x2="15" y2="12"/>
-            <line x1="12" y1="9" x2="12" y2="15"/>
+            <path d="M12 5v14M5 12h14"/>
           </svg>
         </button>
       </div>
@@ -45,13 +43,16 @@ import Navigation from '../components/shared/Navigation.astro';
     <!-- Área de chat -->
     <main class="chat-area">
       <div class="empty-chat" id="empty-chat">
-        <div class="empty-chat-icon">
-          <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
+        <div class="empty-chat-content">
+          <div class="empty-chat-icon">
+            <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              <path d="M9 10h6M9 14h4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Tus Mensajes</h3>
+          <p>Selecciona una conversación o inicia un nuevo chat</p>
         </div>
-        <h3>Tus Mensajes</h3>
-        <p>Selecciona una conversación o inicia un nuevo chat</p>
       </div>
 
       <div class="active-chat hidden" id="active-chat">
@@ -60,14 +61,19 @@ import Navigation from '../components/shared/Navigation.astro';
           <div class="chat-user-info">
             <button class="back-btn" id="back-btn">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="19" y1="12" x2="5" y2="12"/>
-                <polyline points="12 19 5 12 12 5"/>
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
               </svg>
             </button>
-            <img id="chat-avatar" src="" alt="" class="chat-avatar" />
+            <div class="chat-avatar-wrapper">
+              <img id="chat-avatar" src="" alt="" class="chat-avatar" />
+              <span class="online-indicator"></span>
+            </div>
             <div class="chat-details">
               <h3 id="chat-name" class="chat-name">Usuario</h3>
-              <span id="chat-status" class="chat-status">En línea</span>
+              <span id="chat-status" class="chat-status">
+                <span class="status-dot"></span>
+                En línea
+              </span>
             </div>
           </div>
           <div class="chat-actions">
@@ -106,24 +112,25 @@ import Navigation from '../components/shared/Navigation.astro';
               <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
             </svg>
           </button>
-          <button class="emoji-btn" title="Emoji">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-              <line x1="9" y1="9" x2="9.01" y2="9"/>
-              <line x1="15" y1="9" x2="15.01" y2="9"/>
-            </svg>
-          </button>
-          <input 
-            type="text" 
-            id="message-input" 
-            class="message-input" 
-            placeholder="Escribe un mensaje..."
-          />
+          <div class="input-container">
+            <input 
+              type="text" 
+              id="message-input" 
+              class="message-input" 
+              placeholder="Escribe un mensaje..."
+            />
+            <button class="emoji-btn" title="Emoji">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                <line x1="15" y1="9" x2="15.01" y2="9"/>
+              </svg>
+            </button>
+          </div>
           <button class="send-btn" id="send-btn">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
             </svg>
           </button>
         </div>
@@ -215,6 +222,10 @@ import Navigation from '../components/shared/Navigation.astro';
   <!-- Toast -->
   <div id="toast" class="toast-notification hidden">
     <div class="toast-content">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="toast-icon">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
       <p class="toast-message"></p>
     </div>
   </div>
@@ -229,16 +240,13 @@ import Navigation from '../components/shared/Navigation.astro';
   let currentRecipientUsername = '';
   let conversations = [];
 
-  // 🔹 Verificar conexión de WebSocket
   console.log('🔌 Socket conectado:', socketClient.connected);
   console.log('👤 Usuario actual:', currentUserId);
 
-  // Conectar usuario al socket
   if (currentUserId && socketClient.connected) {
     socketClient.emit('user-connected', currentUserId);
   }
 
-  // Verificar eventos del socket
   socketClient.on('connect', () => {
     console.log('✅ Socket conectado exitosamente');
     if (currentUserId) {
@@ -254,7 +262,6 @@ import Navigation from '../components/shared/Navigation.astro';
     console.error('⚠️ Error en socket:', error);
   });
 
-  // 🔹 Cargar todas las conversaciones
   async function loadConversations() {
     try {
       const res = await fetch(`${API_URL}/api/messages/conversations`, { credentials: "include" });
@@ -277,6 +284,7 @@ import Navigation from '../components/shared/Navigation.astro';
           <div class="conversation-avatar-wrapper">
             <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`}" 
                  alt="${user.username}" class="conversation-avatar" />
+            <span class="online-badge"></span>
           </div>
           <div class="conversation-info">
             <div class="conversation-header">
@@ -296,9 +304,7 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  // 🔹 Abrir conversación con un usuario
   async function openConversation(userId, username, avatar) {
-    // Salir del chat anterior si existe
     if (currentRecipientId) {
       socketClient.emit('leave-chat', { 
         userId: currentUserId, 
@@ -309,23 +315,19 @@ import Navigation from '../components/shared/Navigation.astro';
     currentRecipientId = userId;
     currentRecipientUsername = username;
     
-    // Unirse al nuevo chat
     socketClient.emit('join-chat', { 
       userId: currentUserId, 
       recipientId: userId 
     });
 
-    // Actualizar estado visual
     document.getElementById("empty-chat").classList.add("hidden");
     document.getElementById("active-chat").classList.remove("hidden");
 
-    // Marcar conversación activa
     document.querySelectorAll('.conversation-item').forEach(item => {
       item.classList.remove('active');
     });
     document.querySelector(`[data-user-id="${userId}"]`)?.classList.add('active');
 
-    // Actualizar header del chat
     document.getElementById("chat-avatar").src = avatar || `https://ui-avatars.com/api/?name=${username}&background=667BC6&color=fff`;
     document.getElementById("chat-name").textContent = username;
     document.getElementById("chat-status").textContent = "En línea";
@@ -333,7 +335,6 @@ import Navigation from '../components/shared/Navigation.astro';
     await loadMessages(userId);
   }
 
-  // 🔹 Cargar mensajes entre el usuario actual y otro
   async function loadMessages(userId) {
     try {
       const res = await fetch(`${API_URL}/api/messages/${userId}`, { credentials: "include" });
@@ -345,6 +346,11 @@ import Navigation from '../components/shared/Navigation.astro';
       if (messages.length === 0) {
         container.innerHTML = `
           <div class="no-messages">
+            <div class="no-messages-icon">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </div>
             <p>No hay mensajes aún. ¡Inicia la conversación!</p>
           </div>
         `;
@@ -362,7 +368,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  // 🔹 Función para agregar un mensaje al DOM
   function appendMessage(text, isMine, timestamp = new Date(), senderName = '', messageId = null) {
     const container = document.getElementById("messages-list");
     const div = document.createElement("div");
@@ -394,37 +399,28 @@ import Navigation from '../components/shared/Navigation.astro';
     
     container.appendChild(div);
 
-    // Agregar evento de eliminar si es mensaje propio
     if (isMine && messageId) {
       const deleteBtn = div.querySelector('.delete-message-btn');
       deleteBtn?.addEventListener('click', () => deleteMessage(messageId));
     }
   }
 
-  // 🔹 Escuchar mensajes nuevos en tiempo real
   socketClient.on('new-message', (msg) => {
     console.log('📩 Mensaje recibido:', msg);
-    console.log('Current User ID:', currentUserId);
-    console.log('Current Recipient ID:', currentRecipientId);
     
-    // Verificar si el mensaje es para el usuario actual
     const isForMe = msg.recipientId === currentUserId || msg.recipient === currentUserId;
     const isFromCurrentChat = msg.senderId === currentRecipientId || msg.sender === currentRecipientId;
     
     if (isForMe && isFromCurrentChat) {
       appendMessage(msg.text, false, msg.createdAt, msg.senderName || 'Usuario', msg._id);
       scrollToBottom();
-      
-      // Actualizar la lista de conversaciones
       loadConversations();
     } else if (isForMe) {
-      // Si el mensaje es para mí pero de otra conversación, solo actualizar la lista
       loadConversations();
       showToast(`Nuevo mensaje de ${msg.senderName || 'Usuario'}`);
     }
   });
 
-  // 🔹 Escuchar eliminación de mensajes
   socketClient.on('message-deleted', (data) => {
     console.log('🗑️ Mensaje eliminado:', data);
     const messageElement = document.querySelector(`[data-message-id="${data.messageId}"]`);
@@ -434,7 +430,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   });
 
-  // 🔹 Escuchar eliminación de conversación completa
   socketClient.on('conversation-deleted', (data) => {
     console.log('🗑️ Conversación eliminada:', data);
     if (data.userId1 === currentUserId || data.userId2 === currentUserId) {
@@ -448,7 +443,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   });
 
-  // 🔹 Enviar mensaje
   async function sendMessage() {
     const input = document.getElementById("message-input");
     const text = input.value.trim();
@@ -471,12 +465,9 @@ import Navigation from '../components/shared/Navigation.astro';
         const data = await res.json();
         console.log('✅ Mensaje enviado:', data);
         
-        // Agregar el mensaje visualmente con su ID
         appendMessage(text, true, new Date(), '', data.data._id);
         input.value = "";
         scrollToBottom();
-        
-        // Actualizar última conversación
         loadConversations();
       } else {
         console.error('❌ Error en respuesta:', await res.text());
@@ -488,7 +479,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  // 🔹 Eliminar mensaje individual
   async function deleteMessage(messageId) {
     if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) return;
 
@@ -514,7 +504,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  // 🔹 Eliminar conversación completa
   async function deleteConversation(userId) {
     if (!confirm('¿Estás seguro de que quieres eliminar toda esta conversación? Esta acción no se puede deshacer.')) return;
 
@@ -528,12 +517,10 @@ import Navigation from '../components/shared/Navigation.astro';
         const data = await res.json();
         showToast(`Conversación eliminada (${data.deletedCount} mensajes)`);
         
-        // Volver a la vista vacía
         document.getElementById("active-chat").classList.add("hidden");
         document.getElementById("empty-chat").classList.remove("hidden");
         currentRecipientId = null;
         
-        // Recargar conversaciones
         loadConversations();
       } else {
         showToast('Error al eliminar la conversación');
@@ -544,7 +531,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  // 🔹 Scroll automático
   function scrollToBottom() {
     const container = document.getElementById("messages-container");
     setTimeout(() => {
@@ -552,7 +538,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }, 100);
   }
 
-  // 🔹 Buscar conversaciones
   document.getElementById("search-conversations")?.addEventListener("input", (e) => {
     const q = e.target.value.toLowerCase();
     document.querySelectorAll(".conversation-item").forEach(item => {
@@ -561,7 +546,6 @@ import Navigation from '../components/shared/Navigation.astro';
     });
   });
 
-  // 🔹 Envío con botón o Enter
   document.getElementById("send-btn")?.addEventListener("click", sendMessage);
   document.getElementById("message-input")?.addEventListener("keypress", e => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -570,14 +554,12 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   });
 
-  // 🔹 Botón de volver (mobile)
   document.getElementById("back-btn")?.addEventListener("click", () => {
     document.getElementById("active-chat").classList.add("hidden");
     document.getElementById("empty-chat").classList.remove("hidden");
     currentRecipientId = null;
   });
 
-  // 🔹 Botón de menú del chat (eliminar conversación)
   document.getElementById("chat-menu-btn")?.addEventListener("click", () => {
     if (currentRecipientId) {
       const menu = document.createElement('div');
@@ -592,7 +574,6 @@ import Navigation from '../components/shared/Navigation.astro';
         </button>
       `;
       
-      // Posicionar el menú
       const btn = document.getElementById("chat-menu-btn");
       const rect = btn.getBoundingClientRect();
       menu.style.position = 'fixed';
@@ -601,13 +582,11 @@ import Navigation from '../components/shared/Navigation.astro';
       
       document.body.appendChild(menu);
       
-      // Evento de eliminar
       menu.querySelector('.delete-conversation-btn').addEventListener('click', () => {
         deleteConversation(currentRecipientId);
         menu.remove();
       });
       
-      // Cerrar al hacer clic fuera
       setTimeout(() => {
         document.addEventListener('click', function closeMenu(e) {
           if (!menu.contains(e.target)) {
@@ -619,7 +598,6 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   });
 
-  // 🔹 Utilidades
   function formatTime(ts) {
     const date = new Date(ts);
     const now = new Date();
@@ -650,24 +628,28 @@ import Navigation from '../components/shared/Navigation.astro';
     setTimeout(() => toast.classList.add("hidden"), 3000);
   }
 
-  // 🔹 Inicialización
   loadConversations();
 </script>
 
 <style>
   :root {
     --primary: #667BC6;
+    --primary-light: #8a9cd9;
+    --primary-dark: #5265a3;
     --secondary: #DA7297;
-    --dark: #2d2d2d;
+    --secondary-light: #e599b8;
+    --dark: #1a1a1a;
     --gray: #6b7280;
-    --gray-light: #f3f4f6;
+    --gray-light: #f8f9fa;
     --border: #e5e7eb;
     --success: #10b981;
     --card-bg: #ffffff;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --radius: 12px;
-    --radius-sm: 8px;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   * {
@@ -677,22 +659,26 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--gray-light);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
     color: var(--dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   .messages-layout {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 380px 1fr;
     height: calc(100vh - 80px);
     margin-top: 80px;
-    max-width: 1400px;
+    max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
     gap: 0;
     background: var(--card-bg);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius);
+    overflow: hidden;
   }
 
   /* ===== SIDEBAR ===== */
@@ -700,74 +686,110 @@ import Navigation from '../components/shared/Navigation.astro';
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    background: var(--card-bg);
+    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+    position: relative;
   }
 
   .sidebar-header {
-    padding: 20px;
+    padding: 24px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
   }
 
   .sidebar-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--dark);
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
   }
 
   .new-message-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: var(--primary);
-    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .new-message-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: var(--transition);
   }
 
   .new-message-btn:hover {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-md);
+    transform: scale(1.1) rotate(90deg);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .new-message-btn:hover::before {
+    opacity: 1;
+  }
+
+  .new-message-btn:active {
+    transform: scale(1.05) rotate(90deg);
   }
 
   .search-wrapper {
-    padding: 16px 20px;
+    padding: 20px;
     border-bottom: 1px solid var(--border);
     position: relative;
+    background: white;
   }
 
   .search-icon {
     position: absolute;
-    left: 36px;
+    left: 40px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--gray);
+    transition: var(--transition);
+    z-index: 1;
   }
 
   .search-input {
     width: 100%;
-    padding: 10px 16px 10px 40px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
+    padding: 14px 20px 14px 48px;
+    border: 2px solid transparent;
+    border-radius: 14px;
     font-size: 14px;
     outline: none;
     background: var(--gray-light);
+    transition: var(--transition);
+    font-weight: 500;
   }
 
   .search-input:focus {
     border-color: var(--primary);
     background: white;
+    box-shadow: 0 0 0 4px rgba(102, 123, 198, 0.1);
+  }
+
+  .search-input:focus + .search-icon {
+    color: var(--primary);
   }
 
   .conversations-list {
     flex: 1;
     overflow-y: auto;
+    padding: 8px 0;
   }
 
   .loading-conversations {
@@ -775,40 +797,64 @@ import Navigation from '../components/shared/Navigation.astro';
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
+    gap: 16px;
   }
 
   .loader-small {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border);
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border);
     border-top-color: var(--primary);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 12px;
+    animation: spin 0.8s linear infinite;
   }
 
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
 
+  .loading-conversations p {
+    color: var(--gray);
+    font-weight: 500;
+  }
+
   .conversation-item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     padding: 16px 20px;
+    margin: 0 8px 4px;
     cursor: pointer;
-    transition: all 0.2s;
-    border-bottom: 1px solid var(--gray-light);
+    transition: var(--transition);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conversation-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    transform: scaleY(0);
+    transition: var(--transition);
   }
 
   .conversation-item:hover {
-    background: var(--gray-light);
+    background: linear-gradient(135deg, rgba(102, 123, 198, 0.05) 0%, rgba(102, 123, 198, 0.08) 100%);
+    transform: translateX(2px);
   }
 
   .conversation-item.active {
-    background: #e8eaf6;
-    border-left: 3px solid var(--primary);
+    background: linear-gradient(135deg, rgba(102, 123, 198, 0.12) 0%, rgba(102, 123, 198, 0.15) 100%);
+  }
+
+  .conversation-item.active::before {
+    transform: scaleY(1);
   }
 
   .conversation-avatar-wrapper {
@@ -817,10 +863,30 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .conversation-avatar {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid white;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+
+  .conversation-item:hover .conversation-avatar {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+  }
+
+  .online-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--success);
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .conversation-info {
@@ -832,12 +898,12 @@ import Navigation from '../components/shared/Navigation.astro';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   .conversation-name {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--dark);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -848,6 +914,7 @@ import Navigation from '../components/shared/Navigation.astro';
     font-size: 12px;
     color: var(--gray);
     flex-shrink: 0;
+    font-weight: 600;
   }
 
   .conversation-preview {
@@ -864,6 +931,7 @@ import Navigation from '../components/shared/Navigation.astro';
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+    font-weight: 500;
   }
 
   .no-conversations {
@@ -871,7 +939,7 @@ import Navigation from '../components/shared/Navigation.astro';
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    padding: 80px 20px;
     text-align: center;
     color: var(--gray);
   }
@@ -880,7 +948,7 @@ import Navigation from '../components/shared/Navigation.astro';
   .chat-area {
     display: flex;
     flex-direction: column;
-    background: var(--card-bg);
+    background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
     position: relative;
   }
 
@@ -891,23 +959,46 @@ import Navigation from '../components/shared/Navigation.astro';
     justify-content: center;
     height: 100%;
     text-align: center;
-    color: var(--gray);
+  }
+
+  .empty-chat-content {
+    animation: fadeInUp 0.6s ease;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .empty-chat-icon {
-    margin-bottom: 20px;
-    opacity: 0.3;
+    margin-bottom: 24px;
+    opacity: 0.2;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 
   .empty-chat h3 {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     color: var(--dark);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
   }
 
   .empty-chat p {
-    font-size: 15px;
+    font-size: 16px;
+    color: var(--gray);
+    font-weight: 500;
   }
 
   .active-chat {
@@ -921,57 +1012,103 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .chat-header {
-    padding: 16px 24px;
+    padding: 20px 28px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--card-bg);
+    background: white;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   .chat-user-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
   }
 
   .back-btn {
     display: none;
-    background: none;
+    background: var(--gray-light);
     border: none;
-    padding: 8px;
+    padding: 10px;
     cursor: pointer;
     color: var(--gray);
-    border-radius: 50%;
-    transition: all 0.2s;
+    border-radius: 12px;
+    transition: var(--transition);
   }
 
   .back-btn:hover {
-    background: var(--gray-light);
+    background: var(--primary);
+    color: white;
+    transform: translateX(-2px);
+  }
+
+  .chat-avatar-wrapper {
+    position: relative;
   }
 
   .chat-avatar {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid white;
+    box-shadow: var(--shadow-md);
+  }
+
+  .online-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--success);
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
   }
 
   .chat-details {
     display: flex;
     flex-direction: column;
+    gap: 4px;
   }
 
   .chat-name {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
     color: var(--dark);
+    letter-spacing: -0.3px;
   }
 
   .chat-status {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 
   .chat-actions {
@@ -980,30 +1117,47 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .chat-action-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--gray-light);
     border: none;
     color: var(--gray);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: var(--transition);
   }
 
   .chat-action-btn:hover {
-    background: var(--gray-light);
-    color: var(--primary);
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .chat-action-btn:active {
+    transform: translateY(0);
   }
 
   /* ===== MESSAGES ===== */
   .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 24px;
-    background: #fafafa;
+    padding: 24px 28px;
+    background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+    position: relative;
+  }
+
+  .messages-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(102, 123, 198, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(218, 114, 151, 0.03) 0%, transparent 50%);
+    pointer-events: none;
   }
 
   .messages-list {
@@ -1011,63 +1165,73 @@ import Navigation from '../components/shared/Navigation.astro';
     flex-direction: column;
     gap: 16px;
     min-height: 100%;
+    position: relative;
+    z-index: 1;
   }
 
   .no-messages {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
     color: var(--gray);
-    font-size: 14px;
+    gap: 16px;
   }
 
-  /* Estructura de mensaje individual */
+  .no-messages-icon {
+    opacity: 0.3;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .no-messages p {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
   .message {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    max-width: 75%;
-    animation: messageSlide 0.3s ease;
+    gap: 10px;
+    max-width: 70%;
+    animation: messageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes messageSlide {
+  @keyframes messageSlideIn {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(20px) scale(0.95);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
 
-  /* Mensajes del usuario actual (derecha) */
   .message.mine {
     margin-left: auto;
     flex-direction: row-reverse;
   }
 
-  /* Mensajes del otro usuario (izquierda) */
   .message.theirs {
     margin-right: auto;
     flex-direction: row;
   }
 
-  /* Avatar del mensaje */
   .message-avatar {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: var(--shadow-sm);
   }
 
-  /* Contenedor de contenido del mensaje */
   .message-content {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     max-width: 100%;
   }
 
@@ -1079,44 +1243,55 @@ import Navigation from '../components/shared/Navigation.astro';
     align-items: flex-start;
   }
 
-  /* Burbuja del mensaje */
   .message-bubble {
-    padding: 12px 16px;
-    border-radius: 18px;
+    padding: 14px 18px;
+    border-radius: 20px;
     word-wrap: break-word;
     word-break: break-word;
     max-width: 100%;
     position: relative;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
   }
 
   .message.theirs .message-bubble {
     background: white;
     border: 1px solid var(--border);
-    border-bottom-left-radius: 4px;
+    border-bottom-left-radius: 6px;
   }
 
   .message.mine .message-bubble {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
     color: white;
-    border-bottom-right-radius: 4px;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
   }
 
-  /* Botón de eliminar mensaje */
+  .message-bubble:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .message.mine .message-bubble:hover {
+    box-shadow: 0 6px 16px rgba(102, 123, 198, 0.4);
+  }
+
   .delete-message-btn {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    background: rgba(0, 0, 0, 0.3);
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
     border: none;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    transition: all 0.2s;
+    transition: var(--transition);
   }
 
   .delete-message-btn svg {
@@ -1128,19 +1303,23 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .delete-message-btn:hover {
-    background: rgba(239, 68, 68, 0.8);
-    transform: scale(1.1);
+    background: rgba(239, 68, 68, 0.9);
+    transform: scale(1.15) rotate(10deg);
   }
 
-  /* Menú desplegable del chat */
+  .delete-message-btn:active {
+    transform: scale(1.05) rotate(5deg);
+  }
+
   .chat-dropdown-menu {
     background: white;
     border-radius: var(--radius-sm);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-lg);
     padding: 8px;
-    min-width: 200px;
+    min-width: 220px;
     z-index: 1000;
     animation: slideDown 0.2s ease;
+    border: 1px solid var(--border);
   }
 
   @keyframes slideDown {
@@ -1156,22 +1335,24 @@ import Navigation from '../components/shared/Navigation.astro';
 
   .dropdown-item {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border: none;
     background: none;
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     font-size: 14px;
+    font-weight: 600;
     color: var(--dark);
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s;
+    border-radius: 8px;
+    transition: var(--transition);
   }
 
   .dropdown-item:hover {
     background: var(--gray-light);
+    transform: translateX(2px);
   }
 
   .dropdown-item.delete-conversation-btn {
@@ -1182,7 +1363,6 @@ import Navigation from '../components/shared/Navigation.astro';
     background: rgba(239, 68, 68, 0.1);
   }
 
-  /* Animación de fadeOut */
   @keyframes fadeOut {
     from {
       opacity: 1;
@@ -1194,38 +1374,91 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   }
 
-  /* Texto del mensaje */
   .message-text {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.6;
     margin: 0;
     white-space: pre-wrap;
+    font-weight: 500;
   }
 
-  /* Hora del mensaje */
   .message-time {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--gray);
-    padding: 0 4px;
+    padding: 0 6px;
     white-space: nowrap;
+    font-weight: 600;
   }
 
   /* ===== MESSAGE INPUT ===== */
   .message-input-wrapper {
-    padding: 16px 24px;
+    padding: 20px 28px;
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--card-bg);
+    background: white;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .attach-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--gray-light);
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
     flex-shrink: 0;
   }
 
-  .attach-btn,
+  .attach-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px) rotate(-10deg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .input-container {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--gray-light);
+    border-radius: 14px;
+    border: 2px solid transparent;
+    transition: var(--transition);
+  }
+
+  .input-container:focus-within {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 123, 198, 0.1);
+  }
+
+  .message-input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    min-height: 48px;
+    font-weight: 500;
+    color: var(--dark);
+  }
+
   .emoji-btn {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 10px;
     background: none;
     border: none;
     color: var(--gray);
@@ -1233,62 +1466,47 @@ import Navigation from '../components/shared/Navigation.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: var(--transition);
     flex-shrink: 0;
+    margin-right: 8px;
   }
 
-  .attach-btn:hover,
   .emoji-btn:hover {
-    background: var(--gray-light);
+    background: rgba(102, 123, 198, 0.1);
     color: var(--primary);
-  }
-
-  .message-input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    font-size: 14px;
-    outline: none;
-    background: var(--gray-light);
-    font-family: inherit;
-    min-height: 44px;
-  }
-
-  .message-input:focus {
-    border-color: var(--primary);
-    background: white;
+    transform: scale(1.1);
   }
 
   .send-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--primary);
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border: none;
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: var(--transition);
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
   }
 
   .send-btn:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-md);
+    transform: scale(1.08) rotate(-5deg);
+    box-shadow: 0 6px 16px rgba(102, 123, 198, 0.4);
   }
 
   .send-btn:active {
-    transform: scale(0.95);
+    transform: scale(1.02) rotate(-3deg);
   }
 
   /* ===== USER INFO PANEL ===== */
   .user-info-panel {
-    width: 320px;
+    width: 340px;
     border-left: 1px solid var(--border);
-    background: var(--card-bg);
+    background: white;
     display: flex;
     flex-direction: column;
   }
@@ -1298,7 +1516,7 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .panel-header {
-    padding: 20px;
+    padding: 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -1306,110 +1524,125 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .panel-header h3 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
   }
 
   .close-panel-btn {
-    background: none;
+    background: var(--gray-light);
     border: none;
     cursor: pointer;
     color: var(--gray);
-    padding: 4px;
-    border-radius: 50%;
-    transition: all 0.2s;
+    padding: 8px;
+    border-radius: 10px;
+    transition: var(--transition);
   }
 
   .close-panel-btn:hover {
-    background: var(--gray-light);
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
   }
 
   .panel-content {
-    padding: 20px;
+    padding: 24px;
     overflow-y: auto;
   }
 
   .user-profile-section {
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 24px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
   .panel-avatar {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    border: 4px solid white;
+    box-shadow: var(--shadow-md);
   }
 
   .panel-name {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
   }
 
   .panel-username {
     font-size: 14px;
     color: var(--gray);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    font-weight: 600;
   }
 
   .view-profile-btn {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
     border: none;
-    padding: 10px 24px;
-    border-radius: 20px;
-    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
   }
 
   .view-profile-btn:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 6px 16px rgba(102, 123, 198, 0.4);
+  }
+
+  .view-profile-btn:active {
+    transform: translateY(0);
   }
 
   .panel-section {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
 
   .section-title {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 800;
     color: var(--gray);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
   }
 
   .no-files {
     font-size: 14px;
     color: var(--gray);
     text-align: center;
-    padding: 20px;
+    padding: 24px;
+    font-weight: 500;
   }
 
   .panel-action-btn {
     width: 100%;
     background: none;
     border: none;
-    padding: 12px 16px;
+    padding: 14px 16px;
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     font-size: 14px;
+    font-weight: 600;
     color: var(--dark);
     cursor: pointer;
     border-radius: var(--radius-sm);
-    transition: all 0.2s;
+    transition: var(--transition);
+    margin-bottom: 6px;
   }
 
   .panel-action-btn:hover {
     background: var(--gray-light);
+    transform: translateX(4px);
   }
 
   .panel-action-btn.delete-btn {
@@ -1428,12 +1661,18 @@ import Navigation from '../components/shared/Navigation.astro';
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   .modal-overlay.hidden {
@@ -1442,17 +1681,29 @@ import Navigation from '../components/shared/Navigation.astro';
 
   .modal-container {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    max-width: 540px;
     width: 100%;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
+    animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes modalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .modal-header {
-    padding: 20px 24px;
+    padding: 24px 28px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -1460,43 +1711,49 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 
   .modal-header h3 {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
   }
 
   .modal-close {
-    background: none;
+    background: var(--gray-light);
     border: none;
     cursor: pointer;
     color: var(--gray);
-    padding: 4px;
-    border-radius: 50%;
-    transition: all 0.2s;
+    padding: 8px;
+    border-radius: 12px;
+    transition: var(--transition);
   }
 
   .modal-close:hover {
-    background: var(--gray-light);
+    background: #ef4444;
+    color: white;
+    transform: rotate(90deg);
   }
 
   .modal-body {
-    padding: 24px;
+    padding: 28px;
     overflow-y: auto;
   }
 
   .search-users-input {
     width: 100%;
-    padding: 12px 16px;
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    font-size: 14px;
+    padding: 14px 20px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    font-size: 15px;
     outline: none;
     background: var(--gray-light);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    font-weight: 500;
   }
 
   .search-users-input:focus {
     border-color: var(--primary);
     background: white;
+    box-shadow: 0 0 0 4px rgba(102, 123, 198, 0.1);
   }
 
   .users-list {
@@ -1508,77 +1765,103 @@ import Navigation from '../components/shared/Navigation.astro';
   .user-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: 14px;
+    padding: 14px;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
+    border: 2px solid transparent;
   }
 
   .user-item:hover {
-    background: var(--gray-light);
+    background: linear-gradient(135deg, rgba(102, 123, 198, 0.05) 0%, rgba(102, 123, 198, 0.08) 100%);
+    border-color: var(--primary);
+    transform: translateX(4px);
   }
 
   .user-avatar {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid white;
+    box-shadow: var(--shadow-sm);
   }
 
   .user-info h4 {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--dark);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .user-info p {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--gray);
+    font-weight: 500;
   }
 
   /* ===== TOAST ===== */
   .toast-notification {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--card-bg);
-    padding: 16px 20px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
+    bottom: 28px;
+    right: 28px;
+    background: white;
+    padding: 18px 22px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
     z-index: 10000;
-    min-width: 300px;
-    animation: slideUp 0.3s ease;
+    min-width: 320px;
+    animation: toastSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border);
   }
 
   .toast-notification.hidden {
     display: none;
   }
 
-  @keyframes slideUp {
+  @keyframes toastSlideUp {
     from {
-      transform: translateY(100px);
+      transform: translateY(100px) scale(0.9);
       opacity: 0;
     }
     to {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
       opacity: 1;
     }
   }
 
+  .toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .toast-icon {
+    flex-shrink: 0;
+    color: var(--success);
+  }
+
   .toast-message {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--dark);
+    flex: 1;
   }
 
   /* ===== RESPONSIVE ===== */
+  @media (max-width: 1024px) {
+    .messages-layout {
+      grid-template-columns: 340px 1fr;
+    }
+  }
+
   @media (max-width: 900px) {
     .messages-layout {
       grid-template-columns: 1fr;
       margin-top: 60px;
       height: calc(100vh - 60px);
+      border-radius: 0;
     }
 
     .conversations-sidebar {
@@ -1592,6 +1875,7 @@ import Navigation from '../components/shared/Navigation.astro';
       width: 100%;
       height: 100%;
       z-index: 5;
+      border-radius: 0;
     }
 
     .back-btn {
@@ -1599,11 +1883,16 @@ import Navigation from '../components/shared/Navigation.astro';
     }
 
     .chat-actions {
-      display: none;
+      gap: 6px;
+    }
+
+    .chat-action-btn {
+      width: 40px;
+      height: 40px;
     }
 
     .message {
-      max-width: 85%;
+      max-width: 80%;
     }
 
     .user-info-panel {
@@ -1612,7 +1901,7 @@ import Navigation from '../components/shared/Navigation.astro';
       right: 0;
       height: 100%;
       z-index: 10;
-      box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
     }
   }
 
@@ -1623,97 +1912,113 @@ import Navigation from '../components/shared/Navigation.astro';
     }
 
     .sidebar-header {
-      padding: 16px;
+      padding: 18px 16px;
     }
 
     .sidebar-title {
-      font-size: 20px;
+      font-size: 22px;
+    }
+
+    .new-message-btn {
+      width: 40px;
+      height: 40px;
     }
 
     .search-wrapper {
-      padding: 12px 16px;
+      padding: 16px;
     }
 
     .conversation-item {
-      padding: 12px 16px;
+      padding: 14px 16px;
+      margin: 0 6px 4px;
     }
 
     .conversation-avatar {
+      width: 50px;
+      height: 50px;
+    }
+
+    .chat-header {
+      padding: 16px;
+    }
+
+    .chat-avatar {
       width: 44px;
       height: 44px;
     }
 
-    .chat-header {
-      padding: 12px 16px;
-    }
-
-    .chat-avatar {
-      width: 40px;
-      height: 40px;
-    }
-
     .messages-container {
-      padding: 16px;
+      padding: 20px 16px;
     }
 
     .message-input-wrapper {
-      padding: 12px 16px;
-      gap: 8px;
+      padding: 16px;
+      gap: 10px;
     }
 
-    .attach-btn,
-    .emoji-btn {
-      width: 36px;
-      height: 36px;
-    }
-
-    .send-btn {
+    .attach-btn {
       width: 40px;
       height: 40px;
     }
 
+    .send-btn {
+      width: 44px;
+      height: 44px;
+    }
+
     .message {
-      max-width: 90%;
+      max-width: 85%;
     }
 
     .message-avatar {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
     }
 
     .message-bubble {
-      padding: 10px 14px;
-      border-radius: 16px;
+      padding: 12px 16px;
+      border-radius: 18px;
     }
 
     .message-text {
-      font-size: 13px;
+      font-size: 14px;
+    }
+
+    .toast-notification {
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      min-width: auto;
     }
   }
 
   /* ===== SCROLLBAR ===== */
   .conversations-list::-webkit-scrollbar,
   .messages-container::-webkit-scrollbar,
-  .panel-content::-webkit-scrollbar {
-    width: 6px;
+  .panel-content::-webkit-scrollbar,
+  .modal-body::-webkit-scrollbar {
+    width: 8px;
   }
 
   .conversations-list::-webkit-scrollbar-track,
   .messages-container::-webkit-scrollbar-track,
-  .panel-content::-webkit-scrollbar-track {
+  .panel-content::-webkit-scrollbar-track,
+  .modal-body::-webkit-scrollbar-track {
     background: transparent;
   }
 
   .conversations-list::-webkit-scrollbar-thumb,
   .messages-container::-webkit-scrollbar-thumb,
-  .panel-content::-webkit-scrollbar-thumb {
+  .panel-content::-webkit-scrollbar-thumb,
+  .modal-body::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 3px;
+    border-radius: 4px;
   }
 
   .conversations-list::-webkit-scrollbar-thumb:hover,
   .messages-container::-webkit-scrollbar-thumb:hover,
-  .panel-content::-webkit-scrollbar-thumb:hover {
+  .panel-content::-webkit-scrollbar-thumb:hover,
+  .modal-body::-webkit-scrollbar-thumb:hover {
     background: var(--gray);
   }
 
@@ -1737,5 +2042,163 @@ import Navigation from '../components/shared/Navigation.astro';
   .send-btn:disabled:hover {
     transform: none;
     box-shadow: none;
+  }
+
+  /* ===== EFECTOS ADICIONALES ===== */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .conversation-item.loading {
+    background: linear-gradient(
+      90deg,
+      var(--gray-light) 0%,
+      #e0e0e0 50%,
+      var(--gray-light) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Efecto de writing indicator */
+  @keyframes typing {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 18px;
+    width: fit-content;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .typing-indicator span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gray);
+    animation: typing 1.4s infinite;
+  }
+
+  .typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  /* Hover effects mejorados */
+  .conversation-item,
+  .message-bubble,
+  .chat-action-btn,
+  .send-btn,
+  .new-message-btn {
+    will-change: transform;
+  }
+
+  /* Mejoras de accesibilidad */
+  .conversation-item:focus,
+  .message-input:focus,
+  .search-input:focus,
+  button:focus {
+    outline: 3px solid rgba(102, 123, 198, 0.4);
+    outline-offset: 2px;
+  }
+
+  /* Estados de carga */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--gray);
+  }
+
+  .loading-state::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 12px;
+  }
+
+  /* Transiciones suaves entre estados */
+  .messages-layout > * {
+    transition: var(--transition);
+  }
+
+  /* Efecto de glassmorphism para modales */
+  .modal-overlay {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Mejoras visuales para estados hover */
+  button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  button:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* Sombras más suaves y realistas */
+  .message-bubble,
+  .conversation-item.active,
+  .modal-container,
+  .toast-notification {
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.06),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Animación de entrada para elementos */
+  .conversation-item,
+  .message {
+    animation-fill-mode: both;
+  }
+
+  /* Estilos para el modo oscuro (opcional) */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --dark: #ffffff;
+      --card-bg: #1a1a1a;
+      --gray-light: #2d2d2d;
+      --border: #3d3d3d;
+    }
   }
 </style>

@@ -1,12 +1,11 @@
-<script>
-  const input = document.getElementById('user-search-input');
-  const resultsBox = document.getElementById('search-results');
+<script lang="ts">
+  const input = document.getElementById('user-search-input') as HTMLInputElement;
+  const resultsBox = document.getElementById('search-results') as HTMLDivElement;
   const token = localStorage.getItem('authToken');
-
   const API_URL = '/api/users/search';
-  let timeout;
+  let timeout: number | undefined;
 
-  async function searchUsers(query) {
+  async function searchUsers(query: string) {
     if (!query) {
       resultsBox.classList.add('hidden');
       return;
@@ -14,70 +13,49 @@
 
     try {
       const res = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       if (!res.ok) {
-        resultsBox.innerHTML = `<p class="no-results">Error en la búsqueda</p>`;
+        resultsBox.innerHTML = `<div class="no-results">Error al buscar usuarios.</div>`;
+        return;
+      }
+
+      const data = await res.json();
+      if (!data.users || data.users.length === 0) {
+        resultsBox.innerHTML = `<div class="no-results">No se encontraron resultados.</div>`;
         resultsBox.classList.remove('hidden');
         return;
       }
 
-      const users = await res.json();
+      resultsBox.innerHTML = data.users.map((user: any) => `
+        <div class="result-item" onclick="window.location.href='/Profile?user=${user._id}'">
+          <img src="${user.profilePic || '/images/default-avatar.png'}" alt="Foto de ${user.username}">
+          <div class="user-info">
+            <h4>${user.username}</h4>
+            <p>${user.email || ''}</p>
+          </div>
+        </div>
+      `).join('');
 
-      if (!users.length) {
-        resultsBox.innerHTML = `<p class="no-results">Sin resultados</p>`;
-      } else {
-        resultsBox.innerHTML = users
-          .map(
-            (u) => `
-            <div class="result-item" data-id="${u._id}">
-              <img src="${u.profilePic || `https://ui-avatars.com/api/?name=${u.username}`}" alt="${u.username}" />
-              <div class="user-info">
-                <h4>${u.username}</h4>
-                <p>${u.status || 'Offline'}</p>
-              </div>
-            </div>
-          `
-          )
-          .join('');
-      }
       resultsBox.classList.remove('hidden');
     } catch (err) {
       console.error('Error en búsqueda:', err);
-      resultsBox.innerHTML = `<p class="no-results">Error de conexión</p>`;
+      resultsBox.innerHTML = `<div class="no-results">Error de conexión.</div>`;
       resultsBox.classList.remove('hidden');
     }
   }
 
-  // 🔹 Buscar mientras se escribe
-  input.addEventListener('input', () => {
+  // ⏳ Debounce para no saturar el servidor
+  input?.addEventListener('input', () => {
     clearTimeout(timeout);
-    const query = input.value.trim();
-    timeout = setTimeout(() => searchUsers(query), 400);
-  });
-
-  // 🔹 Buscar al presionar Enter
-  input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const query = input.value.trim();
-      searchUsers(query);
-    }
-  });
-
-  // 🔹 Abrir perfil al hacer clic en un resultado
-  resultsBox.addEventListener('click', (e) => {
-    const item = e.target.closest('.result-item');
-    if (item) {
-      const userId = item.dataset.id;
-      window.location.href = `/Profile/${userId}`;
-    }
+    timeout = window.setTimeout(() => searchUsers(input.value), 300);
   });
 
   // 🔹 Ocultar lista si se hace clic fuera
   document.addEventListener('click', (e) => {
-    if (!resultsBox.contains(e.target) && e.target !== input) {
+    const target = e.target as HTMLElement;
+    if (!resultsBox.contains(target) && target !== input) {
       resultsBox.classList.add('hidden');
     }
   });

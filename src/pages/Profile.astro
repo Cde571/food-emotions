@@ -131,688 +131,608 @@ import Bibliography from '../components/Bibliography.astro';
 </Layout>
 
 <script>
-  // ============================================================
-  // 🎯 PROFILE.ASTRO - SCRIPT COMPLETO
-  // ============================================================
+// ============================================================
+// 🎯 PROFILE.ASTRO - SCRIPT COMPLETO MEJORADO
+// ============================================================
 
-  let currentUser = null;
+let currentUser = null;
+let viewedUser = null;
+let isOwner = true;
 
-  // Función para mostrar notificaciones
-  function showNotification(message, type = 'success') {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.className = `notification ${type}`;
-    notification.classList.remove('hidden');
-    
-    setTimeout(() => {
-      notification.classList.add('hidden');
-    }, 3000);
+// ============================================================
+// 🔔 Mostrar notificación flotante
+// ============================================================
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${type}`;
+  notification.classList.remove('hidden');
+  setTimeout(() => notification.classList.add('hidden'), 3000);
+}
+
+// ============================================================
+// 🧩 Cargar datos del perfil
+// ============================================================
+async function loadProfileData() {
+  try {
+    console.log('🔄 Cargando perfil del usuario...');
+    const meRes = await fetch('http://localhost:3000/api/user/me', {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!meRes.ok) {
+      if (meRes.status === 401) return (window.location.href = '/login');
+      throw new Error('Error obteniendo usuario logeado');
+    }
+
+    const me = await meRes.json();
+    currentUser = me;
+
+    // 🔹 Verificar si se está viendo otro usuario
+    const params = new URLSearchParams(window.location.search);
+    const userParam = params.get('user');
+
+    if (userParam && userParam !== me._id) {
+      isOwner = false;
+      const res = await fetch(`http://localhost:3000/api/users/${userParam}`, {
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error('Usuario no encontrado');
+      viewedUser = await res.json();
+    } else {
+      viewedUser = me;
+    }
+
+    updateProfileUI(viewedUser);
+    adjustPermissions();
+  } catch (error) {
+    console.error('❌ Error cargando perfil:', error);
+    showNotification('Error al cargar el perfil', 'error');
   }
+}
 
-  // Cargar datos del perfil
-  async function loadProfileData() {
-    try {
-      console.log('🔄 Cargando perfil del usuario...');
-      
-      const response = await fetch('http://localhost:3000/api/user/me', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
+// ============================================================
+// 🎨 Actualizar UI con datos del usuario cargado
+// ============================================================
+function updateProfileUI(user) {
+  document.getElementById('user-name').textContent = user.username || 'Usuario';
+  document.getElementById('profile-pic').src =
+    user.profilePic ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`;
+  document.getElementById('bio-editor').value = user.bio || '';
+  document.getElementById('bio-description').textContent =
+    user.bio || 'Sin biografía';
+  document.getElementById('followers-count').textContent = `${
+    user.followers?.length || 0
+  } Seguidores`;
+  document.getElementById('likes-count').textContent = `${
+    user.likes?.length || 0
+  } Likes`;
+}
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          window.location.href = '/login';
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+// ============================================================
+// 🔐 Ajustar visibilidad según si es el dueño
+// ============================================================
+function adjustPermissions() {
+  const userLinks = document.querySelector('.user-links');
 
-      const user = await response.json();
-      console.log('✅ Usuario cargado:', user);
+  if (!isOwner) {
+    console.log('👀 Modo visitante activado');
 
-      if (!user.loggedIn) {
-        window.location.href = '/login';
-        return;
-      }
+    const hideSelectors = [
+      '#upload-btn',
+      '#save-bio-btn',
+      '#logout-button',
+      '#status-select',
+      '#bio-editor',
+      '.upload-section',
+      '.upload-button',
+      '#photoModal',
+    ];
 
-      currentUser = user;
+    hideSelectors.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) el.style.display = 'none';
+    });
 
-      // Actualizar imagen de perfil
-      const profilePic = document.getElementById('profile-pic');
-      if (profilePic) {
-        profilePic.src = user.profilePic || 
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=72B340&color=fff`;
-      }
-      
-      // Actualizar nombre de usuario
-      const userName = document.getElementById('user-name');
-      const teamUserName = document.getElementById('team-user-name');
-      const teamMemberName = document.getElementById('team-member-name');
-      
-      if (userName) userName.textContent = user.username || 'Usuario';
-      if (teamUserName) teamUserName.textContent = user.username || 'Usuario';
-      if (teamMemberName) teamMemberName.textContent = (user.username || 'USUARIO').toUpperCase();
+    // 🧩 Botón "Seguir"
+    const followBtn = document.createElement('button');
+    followBtn.textContent = '👥 Seguir';
+    followBtn.className = 'feed-btn';
+    followBtn.addEventListener('click', () => {
+      showNotification(`Ahora sigues a ${viewedUser.username}`, 'success');
+    });
+    userLinks.appendChild(followBtn);
 
-      // Actualizar estado
-      const statusSelect = document.getElementById('status-select');
-      if (statusSelect && user.status) {
-        statusSelect.value = user.status;
-      }
-
-      // Actualizar biografía
-      const bioEditor = document.getElementById('bio-editor');
-      const bioDescription = document.getElementById('bio-description');
-      if (bioEditor) bioEditor.value = user.bio || '';
-      if (bioDescription) bioDescription.textContent = user.bio || 'Sin biografía';
-
-      // ⭐ ACTUALIZAR ESTADÍSTICAS
-      if (user.stats) {
-        console.log('📊 Actualizando estadísticas:', user.stats);
-        
-        const recipesCount = document.getElementById('recipes-count');
-        const followersCount = document.getElementById('followers-count');
-        const likesCount = document.getElementById('likes-count');
-        
-        if (recipesCount) recipesCount.textContent = user.stats.recipesLiked || 0;
-        if (followersCount) followersCount.textContent = `${user.stats.followers || 0} Seguidores`;
-        if (likesCount) likesCount.textContent = `${user.stats.totalLikes || 0} Likes`;
-
-        console.log('✅ Estadísticas actualizadas');
-      }
-
-      return user;
-    } catch (error) {
-      console.error('❌ Error cargando perfil:', error);
-      showNotification('Error al cargar el perfil', 'error');
-      return null;
-    }
-  }
-
-  // Cambiar estado del usuario
-  document.getElementById('status-select')?.addEventListener('change', async (e) => {
-    try {
-      const newStatus = e.target.value;
-      console.log('🔄 Cambiando estado a:', newStatus);
-
-      const response = await fetch('http://localhost:3000/profile/status', {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (!response.ok) throw new Error('Error al cambiar estado');
-
-      const data = await response.json();
-      console.log('✅ Estado actualizado:', data);
-      showNotification('Estado actualizado correctamente', 'success');
-    } catch (error) {
-      console.error('❌ Error cambiando estado:', error);
-      showNotification('Error al cambiar el estado', 'error');
-    }
-  });
-
-  // Guardar biografía
-  document.getElementById('save-bio-btn')?.addEventListener('click', async () => {
-    try {
-      const bioEditor = document.getElementById('bio-editor');
-      const newBio = bioEditor.value.trim();
-
-      console.log('💾 Guardando biografía:', newBio);
-
-      const response = await fetch('http://localhost:3000/profile/bio', {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ bio: newBio })
-      });
-
-      if (!response.ok) throw new Error('Error al guardar biografía');
-
-      const data = await response.json();
-      console.log('✅ Biografía guardada:', data);
-      
-      const bioDescription = document.getElementById('bio-description');
-      if (bioDescription) bioDescription.textContent = newBio || 'Sin biografía';
-      
-      showNotification('Biografía actualizada correctamente', 'success');
-    } catch (error) {
-      console.error('❌ Error guardando biografía:', error);
-      showNotification('Error al guardar la biografía', 'error');
-    }
-  });
-
-  // Modal de cambio de foto
-  const photoModal = document.getElementById('photoModal');
-  const uploadBtn = document.getElementById('upload-btn');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const uploadFileBtn = document.getElementById('upload-file-btn');
-  const uploadUrlBtn = document.getElementById('upload-url-btn');
-  const uploadInput = document.getElementById('upload-input');
-  const urlForm = document.getElementById('urlForm');
-
-  uploadBtn?.addEventListener('click', () => {
-    photoModal?.classList.remove('hidden');
-  });
-
-  closeModalBtn?.addEventListener('click', () => {
-    photoModal?.classList.add('hidden');
-    urlForm?.classList.add('hidden');
-  });
-
-  uploadFileBtn?.addEventListener('click', () => {
-    uploadInput?.click();
-  });
-
-  uploadUrlBtn?.addEventListener('click', () => {
-    urlForm?.classList.remove('hidden');
-  });
-
-  // Subir imagen desde archivo
-  uploadInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      console.log('📤 Subiendo imagen:', file.name);
-      
-      const formData = new FormData();
-      formData.append('profilePic', file);
-
-      const response = await fetch('http://localhost:3000/profile/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      });
-
-      if (!response.ok) throw new Error('Error al subir imagen');
-
-      const data = await response.json();
-      console.log('✅ Imagen subida:', data);
-
-      const profilePic = document.getElementById('profile-pic');
-      if (profilePic && data.profilePic) {
-        profilePic.src = data.profilePic;
-      }
-
-      photoModal?.classList.add('hidden');
-      urlForm?.classList.add('hidden');
-      showNotification('Foto de perfil actualizada', 'success');
-    } catch (error) {
-      console.error('❌ Error subiendo imagen:', error);
-      showNotification('Error al subir la imagen', 'error');
-    }
-  });
-
-  // Subir imagen desde URL
-  urlForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const imageUrlInput = document.getElementById('imageUrl');
-    const imageUrl = imageUrlInput.value.trim();
-
-    if (!imageUrl) {
-      showNotification('Por favor ingresa una URL válida', 'error');
-      return;
-    }
-
-    try {
-      console.log('🌐 Guardando URL de imagen:', imageUrl);
-
-      // Aquí podrías validar la URL o guardarla directamente
-      const profilePic = document.getElementById('profile-pic');
-      if (profilePic) {
-        profilePic.src = imageUrl;
-      }
-
-      // Opcional: guardar en el servidor
-      // await fetch('http://localhost:3000/profile/update-pic-url', { ... });
-
-      photoModal?.classList.add('hidden');
-      urlForm?.classList.add('hidden');
-      imageUrlInput.value = '';
-      showNotification('Foto de perfil actualizada', 'success');
-    } catch (error) {
-      console.error('❌ Error con URL:', error);
-      showNotification('Error al cargar la imagen desde URL', 'error');
-    }
-  });
-
-  // Buscar usuarios en el profile
-  let searchTimeout;
-  const profileSearch = document.getElementById('profile-search');
-  const profileSearchResults = document.getElementById('profile-search-results');
-
-  profileSearch?.addEventListener('input', (e) => {
-    clearTimeout(searchTimeout);
-    const query = e.target.value.trim();
-
-    if (query.length < 2) {
-      profileSearchResults?.classList.add('hidden');
-      return;
-    }
-
-    searchTimeout = setTimeout(async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/api/users/search?q=${encodeURIComponent(query)}`, {
-          credentials: 'include'
-        });
-
-        if (!response.ok) throw new Error('Error en búsqueda');
-
-        const users = await response.json();
-        
-        if (users.length === 0) {
-          profileSearchResults.innerHTML = '<div class="no-results">No se encontraron usuarios</div>';
-        } else {
-          profileSearchResults.innerHTML = users.map(user => `
-            <div class="search-result-item" data-user-id="${user._id}">
-              <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}`}" alt="${user.username}" />
-              <div>
-                <strong>${user.username}</strong>
-                <p>${user.email || ''}</p>
-              </div>
-            </div>
-          `).join('');
-
-          document.querySelectorAll('.search-result-item').forEach(item => {
-            item.addEventListener('click', () => {
-              window.location.href = `/Profile?user=${item.dataset.userId}`;
-            });
-          });
-        }
-        
-        profileSearchResults?.classList.remove('hidden');
-      } catch (error) {
-        console.error('❌ Error en búsqueda:', error);
-      }
-    }, 300);
-  });
-
-  // Ver seguidores
-  document.getElementById('followers-count')?.addEventListener('click', async () => {
-    try {
-      if (!currentUser) return;
-
-      console.log('👥 Cargando seguidores...');
-
-      const response = await fetch(`http://localhost:3000/api/users/${currentUser._id}/followers`, {
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Error al cargar seguidores');
-
-      const followers = await response.json();
-      console.log('✅ Seguidores:', followers);
-
-      const followersList = document.getElementById('followersList');
-      if (followersList) {
-        followersList.innerHTML = followers.length > 0
-          ? followers.map(f => `
-              <div class="follower-item">
-                <img src="${f.profilePic || `https://ui-avatars.com/api/?name=${f.username}`}" alt="${f.username}" />
-                <span>${f.username}</span>
-              </div>
-            `).join('')
-          : '<p>No tienes seguidores aún</p>';
-      }
-
-      document.getElementById('followersModal')?.classList.remove('hidden');
-    } catch (error) {
-      console.error('❌ Error cargando seguidores:', error);
-      showNotification('Error al cargar seguidores', 'error');
-    }
-  });
-
-  // Ver likes (posts con likes)
-  document.getElementById('likes-count')?.addEventListener('click', async () => {
-    try {
-      if (!currentUser) return;
-
-      console.log('❤️ Cargando posts con likes...');
-
-      const response = await fetch(`http://localhost:3000/api/users/${currentUser._id}/liked-posts`, {
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Error al cargar likes');
-
-      const likedPosts = await response.json();
-      console.log('✅ Posts con likes:', likedPosts);
-
-      const likesList = document.getElementById('likesList');
-      if (likesList) {
-        likesList.innerHTML = likedPosts.length > 0
-          ? likedPosts.map(post => `
-              <div class="like-item">
-                <img src="${post.images?.[0] || '/placeholder.jpg'}" alt="Post" />
-                <div>
-                  <p>${post.caption || 'Sin descripción'}</p>
-                  <span>${post.likes?.length || 0} likes</span>
-                </div>
-              </div>
-            `).join('')
-          : '<p>No has dado likes aún</p>';
-      }
-
-      document.getElementById('likesModal')?.classList.remove('hidden');
-    } catch (error) {
-      console.error('❌ Error cargando likes:', error);
-      showNotification('Error al cargar likes', 'error');
-    }
-  });
-
-  // Ir al feed
-  document.getElementById('go-to-feed')?.addEventListener('click', () => {
-    window.location.href = '/Social';
-  });
-
-  // Cerrar sesión
-  document.getElementById('logout-button')?.addEventListener('click', async () => {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      try {
-        await fetch('http://localhost:3000/logout', { 
-          method: 'POST',
-          credentials: 'include' 
-        });
-        window.location.href = '/login';
-      } catch (error) {
-        console.error('❌ Error cerrando sesión:', error);
-      }
-    }
-  });
-
-  // Cerrar modales al hacer clic fuera
-  document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-      e.target.classList.add('hidden');
-    }
-  });
-
-  // Inicializar
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadProfileData);
+    // 💬 Botón de chat directo
+    const chatBtn = document.createElement('button');
+    chatBtn.textContent = '💬 Enviar mensaje';
+    chatBtn.className = 'feed-btn';
+    chatBtn.addEventListener('click', () => {
+      window.location.href = `/Messages?chat=${viewedUser._id}`;
+    });
+    userLinks.appendChild(chatBtn);
   } else {
-    loadProfileData();
+    console.log('✅ Modo propietario activado');
   }
+}
+
+// ============================================================
+// 💬 Cambiar estado del usuario
+// ============================================================
+document.getElementById('status-select')?.addEventListener('change', async e => {
+  try {
+    const newStatus = e.target.value;
+    const res = await fetch('http://localhost:3000/profile/status', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (!res.ok) throw new Error('Error al cambiar estado');
+    showNotification('Estado actualizado correctamente');
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('Error al cambiar estado', 'error');
+  }
+});
+
+// ============================================================
+// ✍️ Guardar biografía
+// ============================================================
+document.getElementById('save-bio-btn')?.addEventListener('click', async () => {
+  try {
+    const newBio = document.getElementById('bio-editor').value.trim();
+    const res = await fetch('http://localhost:3000/profile/bio', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bio: newBio }),
+    });
+    if (!res.ok) throw new Error('Error al guardar bio');
+    document.getElementById('bio-description').textContent = newBio || 'Sin biografía';
+    showNotification('Biografía actualizada correctamente');
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('Error al guardar biografía', 'error');
+  }
+});
+
+// ============================================================
+// 🖼️ Modal de cambio de foto
+// ============================================================
+const photoModal = document.getElementById('photoModal');
+const uploadBtn = document.getElementById('upload-btn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const uploadFileBtn = document.getElementById('upload-file-btn');
+const uploadUrlBtn = document.getElementById('upload-url-btn');
+const uploadInput = document.getElementById('upload-input');
+const urlForm = document.getElementById('urlForm');
+
+uploadBtn?.addEventListener('click', () => photoModal?.classList.remove('hidden'));
+closeModalBtn?.addEventListener('click', () => {
+  photoModal?.classList.add('hidden');
+  urlForm?.classList.add('hidden');
+});
+uploadFileBtn?.addEventListener('click', () => uploadInput?.click());
+uploadUrlBtn?.addEventListener('click', () => urlForm?.classList.remove('hidden'));
+
+uploadInput?.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const formData = new FormData();
+    formData.append('profilePic', file);
+    const res = await fetch('http://localhost:3000/profile/upload', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!res.ok) throw new Error('Error al subir imagen');
+    const data = await res.json();
+    document.getElementById('profile-pic').src = data.profilePic;
+    showNotification('Foto de perfil actualizada');
+    photoModal?.classList.add('hidden');
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('Error al subir imagen', 'error');
+  }
+});
+
+urlForm?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const imageUrl = document.getElementById('imageUrl').value.trim();
+  if (!imageUrl) return showNotification('URL inválida', 'error');
+  document.getElementById('profile-pic').src = imageUrl;
+  photoModal?.classList.add('hidden');
+  showNotification('Foto actualizada desde URL');
+});
+
+// ============================================================
+// 🔍 Buscar usuarios desde el perfil
+// ============================================================
+let searchTimeout;
+const profileSearch = document.getElementById('profile-search');
+const profileSearchResults = document.getElementById('profile-search-results');
+
+profileSearch?.addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  const query = e.target.value.trim();
+  if (query.length < 2) return (profileSearchResults.innerHTML = '');
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/users/search?q=${encodeURIComponent(query)}`,
+        { credentials: 'include' }
+      );
+      if (!res.ok) throw new Error('Error en búsqueda');
+      const users = await res.json();
+      profileSearchResults.innerHTML =
+        users.length === 0
+          ? '<div class="no-results">No se encontraron usuarios</div>'
+          : users
+              .map(
+                u => `
+              <div class="search-result-item" data-user-id="${u._id}">
+                <img src="${u.profilePic || `https://ui-avatars.com/api/?name=${u.username}`}" alt="${u.username}" />
+                <div>
+                  <strong>${u.username}</strong>
+                  <p>${u.email || ''}</p>
+                </div>
+              </div>`
+              )
+              .join('');
+      document.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', () => {
+          window.location.href = `/Profile?user=${item.dataset.userId}`;
+        });
+      });
+      profileSearchResults.classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error en búsqueda:', err);
+    }
+  }, 300);
+});
+
+// ============================================================
+// 👥 Ver seguidores y likes
+// ============================================================
+document.getElementById('followers-count')?.addEventListener('click', async () => {
+  if (!currentUser) return;
+  const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}/followers`, {
+    credentials: 'include',
+  });
+  const followers = await res.json();
+  const followersList = document.getElementById('followersList');
+  followersList.innerHTML =
+    followers.length > 0
+      ? followers
+          .map(
+            f => `
+        <div class="follower-item">
+          <img src="${f.profilePic || `https://ui-avatars.com/api/?name=${f.username}`}" />
+          <span>${f.username}</span>
+        </div>`
+          )
+          .join('')
+      : '<p>No tienes seguidores aún</p>';
+  document.getElementById('followersModal')?.classList.remove('hidden');
+});
+
+document.getElementById('likes-count')?.addEventListener('click', async () => {
+  if (!currentUser) return;
+  const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}/liked-posts`, {
+    credentials: 'include',
+  });
+  const liked = await res.json();
+  const likesList = document.getElementById('likesList');
+  likesList.innerHTML =
+    liked.length > 0
+      ? liked
+          .map(
+            p => `
+        <div class="like-item">
+          <img src="${p.images?.[0] || '/placeholder.jpg'}" />
+          <div>
+            <p>${p.caption || 'Sin descripción'}</p>
+            <span>${p.likes?.length || 0} likes</span>
+          </div>
+        </div>`
+          )
+          .join('')
+      : '<p>No has dado likes aún</p>';
+  document.getElementById('likesModal')?.classList.remove('hidden');
+});
+
+// ============================================================
+// 🚪 Ir al feed / cerrar sesión
+// ============================================================
+document.getElementById('go-to-feed')?.addEventListener('click', () => {
+  window.location.href = '/Social';
+});
+
+document.getElementById('logout-button')?.addEventListener('click', async () => {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await fetch('http://localhost:3000/logout', { method: 'POST', credentials: 'include' });
+  window.location.href = '/login';
+});
+
+// ============================================================
+// 🪟 Cerrar modales al hacer clic fuera
+// ============================================================
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal')) e.target.classList.add('hidden');
+});
+
+// ============================================================
+// 🚀 Inicializar
+// ============================================================
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadProfileData);
+} else {
+  loadProfileData();
+}
 </script>
 
 <style>
   :root {
-    --primary: #72b340;
-    --dark-bg: #3b432b;
-    --light: #fff;
-  }
+  --primary: #72b340;
+  --primary-dark: #5a9332;
+  --accent: #667BC6;
+  --secondary: #DA7297;
+  --light: #f8fafc;
+  --white: #ffffff;
+  --dark-bg: #222831;
+  --text-dark: #222;
+  --text-light: #e5e7eb;
+  --border-color: #374151;
+  --radius: 12px;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.25);
+  font-family: 'Poppins', sans-serif;
+}
 
+/* === LAYOUT GENERAL === */
+.profile-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 24px;
+  padding: 20px;
+  max-width: 1300px;
+  margin: 80px auto;
+}
+
+/* === COLUMNA IZQUIERDA === */
+.left-section {
+  background: var(--dark-bg);
+  color: var(--text-light);
+  padding: 24px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+  object-fit: cover;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-lg);
+}
+
+.upload-button,
+.logout-button,
+.feed-btn {
+  background: var(--primary);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  margin-top: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.25s;
+}
+
+.upload-button:hover,
+.feed-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.logout-button {
+  background: #ef4444;
+}
+.logout-button:hover {
+  background: #dc2626;
+}
+
+.user-info h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 12px 0 6px;
+  color: var(--white);
+}
+
+.status-label {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+#status-select {
+  background: #374151;
+  color: #f3f4f6;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.user-stats p {
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.user-links a {
+  display: block;
+  margin-top: 10px;
+  color: var(--light);
+  text-decoration: none;
+  transition: 0.2s;
+}
+.user-links a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* === COLUMNA CENTRAL === */
+.main-section {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+  color: var(--text-dark);
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid #d1d5db;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  outline-color: var(--accent);
+}
+
+.banner {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.banner-image {
+  width: 100%;
+  border-radius: var(--radius);
+  object-fit: cover;
+  height: 180px;
+  filter: brightness(0.9);
+}
+
+.team-card {
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  color: white;
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  margin-top: 20px;
+}
+
+.team-card button {
+  margin-top: 10px;
+  background: #fff;
+  color: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.25s;
+}
+.team-card button:hover {
+  background: var(--light);
+  transform: scale(1.05);
+}
+
+/* === COLUMNA DERECHA === */
+.right-section {
+  background: var(--dark-bg);
+  color: var(--text-light);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.bio-editor {
+  background: #374151;
+  color: var(--text-light);
+  width: 100%;
+  border-radius: var(--radius);
+  border: none;
+  margin-top: 16px;
+  padding: 10px;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.save-bio-btn {
+  margin-top: 14px;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent), var(--secondary));
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.save-bio-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* === MODALES Y NOTIFICACIONES === */
+.modal {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+}
+
+.notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  padding: 14px 22px;
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 600;
+  z-index: 9999;
+  animation: slideIn 0.3s ease;
+}
+
+.notification.success { background: #10b981; }
+.notification.error { background: #ef4444; }
+.notification.hidden { display: none; }
+
+@keyframes slideIn {
+  from { transform: translateX(300px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
   .profile-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 100px auto 50px;
+    grid-template-columns: 1fr;
+    margin-top: 60px;
   }
-
-  .left-section, .right-section {
-    background: var(--dark-bg);
-    color: var(--light);
-    padding: 20px;
-    border-radius: 10px;
-  }
-
-  .profile-pic-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .profile-image {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-
-  .upload-button, .logout-button, .feed-btn {
-    background: var(--primary);
-    border: none;
-    padding: 10px 16px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 500;
-    margin-top: 10px;
-    width: 100%;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
-  }
-
-  .upload-button:hover, .feed-btn:hover {
-    background: #5a9332;
-    transform: scale(1.05);
-  }
-
-  .logout-button {
-    background: #e53935;
-  }
-
-  .logout-button:hover {
-    background: #c62828;
-  }
-
-  .user-info {
-    text-align: center;
-    margin-top: 15px;
-  }
-
-  .user-stats p {
-    margin: 5px 0;
-  }
-
-  .user-links a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-
-  .user-links a:hover {
-    text-decoration: underline;
-  }
-
-  .main-section {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-  }
-
-  .search-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-  }
-
-  .banner-image {
-    width: 100%;
-    border-radius: 10px;
-  }
-
-  .team-card {
-    background: white;
-    color: #831400;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    margin-top: 20px;
-  }
-
+  .left-section,
   .right-section {
-    display: flex;
-    flex-direction: column;
+    text-align: center;
   }
-
-  .bio-editor {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  .modal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 999;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-  }
-
-  .modal.hidden {
-    display: none;
-  }
-
-  @media (max-width: 992px) {
-    .profile-container {
-      grid-template-columns: 1fr;
-      margin-top: 70px;
-    }
-  }
-
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 16px 24px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 500;
-    z-index: 9999;
-    animation: slideIn 0.3s ease;
-  }
-
-  .notification.success {
-    background: #10b981;
-  }
-
-  .notification.error {
-    background: #ef4444;
-  }
-
-  .notification.hidden {
-    display: none;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  .save-bio-btn {
-    width: 100%;
-    margin-top: 12px;
-    padding: 10px;
-    background: linear-gradient(135deg, #667BC6 0%, #DA7297 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .save-bio-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
-  }
-
-  .search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 100;
-    margin-top: 8px;
-  }
-
-  .search-results.hidden {
-    display: none;
-  }
-
-  .search-result-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  .search-result-item:hover {
-    background: #f9fafb;
-  }
-
-  .search-result-item img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .followers-list, .likes-list {
-    max-height: 400px;
-    overflow-y: auto;
-  }
-
-  .follower-item, .like-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
-  .follower-item img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .like-item img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
+}
 </style>
 
 
