@@ -4,10 +4,12 @@ class SocketClient {
     this.listeners = new Map();
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.currentUserId = null; // 🆕 Para filtrar posts propios
   }
 
-  connect(token) {
+  connect(token, userId) { // 🆕 Recibe userId
     const WS_URL = import.meta.env.PUBLIC_WS_URL || 'http://localhost:3000';
+    this.currentUserId = userId; // 🆕 Guarda el userId
     
     try {
       this.socket = io(WS_URL, {
@@ -32,7 +34,18 @@ class SocketClient {
         this.reconnectAttempts++;
       });
 
-      // Listeners de eventos
+      // 🆕 LISTENER PARA POST CREADO
+      this.socket.on('post-created', (data) => {
+        // Filtrar si el post es del usuario actual
+        if (data.authorId !== this.currentUserId) {
+          console.log('📬 Nuevo post recibido:', data.post);
+          this.emit('post-created', data);
+        } else {
+          console.log('🚫 Post propio ignorado (ya está en el feed)');
+        }
+      });
+
+      // Listeners de eventos existentes
       this.socket.on('post-liked', (data) => {
         this.emit('post-liked', data);
       });
@@ -61,6 +74,18 @@ class SocketClient {
     this.listeners.get(event).push(callback);
   }
 
+  off(event, callback) { // 🆕 Para eliminar listeners
+    if (!this.listeners.has(event)) return;
+    
+    if (callback) {
+      const callbacks = this.listeners.get(event);
+      const index = callbacks.indexOf(callback);
+      if (index > -1) callbacks.splice(index, 1);
+    } else {
+      this.listeners.delete(event);
+    }
+  }
+
   emit(event, data) {
     const callbacks = this.listeners.get(event) || [];
     callbacks.forEach(callback => callback(data));
@@ -82,6 +107,7 @@ class SocketClient {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+      this.listeners.clear(); // 🆕 Limpia listeners
     }
   }
 }
@@ -92,6 +118,7 @@ const socketClient = typeof io !== 'undefined'
   : {
       connect: () => console.warn('Socket.IO no disponible'),
       on: () => {},
+      off: () => {},
       emit: () => {},
       likePost: () => {},
       addComment: () => {},

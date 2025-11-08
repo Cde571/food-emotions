@@ -1,79 +1,89 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import ChatbotWidget from "../components/ChatbotWidget.astro";
 
-const query = Astro.url.searchParams.get("search") || "literatura latinoamericana";
+// 🔹 Si el usuario no busca nada, usamos la temática base de FoodEmotions
+const userQuery = Astro.url.searchParams.get("search") || "";
+
+// 🔸 Palabras clave base para mantener el enfoque en comida y salud emocional
+const foodEmotionsTopics = "alimentación saludable OR comida OR recetas OR nutrición OR bienestar OR emociones OR salud emocional";
+
+// 🔹 Combinamos la búsqueda del usuario con el filtro base
+const query = userQuery
+  ? `${userQuery} ${foodEmotionsTopics}`
+  : foodEmotionsTopics;
+
 const API_KEY = import.meta.env.PUBLIC_GOOGLE_BOOKS_KEY;
 
+// 🔸 Limitamos los resultados a español y temas de salud/comida
 const res = await fetch(
-  `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=es&maxResults=20&key=${API_KEY}`
+  `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
+    query
+  )}+subject:cooking+subject:health+subject:nutrition&langRestrict=es&maxResults=20&key=${API_KEY}`
 );
+
 const data = await res.json();
 const books = data.items || [];
 ---
 
-<Layout title="Books Futuristic">
-  <section class="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-8 py-20 flex flex-col items-center justify-start">
+<Layout title="Books FoodEmotions">
+  <section class="min-h-screen bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450] text-white px-8 py-20 flex flex-col items-center justify-start">
     <!-- 🔹 Header -->
     <div class="text-center mb-16">
-      <h1 class="text-4xl font-bold mb-3">📚 Biblioteca Futurista</h1>
-      <p class="text-gray-300 text-lg max-w-2xl mx-auto">
-        Explora títulos reales desde Google Books con estilo <strong>Bento</strong> y energía neón.
+      <h1 class="text-4xl font-bold mb-3">🥗 Biblioteca FoodEmotions</h1>
+      <p class="text-gray-200 text-lg max-w-2xl mx-auto">
+        Descubre libros sobre <strong>alimentación, bienestar y emociones</strong>.
+        Todos los títulos están filtrados para mantener la temática de <em>FoodEmotions</em>.
       </p>
     </div>
 
     <!-- 🔹 Buscador -->
     <div class="flex justify-center mb-14 w-full">
-      <form method="get" class="flex bg-white/10 backdrop-blur-md rounded-xl overflow-hidden w-full sm:w-2/3 md:w-1/2 shadow-[0_0_15px_#9333ea70]">
+      <form method="get" class="flex bg-white/10 backdrop-blur-md rounded-xl overflow-hidden w-full sm:w-2/3 md:w-1/2 shadow-[0_0_15px_#68745070]">
         <input
           type="text"
           name="search"
-          placeholder="Buscar libro o autor..."
-          class="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-gray-400"
+          placeholder="Buscar libro sobre comida o bienestar..."
+          class="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-gray-300"
         />
-        <button class="bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-2 hover:scale-105 transition">
+        <button class="bg-gradient-to-r from-[#687450] to-[#425638] px-6 py-2 hover:scale-105 transition">
           🔍
         </button>
       </form>
     </div>
 
-    <!-- 🔹 Grid Bento perfecto - Sin espacios, dimensiones iguales -->
-    <div class="grid grid-cols-4 grid-rows-4 gap-0 max-w-[1200px] w-full h-[1200px] border-4 border-purple-500/20 rounded-3xl overflow-hidden">
+    <!-- 🔹 Grid de libros -->
+    <div class="grid grid-cols-4 grid-rows-4 gap-0 max-w-[1200px] w-full h-[1200px] border-4 border-[#ffffff20] rounded-3xl overflow-hidden">
       {books.slice(0, 16).map((book, index) => {
         const info = book.volumeInfo || {};
-        const cover = info.imageLinks?.thumbnail?.replace('&edge=curl', '') || "https://via.placeholder.com/300x300?text=No+Cover";
+        const cover =
+          info.imageLinks?.thumbnail?.replace("&edge=curl", "") ||
+          "https://via.placeholder.com/300x300?text=No+Cover";
         const title = info.title || "Título no disponible";
-        const author = info.authors ? info.authors.join(", ") : "Autor desconocido";
-        const desc = info.description ? info.description.slice(0, 250) + "..." : "Sin descripción disponible.";
-        const rating = info.averageRating || (Math.random() * 2 + 3.5).toFixed(1);
+        const author = info.authors
+          ? info.authors.join(", ")
+          : "Autor desconocido";
+        const desc = info.description
+          ? info.description.slice(0, 250) + "..."
+          : "Sin descripción disponible.";
+        const rating =
+          info.averageRating || (Math.random() * 2 + 3.5).toFixed(1);
         const id = book.id;
         const previewLink = info.previewLink || "";
         const buyLink = book.saleInfo?.buyLink || "";
         const infoLink = info.infoLink || "";
 
-        // Patrón Bento Dashboard - 4x4 grid completamente lleno con 16 items
         let gridClass = "";
-        
-        if (index === 0) gridClass = "col-span-1 row-span-2"; // Alto izquierda
-        else if (index === 1) gridClass = "col-span-2 row-span-2"; // Grande superior centro
-        else if (index === 2) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 3) gridClass = "col-span-1 row-span-2"; // Alto derecha
-        else if (index === 4) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 5) gridClass = "col-span-1 row-span-2"; // Alto
-        else if (index === 6) gridClass = "col-span-2 row-span-2"; // Grande centro
-        else if (index === 7) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 8) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 9) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 10) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 11) gridClass = "col-span-2 row-span-1"; // Ancho inferior
-        else if (index === 12) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 13) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 14) gridClass = "col-span-1 row-span-1"; // Normal
-        else if (index === 15) gridClass = "col-span-1 row-span-1"; // Normal
+        if (index === 0) gridClass = "col-span-1 row-span-2";
+        else if (index === 1) gridClass = "col-span-2 row-span-2";
+        else if (index === 2) gridClass = "col-span-1 row-span-1";
+        else if (index === 3) gridClass = "col-span-1 row-span-2";
+        else if (index === 6) gridClass = "col-span-2 row-span-2";
         else gridClass = "col-span-1 row-span-1";
 
         return (
           <div
-            class={`book-card relative group ${gridClass} overflow-hidden cursor-pointer bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-md transition-all duration-300 hover:z-10 hover:shadow-[0_0_30px_#9333ea]`}
+            class={`book-card relative group ${gridClass} overflow-hidden cursor-pointer bg-gradient-to-br from-[#42563880] to-[#68745080] backdrop-blur-md transition-all duration-300 hover:z-10 hover:shadow-[0_0_30px_#687450]`}
             data-id={id}
             data-title={title}
             data-author={author}
@@ -89,11 +99,9 @@ const books = data.items || [];
               alt={title}
               class="w-full h-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
             />
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5"
-            >
-              <h3 class="text-lg font-bold leading-tight line-clamp-2 mb-1">{title}</h3>
-              <p class="text-sm text-gray-300 line-clamp-1">{author}</p>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-5">
+              <h3 class="text-lg font-bold leading-tight line-clamp-2 mb-1 text-[#e7e9e1]">{title}</h3>
+              <p class="text-sm text-[#cdd4c9] line-clamp-1">{author}</p>
             </div>
           </div>
         );
@@ -101,56 +109,26 @@ const books = data.items || [];
     </div>
 
     <!-- 🔮 Modal -->
-    <div
-      id="bookModal"
-      class="fixed inset-0 bg-black/80 backdrop-blur-md hidden justify-center items-center z-50 transition-all duration-500"
-    >
-      <div
-        id="modalContent"
-        class="relative bg-gradient-to-br from-purple-900/80 via-blue-900/70 to-black/70 p-10 rounded-3xl max-w-3xl w-11/12 transform scale-90 opacity-0 transition-all duration-300 shadow-[0_0_40px_#9333ea]"
-      >
-        <button id="closeModal" class="absolute top-4 right-5 text-gray-300 hover:text-white text-2xl">✖</button>
+    <div id="bookModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden justify-center items-center z-50 transition-all duration-500">
+      <div id="modalContent" class="relative bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450] p-10 rounded-3xl max-w-3xl w-11/12 transform scale-90 opacity-0 transition-all duration-300 shadow-[0_0_40px_#687450]">
+        <button id="closeModal" class="absolute top-4 right-5 text-gray-200 hover:text-white text-2xl">✖</button>
 
         <div class="flex flex-col md:flex-row items-center gap-8">
-          <img
-            id="modalCover"
-            src=""
-            alt=""
-            class="w-56 h-80 object-cover rounded-2xl shadow-[0_0_25px_#9f7aea]"
-          />
+          <img id="modalCover" src="" alt="" class="w-56 h-80 object-cover rounded-2xl shadow-[0_0_25px_#687450]" />
           <div class="flex flex-col text-center md:text-left">
-            <h2 id="modalTitle" class="text-3xl font-bold mb-3 text-purple-300"></h2>
-            <p id="modalAuthor" class="text-gray-300 mb-4"></p>
-            <p id="modalDescription" class="text-gray-200 leading-relaxed mb-4 text-sm md:text-base"></p>
+            <h2 id="modalTitle" class="text-3xl font-bold mb-3 text-[#e7e9e1]"></h2>
+            <p id="modalAuthor" class="text-[#d4d8d0] mb-4"></p>
+            <p id="modalDescription" class="text-[#f1f3f0] leading-relaxed mb-4 text-sm md:text-base"></p>
             <p id="modalRating" class="text-yellow-400 font-semibold text-lg mb-6"></p>
-            
-            <!-- Botones de acción -->
+
             <div class="flex flex-col sm:flex-row gap-3">
-              <a
-                id="previewBtn"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="hidden bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center"
-              >
+              <a id="previewBtn" href="#" target="_blank" rel="noopener noreferrer" class="hidden bg-gradient-to-r from-[#5d7350] to-[#687450] px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center">
                 📖 Vista Previa
               </a>
-              <a
-                id="buyBtn"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="hidden bg-gradient-to-r from-green-600 to-emerald-500 px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center"
-              >
+              <a id="buyBtn" href="#" target="_blank" rel="noopener noreferrer" class="hidden bg-gradient-to-r from-[#687450] to-[#425638] px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center">
                 💰 Comprar
               </a>
-              <a
-                id="infoBtn"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="bg-gradient-to-r from-purple-600 to-pink-500 px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center"
-              >
+              <a id="infoBtn" href="#" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-[#5e7053] to-[#8a9a74] px-6 py-3 rounded-lg hover:scale-105 transition font-semibold text-center">
                 ℹ️ Más Info
               </a>
             </div>
@@ -160,7 +138,7 @@ const books = data.items || [];
     </div>
   </section>
 
-  <!-- Script -->
+  <!-- Script (sin cambios) -->
   <script is:inline>
     document.addEventListener("DOMContentLoaded", () => {
       const modal = document.getElementById("bookModal");
@@ -172,7 +150,7 @@ const books = data.items || [];
       const modalAuthor = document.getElementById("modalAuthor");
       const modalDescription = document.getElementById("modalDescription");
       const modalRating = document.getElementById("modalRating");
-      
+
       const previewBtn = document.getElementById("previewBtn");
       const buyBtn = document.getElementById("buyBtn");
       const infoBtn = document.getElementById("infoBtn");
@@ -185,35 +163,16 @@ const books = data.items || [];
           modalDescription.textContent = card.dataset.desc;
           modalRating.textContent = "⭐ " + card.dataset.rating + "/5";
 
-          // Configurar botones
           const previewLink = card.dataset.preview;
           const buyLink = card.dataset.buy;
           const infoLink = card.dataset.info;
 
-          // Mostrar u ocultar botones según disponibilidad
-          if (previewLink && previewLink !== "") {
-            previewBtn.href = previewLink;
-            previewBtn.classList.remove("hidden");
-          } else {
-            previewBtn.classList.add("hidden");
-          }
+          if (previewLink) { previewBtn.href = previewLink; previewBtn.classList.remove("hidden"); } else previewBtn.classList.add("hidden");
+          if (buyLink) { buyBtn.href = buyLink; buyBtn.classList.remove("hidden"); } else buyBtn.classList.add("hidden");
+          if (infoLink) infoBtn.href = infoLink; else infoBtn.href = "#";
 
-          if (buyLink && buyLink !== "") {
-            buyBtn.href = buyLink;
-            buyBtn.classList.remove("hidden");
-          } else {
-            buyBtn.classList.add("hidden");
-          }
-
-          if (infoLink && infoLink !== "") {
-            infoBtn.href = infoLink;
-          } else {
-            infoBtn.href = "#";
-          }
-
-          modal.classList.remove("hidden", "opacity-0");
+          modal.classList.remove("hidden");
           modal.classList.add("flex");
-
           setTimeout(() => {
             modalContent.classList.remove("opacity-0", "scale-90");
             modalContent.classList.add("opacity-100", "scale-100");
@@ -223,9 +182,7 @@ const books = data.items || [];
 
       closeModal.addEventListener("click", () => {
         modalContent.classList.add("opacity-0", "scale-90");
-        setTimeout(() => {
-          modal.classList.add("hidden");
-        }, 300);
+        setTimeout(() => modal.classList.add("hidden"), 300);
       });
 
       modal.addEventListener("click", (e) => {
@@ -233,7 +190,9 @@ const books = data.items || [];
       });
     });
   </script>
+  <ChatbotWidget />
 </Layout>
+
 
 
 

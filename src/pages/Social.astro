@@ -503,7 +503,7 @@ async function loadActivityStats() {
 }
 
 // ============================================================
-// 📝 CREAR POST - MODAL FUNCIONAL
+// 📝 CREAR POST - MODAL FUNCIONAL (Sin duplicados)
 // ============================================================
 function setupCreatePostModal() {
   const modal = document.getElementById('post-modal');
@@ -514,35 +514,38 @@ function setupCreatePostModal() {
   const captionInput = modal?.querySelector('#post-caption');
   const visibilitySelect = modal?.querySelector('#post-visibility');
 
+  // ✅ Evitar registrar eventos duplicados
+  if (form?.dataset.initialized === "true") return;
   if (!modal || !form) {
     console.warn('⚠️ Modal de crear post no encontrado');
     return;
   }
+  form.dataset.initialized = "true";
 
-  // Cerrar modal
-  closeBtn?.addEventListener('click', () => {
+  // ============================================================
+  // 🔒 Cerrar modal correctamente
+  // ============================================================
+  const closeModal = () => {
     modal.classList.add('hidden');
     form.reset();
     if (imagePreview) imagePreview.innerHTML = '';
-  });
+  };
 
-  // Cerrar al hacer clic fuera
+  closeBtn?.addEventListener('click', closeModal);
+
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      form.reset();
-      if (imagePreview) imagePreview.innerHTML = '';
-    }
+    if (e.target === modal) closeModal();
   });
 
-  // Preview de imágenes
+  // ============================================================
+  // 🖼️ Previsualización de imágenes
+  // ============================================================
   imageInput?.addEventListener('change', (e) => {
     const files = Array.from(e.target.files || []);
     if (!imagePreview) return;
-    
     imagePreview.innerHTML = '';
-    
-    files.forEach(file => {
+
+    files.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const div = document.createElement('div');
@@ -551,94 +554,211 @@ function setupCreatePostModal() {
           <img src="${e.target.result}" alt="Preview" />
           <button type="button" class="remove-image" title="Eliminar">×</button>
         `;
-        
         div.querySelector('.remove-image')?.addEventListener('click', () => {
           div.remove();
-          // Actualizar input de archivos
           const dt = new DataTransfer();
-          Array.from(imageInput.files).forEach((f, i) => {
+          Array.from(imageInput.files).forEach((f) => {
             if (f !== file) dt.items.add(f);
           });
           imageInput.files = dt.files;
         });
-        
         imagePreview.appendChild(div);
       };
       reader.readAsDataURL(file);
     });
   });
 
-  // Enviar post
+  // ============================================================
+  // 🚀 Enviar publicación
+  // ============================================================
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    // ✅ Evitar envíos múltiples
+    if (form.dataset.submitting === "true") return;
+    form.dataset.submitting = "true";
+
     const caption = captionInput?.value.trim();
     const files = imageInput?.files;
     const visibility = visibilitySelect?.value || 'public';
-    
+
     if (!caption && (!files || files.length === 0)) {
       showToast('Agrega texto o una imagen', 'error');
+      form.dataset.submitting = "false";
       return;
     }
 
     const formData = new FormData();
     if (caption) formData.append('caption', caption);
     formData.append('visibility', visibility);
-    
-    if (files) {
-      Array.from(files).forEach(file => {
-        formData.append('images', file);
-      });
-    }
+    if (files) Array.from(files).forEach((file) => formData.append('images', file));
 
+    const submitBtn = form.querySelector('[type="submit"]');
+    
     try {
-      const submitBtn = form.querySelector('[type="submit"]');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Publicando...';
       }
 
       console.log('📤 Creando publicación...');
-      
+
       const response = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         credentials: 'include',
-        body: formData
+        body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Error al crear publicación');
-      }
+      if (!response.ok) throw new Error(`Error al crear publicación (${response.status})`);
 
       const result = await response.json();
       console.log('✅ Post creado:', result);
 
       showToast('Publicación creada exitosamente', 'success');
+
+      // ✅ Cerrar modal y limpiar
+      closeModal();
+
+      // ============================================================
+      // 🔄 SOLUCIÓN: Solo agregar el nuevo post (sin recargar todo)
+      // ============================================================
+      const feedContainer = document.getElementById('posts-feed');
       
-      // Cerrar modal y limpiar
-      modal.classList.add('hidden');
-      form.reset();
-      if (imagePreview) imagePreview.innerHTML = '';
-      
-      // Recargar feed
-      currentPage = 1;
-      hasMore = true;
-      await loadFeed(1, currentFilter);
-      
-      // Actualizar stats
-      await loadActivityStats();
-      
+      if (result.post && feedContainer) {
+        // Verificar que no exista ya (por si hay otro listener)
+        const existingPost = feedContainer.querySelector(`[data-post-id="${result.post._id}"]`);
+        
+        if (!existingPost) {
+          // Crear HTML del nuevo post
+          const postHTML = createPostHTML(result.post);
+          
+          // Insertarlo al inicio
+          feedContainer.insertAdjacentHTML('afterbegin', postHTML);
+          
+          // Re-aplicar event listeners (si usas delegation, esto no es necesario)
+          if (typeof setupPostInteractions === 'function') {
+            setupPostInteractions(result.post._id);
+          }
+          
+          console.log('✅ Post agregado al feed');
+        } else {
+          console.log('ℹ️ Post ya existe en el feed (evitando duplicado)');
+        }
+      }
+
+      // 🔁 Actualizar estadísticas del usuario
+      if (typeof loadActivityStats === 'function') {
+        await loadActivityStats();
+      }
+
     } catch (error) {
       console.error('❌ Error creando post:', error);
       showToast('Error al crear la publicación', 'error');
     } finally {
-      const submitBtn = form.querySelector('[type="submit"]');
+      // ✅ Liberar bloqueo
+      form.dataset.submitting = "false";
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Publicar';
       }
     }
   });
+}
+
+// ============================================================
+// 🎨 FUNCIÓN AUXILIAR: Crear HTML de un post
+// ============================================================
+function createPostHTML(post) {
+  const currentUser = getCurrentUser(); // Función que debes tener
+  const isOwner = currentUser && currentUser._id === post.author._id;
+  
+  // Formatear fecha
+  const date = new Date(post.createdAt);
+  const timeAgo = formatTimeAgo(date); // Función que debes tener
+  
+  // Imágenes
+  let imagesHTML = '';
+  if (post.images && post.images.length > 0) {
+    imagesHTML = `
+      <div class="post-images">
+        ${post.images.map(img => `
+          <img src="${img}" alt="Post image" loading="lazy" />
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // HTML del post
+  return `
+    <article class="post" data-post-id="${post._id}">
+      <div class="post-header">
+        <img src="${post.author.profilePicture || '/default-avatar.png'}" 
+             alt="${post.author.username}" 
+             class="post-avatar" />
+        <div class="post-info">
+          <a href="/profile/${post.author.username}" class="post-author">
+            @${post.author.username}
+          </a>
+          <span class="post-time">${timeAgo}</span>
+        </div>
+        ${isOwner ? `
+          <button class="post-menu-btn" data-post-id="${post._id}">⋮</button>
+        ` : ''}
+      </div>
+      
+      ${post.caption ? `<p class="post-caption">${escapeHTML(post.caption)}</p>` : ''}
+      
+      ${imagesHTML}
+      
+      <div class="post-actions">
+        <button class="action-btn like-btn" data-post-id="${post._id}">
+          <span class="icon">❤️</span>
+          <span class="count">${post.likes?.length || 0}</span>
+        </button>
+        <button class="action-btn comment-btn" data-post-id="${post._id}">
+          <span class="icon">💬</span>
+          <span class="count">${post.comments?.length || 0}</span>
+        </button>
+        <button class="action-btn share-btn" data-post-id="${post._id}">
+          <span class="icon">🔗</span>
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+// ============================================================
+// 🛡️ FUNCIÓN AUXILIAR: Escapar HTML
+// ============================================================
+function escapeHTML(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// ⏰ FUNCIÓN AUXILIAR: Formatear tiempo relativo
+// ============================================================
+function formatTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  const intervals = {
+    año: 31536000,
+    mes: 2592000,
+    semana: 604800,
+    día: 86400,
+    hora: 3600,
+    minuto: 60
+  };
+  
+  for (const [name, value] of Object.entries(intervals)) {
+    const interval = Math.floor(seconds / value);
+    if (interval >= 1) {
+      return `hace ${interval} ${name}${interval > 1 ? 's' : ''}`;
+    }
+  }
+  
+  return 'justo ahora';
 }
 
 // ============================================================
@@ -1692,20 +1812,20 @@ function showToast(message, type = 'success') {
 
 <style>
   :root {
-  --primary: #667BC6;
-  --primary-dark: #5568b8;
-  --secondary: #DA7297;
-  --accent: #FADA7A;
+  --primary: #687450;
+  --primary-dark: #5a6444;
+  --secondary: #425638;
+  --accent: #8a9b6f;
   --dark: #2d2d2d;
   --gray: #6b7280;
-  --gray-light: #f3f4f6;
-  --border: #e5e7eb;
-  --success: #10b981;
-  --error: #ef4444;
+  --gray-light: #f5f5f3;
+  --border: #e5e7e3;
+  --success: #687450;
+  --error: #d84315;
   --card-bg: #ffffff;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(66, 86, 56, 0.1);
+  --shadow-md: 0 4px 6px rgba(66, 86, 56, 0.15);
+  --shadow-lg: 0 10px 15px rgba(66, 86, 56, 0.2);
   --radius: 12px;
   --radius-sm: 8px;
 }
@@ -1731,6 +1851,7 @@ body {
   max-width: 1400px;
   margin: 90px auto 40px;
   padding: 0 24px;
+  top: 0;
 }
 
 .social-layout[data-show-nav="false"] {

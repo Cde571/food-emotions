@@ -4,9 +4,10 @@ import Navigation from '../components/shared/Navigation.astro';
 ---
 
 <Layout title="Mensajes">
-  <Navigation />
+    <Navigation />
+ 
   
-  <div class="messages-layout">
+  <div class="messages-layout mt-11">
     <!-- Sidebar de conversaciones -->
     <aside class="conversations-sidebar">
       <div class="sidebar-header">
@@ -901,25 +902,6 @@ import Navigation from '../components/shared/Navigation.astro';
 </script>
 
 <style>
-:global(:root) {
-  --primary: #667BC6;
-  --primary-light: #8a9cd9;
-  --primary-dark: #5265a3;
-  --secondary: #DA7297;
-  --secondary-light: #e599b8;
-  --dark: #1a1a1a;
-  --gray: #6b7280;
-  --gray-light: #f8f9fa;
-  --border: #e5e7eb;
-  --success: #10b981;
-  --card-bg: #ffffff;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 :global(*) {
   margin: 0;
@@ -940,16 +922,13 @@ import Navigation from '../components/shared/Navigation.astro';
 :global(.messages-layout) {
   display: grid;
   grid-template-columns: 380px 1fr;
-  height: 100vh;
-  max-width: 100vw;
+  min-height: calc(100vh - 60px); 
+  width: 100%;
   margin: 0 auto;
   background: var(--card-bg);
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  overflow-y: auto; 
+  position: relative; 
+  top: 60px; 
 }
 
 /* ===== SIDEBAR ===== */
@@ -1255,8 +1234,8 @@ import Navigation from '../components/shared/Navigation.astro';
   display: flex;
   flex-direction: column;
   background: #f8f9fb;
+  height: 100%;
   position: relative;
-  overflow: hidden;
 }
 
 :global(.empty-chat) {
@@ -1464,11 +1443,10 @@ import Navigation from '../components/shared/Navigation.astro';
 /* ===== MESSAGES ===== */
 :global(.messages-container) {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; 
   padding: 20px;
   background: linear-gradient(to bottom right, #fafafa, #f5f6fa);
   scroll-behavior: smooth;
-  min-height: 0;
 }
 
 :global(.messages-list) {
@@ -2468,5 +2446,65 @@ import Navigation from '../components/shared/Navigation.astro';
     grid-template-columns: repeat(8, 1fr);
     max-width: 320px;
   }
+}
+
+:global(:root) {
+  --primary: #425638;
+  --primary-light: #687450;
+  --primary-dark: #364c2c;
+  --secondary: #DAE3B6;
+  --dark: #2b2b2b;
+  --gray: #777;
+  --gray-light: #f2f3ef;
+  --border: #e1e3da;
+  --success: #6db47c;
+  --card-bg: #ffffff;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 🌿 Fondo natural */
+:global(body) {
+  background: linear-gradient(135deg, #f3f5ef 0%, #e8ebdf 100%);
+}
+
+/* 🌿 Sidebar header */
+:global(.sidebar-header) {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff;
+}
+
+/* 🌿 Burbujas de mensaje adaptadas */
+:global(.message.mine .message-bubble) {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff;
+}
+:global(.message.theirs .message-bubble) {
+  background: #fff;
+  border: 1px solid var(--border);
+}
+
+/* 🌿 Botón flotante para mostrar header */
+:global(.toggle-header-btn) {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  background: var(--primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+:global(.toggle-header-btn:hover) {
+  background: var(--primary);
+  transform: scale(1.1);
 }
 </style>

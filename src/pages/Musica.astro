@@ -13,12 +13,12 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
 ---
 
 <Layout title="Música">
-  <section class="pt-20 min-h-screen flex text-white bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
+  <section class="pt-20 min-h-screen flex text-white bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450]">
     
     <!-- 🎵 SIDEBAR - Playlists -->
-    <aside class="w-80 bg-black/40 backdrop-blur-md p-6 overflow-y-auto border-r border-white/10">
+    <aside class="w-80 bg-[#ffffff0d] backdrop-blur-md p-6 overflow-y-auto border-r border-[#a0b38b]/30">
       <div class="mb-6">
-        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-[#eaf0e3]">
           <span>📚</span> Mis playlists
         </h2>
         
@@ -28,11 +28,11 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
             id="newPlaylistInput"
             type="text"
             placeholder="Nueva playlist..."
-            class="w-full p-2 rounded-lg bg-white/10 backdrop-blur-md placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-500 transition text-sm"
+            class="w-full p-2 rounded-lg bg-white/10 placeholder-[#cdd4c9] outline-none focus:ring-2 focus:ring-[#a0b38b] transition text-sm"
           />
           <button
             id="createPlaylistBtn"
-            class="w-full mt-2 bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-2 rounded-lg hover:scale-105 transition font-semibold"
+            class="w-full mt-2 bg-gradient-to-r from-[#687450] to-[#425638] px-4 py-2 rounded-lg hover:scale-105 transition font-semibold text-[#f3f7ef]"
           >
             + Crear playlist
           </button>
@@ -40,18 +40,16 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       </div>
 
       <!-- Lista de playlists -->
-      <div id="playlistsList" class="space-y-2">
-        <!-- Las playlists se cargarán aquí -->
-      </div>
+      <div id="playlistsList" class="space-y-2"></div>
     </aside>
 
     <!-- 🎧 CONTENIDO PRINCIPAL -->
     <main class="flex-1 flex flex-col px-6 py-10 overflow-y-auto">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold">
-          🎧 <span class="text-purple-400">Music therapy</span>
+          🎧 <span class="text-[#cddfc2]">Music Therapy</span>
         </h1>
-        <p class="mt-3 text-gray-300 max-w-2xl mx-auto">
+        <p class="mt-3 text-[#e3e9dd] max-w-2xl mx-auto">
           Deja que <strong>Roy</strong> te acompañe con melodías que armonizan tu mente y cuerpo.<br />
           Busca, elige y disfruta música directamente desde YouTube.
         </p>
@@ -63,7 +61,7 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
           id="searchInput"
           type="text"
           placeholder="Buscar canción en YouTube..."
-          class="w-11/12 sm:w-2/3 md:w-1/2 p-3 rounded-xl bg-white/10 backdrop-blur-md text-center placeholder-gray-300 outline-none focus:ring-2 focus:ring-purple-500 transition"
+          class="w-11/12 sm:w-2/3 md:w-1/2 p-3 rounded-xl bg-white/10 backdrop-blur-md text-center placeholder-[#cdd4c9] outline-none focus:ring-2 focus:ring-[#a0b38b] transition"
         />
       </div>
 
@@ -74,16 +72,16 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       <div id="defaultList" class="w-full max-w-3xl mx-auto space-y-3">
         {defaultSongs.map((song) => (
           <div
-            class="song-item flex justify-between items-center bg-white/10 backdrop-blur-md p-4 rounded-xl hover:bg-white/20 transition cursor-pointer"
+            class="song-item flex justify-between items-center bg-white/10 backdrop-blur-md p-4 rounded-xl hover:bg-white/20 transition cursor-pointer border border-[#a0b38b]/20 hover:border-[#a0b38b]/40"
             data-title={song.title}
             data-artist={song.artist}
           >
             <div>
-              <h3 class="text-lg font-semibold">{song.title}</h3>
-              <p class="text-sm text-gray-300">{song.artist}</p>
+              <h3 class="text-lg font-semibold text-[#f3f7ef]">{song.title}</h3>
+              <p class="text-sm text-[#dce5d3]">{song.artist}</p>
             </div>
             <button
-              class="btn-play bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-2 rounded-lg hover:scale-110 transition"
+              class="btn-play bg-gradient-to-r from-[#687450] to-[#425638] px-3 py-2 rounded-lg hover:scale-110 transition"
             >
               ▶
             </button>
@@ -93,19 +91,21 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
 
       <!-- 🔹 Reproductor -->
       <footer class="mt-auto pt-10">
-        <div class="bg-black/30 backdrop-blur-md rounded-2xl px-6 py-4 w-full max-w-3xl mx-auto flex flex-col items-center space-y-3">
+        <div class="bg-[#ffffff0d] backdrop-blur-md rounded-2xl px-6 py-4 w-full max-w-3xl mx-auto flex flex-col items-center space-y-3 border border-[#a0b38b]/30">
           <div class="text-center">
-            <h3 id="now-title" class="font-semibold text-lg">Selecciona una canción</h3>
-            <p id="now-artist" class="text-sm text-gray-300"></p>
+            <h3 id="now-title" class="font-semibold text-lg text-[#f3f7ef]">
+              Selecciona una canción
+            </h3>
+            <p id="now-artist" class="text-sm text-[#cdd4c9]"></p>
           </div>
 
           <div id="playerContainer" class="w-full aspect-video rounded-xl overflow-hidden hidden bg-black"></div>
 
           <div class="flex justify-center space-x-6 text-3xl">
-            <button id="prevBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Anterior">⏮️</button>
-            <button id="pauseBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Pausar">⏸️</button>
-            <button id="playBtn" class="hover:text-pink-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Reproducir">▶️</button>
-            <button id="nextBtn" class="hover:text-purple-400 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Siguiente">⏭️</button>
+            <button id="prevBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Anterior">⏮️</button>
+            <button id="pauseBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Pausar">⏸️</button>
+            <button id="playBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Reproducir">▶️</button>
+            <button id="nextBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Siguiente">⏭️</button>
           </div>
         </div>
       </footer>

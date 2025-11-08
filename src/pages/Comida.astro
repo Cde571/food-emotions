@@ -2,13 +2,15 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Food Explorer 🍲">
-  <section class="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-6 py-20 flex flex-col items-center">
+<Layout title="Food Explorer 🥗">
+  <section class="min-h-screen bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450] text-white px-6 py-20 flex flex-col items-center">
     <!-- 🔹 Header -->
     <div class="text-center mb-10">
-      <h1 class="text-4xl font-bold text-pink-400 drop-shadow-lg">Descubre recetas deliciosas</h1>
-      <p class="text-gray-300 mt-3 max-w-xl">
-        Busca por nombre, tipo o ingredientes y deja que <strong>Roy</strong> te inspire con opciones saludables y futuristas 🌱
+      <h1 class="text-4xl font-bold text-[#eaf0e3] drop-shadow-lg">
+        Descubre recetas deliciosas
+      </h1>
+      <p class="text-[#dce5d3] mt-3 max-w-xl">
+        Busca por nombre, tipo o ingredientes y deja que <strong>Roy</strong> te inspire con opciones naturales y saludables 🌿
       </p>
     </div>
 
@@ -18,13 +20,15 @@ import Layout from "../layouts/Layout.astro";
         id="foodSearch"
         type="text"
         placeholder="Ejemplo: pasta, pollo, ensalada..."
-        class="w-11/12 sm:w-2/3 md:w-1/2 p-3 rounded-xl bg-white/10 text-center placeholder-gray-400 outline-none focus:ring-2 focus:ring-pink-500 transition"
+        class="w-11/12 sm:w-2/3 md:w-1/2 p-3 rounded-xl bg-white/10 text-center placeholder-[#cfd8cc] outline-none focus:ring-2 focus:ring-[#a0b38b] transition"
         onkeydown="if(event.key === 'Enter') buscarRecetas()"
       />
     </div>
 
-    <!-- 🔹 Título para recetas aleatorias -->
-    <h2 id="randomTitle" class="text-2xl font-semibold mb-6 text-purple-400">✨ Recomendaciones de hoy</h2>
+    <!-- 🔹 Título -->
+    <h2 id="randomTitle" class="text-2xl font-semibold mb-6 text-[#eaf0e3]">
+      ✨ Recomendaciones de hoy
+    </h2>
 
     <!-- 🔹 Resultados -->
     <div id="recipesResults" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-6xl"></div>
@@ -41,21 +45,24 @@ import Layout from "../layouts/Layout.astro";
 
     async function cargarRecetasAleatorias() {
       title.textContent = "✨ Recomendaciones de hoy";
-      recipesDiv.innerHTML = "<p class='text-gray-400 text-center col-span-3'>Cargando recetas aleatorias...</p>";
+      recipesDiv.innerHTML =
+        "<p class='text-[#e3e9dd] text-center col-span-3'>Cargando recetas...</p>";
 
       try {
         const res = await fetch(`${API_URL}/random?number=9&apiKey=${API_KEY}`);
         const data = await res.json();
 
         if (!data.recipes || data.recipes.length === 0) {
-          recipesDiv.innerHTML = "<p class='text-gray-400 text-center col-span-3'>No hay recetas disponibles.</p>";
+          recipesDiv.innerHTML =
+            "<p class='text-[#e3e9dd] text-center col-span-3'>No hay recetas disponibles.</p>";
           return;
         }
 
         renderizarRecetas(data.recipes);
       } catch (error) {
         console.error("Error al cargar recetas aleatorias:", error);
-        recipesDiv.innerHTML = "<p class='text-red-400 text-center col-span-3'>Error al cargar recetas.</p>";
+        recipesDiv.innerHTML =
+          "<p class='text-red-300 text-center col-span-3'>Error al cargar recetas.</p>";
       }
     }
 
@@ -65,41 +72,59 @@ import Layout from "../layouts/Layout.astro";
       if (!query) return;
 
       title.textContent = `🔍 Resultados para "${query}"`;
-      recipesDiv.innerHTML = "<p class='text-gray-400 text-center col-span-3'>Buscando recetas...</p>";
+      recipesDiv.innerHTML =
+        "<p class='text-[#e3e9dd] text-center col-span-3'>Buscando recetas...</p>";
 
       try {
         const res = await fetch(
-          `${API_URL}/complexSearch?query=${encodeURIComponent(query)}&number=9&addRecipeInformation=true&apiKey=${API_KEY}`
+          `${API_URL}/complexSearch?query=${encodeURIComponent(
+            query
+          )}&number=9&addRecipeInformation=true&apiKey=${API_KEY}`
         );
         const data = await res.json();
 
         if (!data.results || data.results.length === 0) {
-          recipesDiv.innerHTML = "<p class='text-gray-400 text-center col-span-3'>❌ No se encontraron recetas.</p>";
+          recipesDiv.innerHTML =
+            "<p class='text-[#e3e9dd] text-center col-span-3'>❌ No se encontraron recetas.</p>";
           return;
         }
 
         renderizarRecetas(data.results);
       } catch (error) {
         console.error("Error al buscar recetas:", error);
-        recipesDiv.innerHTML = "<p class='text-red-400 text-center col-span-3'>Error al buscar recetas.</p>";
+        recipesDiv.innerHTML =
+          "<p class='text-red-300 text-center col-span-3'>Error al buscar recetas.</p>";
       }
     }
 
-    // 🔹 Renderizar lista de recetas (aleatorias o buscadas)
+    // 🔹 Renderizar lista de recetas
     function renderizarRecetas(lista) {
-      recipesDiv.innerHTML = lista.map(r => `
-        <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md hover:bg-white/20 transition cursor-pointer flex flex-col justify-between">
-          <img src="${r.image}" alt="${r.title}" class="rounded-lg w-full h-48 object-cover mb-3 shadow-md shadow-pink-500/20"/>
+      recipesDiv.innerHTML = lista
+        .map(
+          (r) => `
+        <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md hover:bg-white/20 transition cursor-pointer flex flex-col justify-between border border-[#a0b38b]/20 hover:border-[#a0b38b]/40 shadow-md shadow-[#425638]/20">
+          <img
+            src="${r.image}"
+            alt="${r.title}"
+            class="rounded-lg w-full h-48 object-cover mb-3 shadow-lg shadow-[#687450]/30"
+          />
           <div>
-            <h3 class="text-xl font-semibold mb-1">${r.title}</h3>
-            <p class="text-gray-300 text-sm mb-3">Listo en ${r.readyInMinutes || '?'} min • ${r.servings || '?'} porciones</p>
-            <a href="/Recipe/${r.id}" class="text-pink-400 hover:underline text-sm">Ver detalles →</a>
+            <h3 class="text-xl font-semibold mb-1 text-[#f3f7ef]">${r.title}</h3>
+            <p class="text-[#e3e9dd] text-sm mb-3">
+              Listo en ${r.readyInMinutes || "?"} min • ${r.servings || "?"} porciones
+            </p>
+            <a href="/Recipe/${r.id}" class="text-[#b8c8a4] hover:text-[#d8e3cf] hover:underline text-sm font-medium">
+              Ver detalles →
+            </a>
           </div>
         </div>
-      `).join("");
+      `
+        )
+        .join("");
     }
   </script>
 </Layout>
+
 
 
 

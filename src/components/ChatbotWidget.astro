@@ -1,0 +1,133 @@
+---
+import { onMount } from "astro/jsx-runtime";
+---
+
+<!-- 🔹 BOTÓN FLOTANTE -->
+<div id="royWidgetBtn" class="fixed bottom-6 right-6 bg-gradient-to-r from-[#687450] to-[#425638] text-white p-4 rounded-full shadow-lg hover:scale-110 transition cursor-pointer z-50">
+  🤖
+</div>
+
+<!-- 🔹 MODAL DEL CHATBOT -->
+<div id="royModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden justify-center items-center z-50">
+  <div class="bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450] text-white rounded-3xl shadow-2xl w-96 max-w-[90%] flex flex-col overflow-hidden">
+    <!-- Header -->
+    <div class="flex justify-between items-center p-4 border-b border-white/20">
+      <div class="flex items-center gap-3">
+        <img src="/img/chatbot.png" alt="Roy" class="w-10 h-10 rounded-full" />
+        <div>
+          <h2 class="font-semibold">Roy</h2>
+          <p class="text-xs text-gray-200">Tu asistente emocional</p>
+        </div>
+      </div>
+      <button id="closeRoy" class="text-gray-300 hover:text-white text-2xl">×</button>
+    </div>
+
+    <!-- Chat -->
+    <div id="royChatBox" class="flex-1 p-4 space-y-3 overflow-y-auto max-h-[400px]">
+      <div class="text-gray-300 text-sm text-center">👋 ¡Hola! Soy Roy, ¿cómo te sientes hoy?</div>
+    </div>
+
+    <!-- Input -->
+    <div class="p-3 border-t border-white/20 flex gap-2 items-center bg-white/10">
+      <textarea id="royInput" class="flex-1 bg-transparent border-none outline-none text-sm resize-none h-10 placeholder-gray-300" placeholder="Escribe aquí..."></textarea>
+      <button id="royVoiceBtn" title="Escuchar respuesta" class="text-[#b8c8a4] hover:text-[#eaf0e3] text-xl">🔊</button>
+      <button id="roySendBtn" class="bg-gradient-to-r from-[#687450] to-[#425638] px-3 py-2 rounded-lg hover:scale-105 transition">📩</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  const widgetBtn = document.getElementById("royWidgetBtn");
+  const modal = document.getElementById("royModal");
+  const closeBtn = document.getElementById("closeRoy");
+  const sendBtn = document.getElementById("roySendBtn");
+  const input = document.getElementById("royInput");
+  const chatBox = document.getElementById("royChatBox");
+  const voiceBtn = document.getElementById("royVoiceBtn");
+
+  let lastBotReply = "";
+
+  widgetBtn.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  function addMessage(content, sender = "bot") {
+    const msg = document.createElement("div");
+    msg.className = sender === "bot" ? "text-left" : "text-right";
+    msg.innerHTML = `
+      <div class="inline-block px-3 py-2 rounded-xl mb-1 max-w-[80%] ${
+        sender === "bot"
+          ? "bg-white/20 text-[#eaf0e3]"
+          : "bg-[#a0b38b]/70 text-white"
+      }">${content}</div>
+    `;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    addMessage("Roy está escribiendo...", "bot");
+
+    try {
+      const res = await fetch("http://localhost:3000/api/chat/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, mode: "general" }),
+        });
+
+      const data = await res.json();
+        chatBox.lastChild.remove(); // elimina "escribiendo..."
+
+        const reply = data.reply || "No pude procesar tu mensaje.";
+        addMessage(reply, "bot");
+        lastBotReply = reply;
+
+        // 🔊 Si el backend generó audio, reproducirlo
+        if (data.audioUrl) {
+        const audio = new Audio(`http://localhost:3000${data.audioUrl}`);
+        audio.play();
+        }
+
+
+      lastBotReply = reply;
+    } catch (err) {
+      chatBox.lastChild.remove();
+      addMessage("❌ Error al conectar con el servidor.", "bot");
+    }
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // 🔊 Voz (Text-to-Speech)
+  voiceBtn.addEventListener("click", () => {
+    if (!lastBotReply) return;
+    const synth = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(lastBotReply);
+    utter.lang = "es-ES";
+    utter.rate = 1;
+    utter.pitch = 1;
+    synth.speak(utter);
+  });
+</script>
+
+<style>
+  #royModal::-webkit-scrollbar { width: 6px; }
+  #royModal::-webkit-scrollbar-thumb { background: #a0b38b; border-radius: 3px; }
+</style>
