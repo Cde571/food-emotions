@@ -8,20 +8,83 @@ import chatbotImage from '../img/chatbot.png';
     <img src={chatbotImage.src} alt="Bot" class="bot-image" />
 
     <div class="bot-chat mt-8">
-      <div id="bot-response" class="bot-response">Hola, ¿cómo puedo ayudarte hoy?</div>
-      <input type="text" id="user-input" placeholder="Escribe tu pregunta..." class="bot-input" />
+      <div id="bot-response" class="bot-response">👋 Hola, soy Roy. ¿Cómo puedo ayudarte hoy?</div>
+
+      <div class="bot-options">
+        <button class="option-btn">¿Qué es esta aplicación?</button>
+        <button class="option-btn">¿Para qué sirve?</button>
+        <button class="option-btn">¿Quién creó FoodEmotions?</button>
+        <button class="option-btn">¿Cómo puedo usar el chatbot?</button>
+      </div>
+
+      <input type="text" id="user-input" placeholder="O escribe tu pregunta..." class="bot-input" />
       <button id="send-btn" class="bot-button">Enviar</button>
     </div>
   </section>
 
-  <script src="/src/scripts/bot.js" type="module" defer></script>
+  <script>
+    const botResponse = document.getElementById('bot-response');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const optionButtons = document.querySelectorAll('.option-btn');
+
+    // 🧠 Respuestas predefinidas
+    const responses = {
+      "¿qué es esta aplicación?": "FoodEmotions es una plataforma que conecta emociones y comida 🍽️. Te permite descubrir recetas según tu estado de ánimo y compartir experiencias con otros usuarios.",
+      "¿para qué sirve?": "Sirve para recomendarte recetas, canciones o lecturas según cómo te sientas 💭. Además, puedes interactuar con el bot Roy para recibir orientación emocional.",
+      "¿quién creó foodemotions?": "Esta aplicación fue creada por el equipo de desarrollo de FoodEmotions, liderado por Cristian Echeverry González 👨‍💻 como parte de un proyecto de inteligencia emocional aplicada a la gastronomía.",
+      "¿cómo puedo usar el chatbot?": "Solo selecciona una de las opciones o escribe una pregunta y presiona Enviar 💬. Roy analizará tu mensaje y te responderá con empatía.",
+    };
+
+    // ✨ Efecto de escritura simulada
+    function typeText(text) {
+      botResponse.textContent = "";
+      let index = 0;
+      const interval = setInterval(() => {
+        botResponse.textContent += text[index];
+        index++;
+        if (index === text.length) clearInterval(interval);
+      }, 30);
+    }
+
+    // 🗣️ Mostrar respuesta
+    function showResponse(question) {
+      const lower = question.toLowerCase().trim();
+      const answer = responses[lower] || "🤔 Lo siento, no tengo una respuesta para eso... pero pronto aprenderé más cosas.";
+      typeText(answer);
+    }
+
+    // 📩 Enviar desde input
+    sendBtn.addEventListener('click', () => {
+      const text = userInput.value.trim();
+      if (!text) return;
+      showResponse(text);
+      userInput.value = "";
+    });
+
+    // ⌨️ Enter también envía
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+
+    // 🔘 Seleccionar una opción
+    optionButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const question = btn.textContent;
+        typeText("✍️ Roy está escribiendo...");
+        setTimeout(() => showResponse(question), 800);
+      });
+    });
+  </script>
 
   <style>
     .bot-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 150px;
       margin-bottom: 100px;
       padding: 20px;
       border-radius: 10px;
@@ -31,47 +94,96 @@ import chatbotImage from '../img/chatbot.png';
       width: 150px;
       height: auto;
       margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
     }
 
     .bot-chat {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 80%;
+      width: 90%;
       max-width: 400px;
+      background: linear-gradient(145deg, #425638, #687450);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      color: #fff;
     }
 
     .bot-response {
-      background-color: #f0f0f0;
-      color: #333;
-      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.15);
+      padding: 12px 15px;
       border-radius: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       width: 100%;
       text-align: center;
-      min-height: 50px;
+      min-height: 60px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.1);
+    }
+
+    .bot-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .option-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .option-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.02);
     }
 
     .bot-input {
       width: 100%;
       padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
+      border-radius: 6px;
+      border: none;
+      outline: none;
       margin-bottom: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .bot-input::placeholder {
+      color: #ddd;
     }
 
     .bot-button {
       padding: 10px 20px;
-      background-color: #4CAF50;
+      background: linear-gradient(90deg, #687450, #425638);
       color: #ffffff;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: transform 0.2s ease, background 0.3s ease;
+      font-weight: 600;
     }
 
     .bot-button:hover {
-      background-color: #45a049;
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #425638, #687450);
     }
   </style>
 </Layout>
+

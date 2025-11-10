@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/shared/Navigation.astro';
 import PopularCollections from '../components/PopularCollections.astro';
-import Bibliography from '../components/Bibliography.astro';
 ---
 
 <Layout title="Perfil">
@@ -26,16 +25,18 @@ import Bibliography from '../components/Bibliography.astro';
 
       <!-- 🔸 Modal para cambiar foto -->
       <div id="photoModal" class="modal hidden">
-        <h2>Cambiar foto de perfil</h2>
-        <div class="modal-options">
-          <button id="upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
-          <button id="upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
+        <div class="modal-content">
+          <button id="closeModalBtn" class="close-modal">×</button>
+          <h2>Cambiar foto de perfil</h2>
+          <div class="modal-options">
+            <button id="upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
+            <button id="upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
+          </div>
+          <form id="urlForm" class="hidden">
+            <input type="url" id="imageUrl" placeholder="Pega la URL de la imagen..." />
+            <button type="submit" class="modal-btn confirm">Guardar</button>
+          </form>
         </div>
-        <form id="urlForm" class="hidden">
-          <input type="url" id="imageUrl" placeholder="Pega la URL de la imagen..." />
-          <button type="submit" class="modal-btn confirm">Guardar</button>
-        </form>
-        <button id="closeModalBtn" class="close-modal">Cancelar</button>
       </div>
 
       <div class="user-info">
@@ -49,9 +50,15 @@ import Bibliography from '../components/Bibliography.astro';
         </select>
 
         <div class="user-stats">
-        <p>Recetas <span id="recipes-count">0</span></p>
-        <p>Seguidores <span id="followers-count">0</span></p>
-        <p>Likes <span id="likes-count">0</span></p>
+          <p id="recipes-stat" style="cursor: pointer;" title="Ver publicaciones">
+            Publicaciones <span id="recipes-count">0</span>
+          </p>
+          <p id="followers-stat" style="cursor: pointer;" title="Ver seguidores">
+            Seguidores <span id="followers-count">0</span>
+          </p>
+          <p id="likes-stat" style="cursor: pointer;" title="Ver likes">
+            Likes totales <span id="likes-count">0</span>
+          </p>
         </div>
 
         <div class="user-links">
@@ -75,30 +82,110 @@ import Bibliography from '../components/Bibliography.astro';
       <div id="profile-search-results" class="search-results hidden"></div>
 
       <div class="banner">
-        <img src="/src/img/1.png" alt="Banner" class="banner-image" />
+        <img id="banner-image" src="/src/img/1.png" alt="Banner" class="banner-image" />
+        <button id="change-banner-btn" class="change-banner-btn">📷 Cambiar portada</button>
+      </div>
+
+      <!-- Modal para cambiar banner -->
+      <div id="bannerModal" class="modal hidden">
+        <div class="modal-content">
+          <button id="closeBannerModalBtn" class="close-modal">×</button>
+          <h2>Cambiar portada</h2>
+          <div class="modal-options">
+            <button id="banner-upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
+            <button id="banner-upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
+          </div>
+          <input type="file" id="banner-upload-input" accept="image/*" hidden />
+          <form id="bannerUrlForm" class="hidden">
+            <input type="url" id="bannerImageUrl" placeholder="Pega la URL de la imagen..." />
+            <button type="submit" class="modal-btn confirm">Guardar</button>
+          </form>
+        </div>
       </div>
 
       <PopularCollections />
 
       <div class="team-info">
-        <h3 class="team"><span id="team-user-name">Usuario</span> aparece en este equipo</h3>
+        <h3 class="team">
+          Grupos
+          <button id="create-group-btn" class="create-group-btn">+ Crear Grupo</button>
+        </h3>
+        
+        <!-- Lista de grupos disponibles -->
+        <div id="groups-list" class="groups-list">
+          <!-- Se llenará dinámicamente -->
+        </div>
+
+        <!-- Grupo predeterminado Royal UI Force -->
         <div class="team-card">
           <h4>ROYAL UI FORCE</h4>
-          <p>Formado en 2013</p>
-          <button id="follow-team-button">Seguir Equipo</button>
-          <p><span id="team-member-name">USUARIO</span> es miembro desde nov, 2014</p>
+          <p>Comunidad de desarrolladores creativos</p>
+          <p><span id="team-members-count">1,234</span> miembros</p>
+          <button id="join-team-button" class="team-action-btn" data-joined="false">👥 Unirse al grupo</button>
+        </div>
+      </div>
+
+      <!-- Modal para crear grupo -->
+      <div id="createGroupModal" class="modal hidden">
+        <div class="modal-content">
+          <button class="close-modal" onclick="document.getElementById('createGroupModal').classList.add('hidden')">×</button>
+          <h2>Crear Nuevo Grupo</h2>
+          <form id="create-group-form">
+            <div class="form-group">
+              <label for="group-name">Nombre del Grupo *</label>
+              <input type="text" id="group-name" required placeholder="Ej: Amantes de la Cocina" />
+            </div>
+            <div class="form-group">
+              <label for="group-description">Descripción</label>
+              <textarea id="group-description" rows="3" placeholder="Describe de qué trata tu grupo..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="group-image">Imagen del Grupo</label>
+              <div class="image-upload-container">
+                <input type="file" id="group-image-file" accept="image/*" hidden />
+                <button type="button" class="image-preview-btn" id="select-group-image">
+                  <span id="image-preview-text">📷 Seleccionar imagen</span>
+                  <img id="group-image-preview" class="hidden" alt="Preview" />
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="modal-btn confirm">Crear Grupo</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal de detalles del grupo -->
+      <div id="groupDetailsModal" class="modal hidden">
+        <div class="modal-content group-details-modal">
+          <button class="close-modal" onclick="document.getElementById('groupDetailsModal').classList.add('hidden')">×</button>
+          <div id="group-details-content">
+            <!-- Se llenará dinámicamente -->
+          </div>
         </div>
       </div>
     </main>
 
     <!-- 🔹 DERECHA -->
     <aside class="right-section">
-      <Bibliography
-        id="bio-description"
-        description="Descripción no disponible"
-        website="https://youtube.com/cdecp"
-        skills={[]}
-      />
+      <!-- ✅ Componente Bibliography Dinámico -->
+      <div class="bibliography-card">
+        <div class="bio-header">
+          <h3>📖 Biografía</h3>
+        </div>
+        <div class="bio-content" id="bio-display">
+          <p id="bio-text">Descripción no disponible</p>
+        </div>
+        <div class="bio-footer">
+          <div class="bio-meta">
+            <span class="bio-icon">🌐</span>
+            <a href="https://youtube.com/cdecp" target="_blank" id="bio-website">youtube.com/cdecp</a>
+          </div>
+          <div class="bio-skills" id="bio-skills">
+            <!-- Se llenará dinámicamente -->
+          </div>
+        </div>
+      </div>
+      
       <textarea
         id="bio-editor"
         class="bio-editor"
@@ -106,6 +193,15 @@ import Bibliography from '../components/Bibliography.astro';
       ></textarea>
       <button id="save-bio-btn" class="save-bio-btn">Guardar biografía</button>
     </aside>
+  </div>
+
+  <!-- Modal de Publicaciones -->
+  <div id="postsModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-modal" onclick="document.getElementById('postsModal').classList.add('hidden')">×</button>
+      <h2>Publicaciones</h2>
+      <div id="postsList" class="posts-list"></div>
+    </div>
   </div>
 
   <!-- Modal de Seguidores -->
@@ -121,18 +217,17 @@ import Bibliography from '../components/Bibliography.astro';
   <div id="likesModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-modal" onclick="document.getElementById('likesModal').classList.add('hidden')">×</button>
-      <h2>Likes</h2>
+      <h2>Publicaciones con Like</h2>
       <div id="likesList" class="likes-list"></div>
     </div>
   </div>
 
   <div id="notification" class="notification hidden"></div>
-  <p id="error-message" class="error-text"></p>
 </Layout>
 
 <script>
 // ============================================================
-// 🎯 PROFILE.ASTRO 
+// 🎯 PROFILE.ASTRO - VERSIÓN COMPLETA CORREGIDA
 // ============================================================
 
 let currentUser = null;
@@ -167,19 +262,28 @@ async function loadProfileData() {
     }
 
     const me = await meRes.json();
+    
+    if (!me.loggedIn) {
+      window.location.href = '/login';
+      return;
+    }
+    
     currentUser = me;
 
-    // 🔹 Verificar si se está viendo otro usuario
     const params = new URLSearchParams(window.location.search);
     const userParam = params.get('user');
 
     if (userParam && userParam !== me._id) {
       isOwner = false;
-      const res = await fetch(`http://localhost:3000/api/users/${userParam}`, {
+      const res = await fetch(`http://localhost:3000/api/users/${userParam}/profile`, {
         credentials: 'include',
         headers: { Accept: 'application/json' },
       });
-      if (!res.ok) throw new Error('Usuario no encontrado');
+      if (!res.ok) {
+        showNotification('Usuario no encontrado', 'error');
+        window.location.href = '/Profile';
+        return;
+      }
       viewedUser = await res.json();
     } else {
       viewedUser = me;
@@ -187,6 +291,8 @@ async function loadProfileData() {
 
     updateProfileUI(viewedUser);
     adjustPermissions();
+    
+    console.log('✅ Perfil cargado correctamente');
   } catch (error) {
     console.error('❌ Error cargando perfil:', error);
     showNotification('Error al cargar el perfil', 'error');
@@ -197,19 +303,48 @@ async function loadProfileData() {
 // 🎨 Actualizar UI con datos del usuario cargado
 // ============================================================
 function updateProfileUI(user) {
-  document.getElementById('user-name').textContent = user.username || 'Usuario';
-  document.getElementById('profile-pic').src =
-    user.profilePic ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}`;
-  document.getElementById('bio-editor').value = user.bio || '';
-  document.getElementById('bio-description').textContent =
-    user.bio || 'Sin biografía';
-  document.getElementById('followers-count').textContent = `${
-    user.followers?.length || 0
-  } Seguidores`;
-  document.getElementById('likes-count').textContent = `${
-    user.likes?.length || 0
-  } Likes`;
+  const stats = user.stats || {};
+  
+  const userName = document.getElementById('user-name');
+  const profilePic = document.getElementById('profile-pic');
+  const bioEditor = document.getElementById('bio-editor');
+  const bioText = document.getElementById('bio-text');
+  const recipesCount = document.getElementById('recipes-count');
+  const followersCount = document.getElementById('followers-count');
+  const likesCount = document.getElementById('likes-count');
+  const bannerImage = document.getElementById('banner-image');
+  const statusSelect = document.getElementById('status-select');
+  
+  if (userName) userName.textContent = user.username || 'Usuario';
+  
+  if (profilePic) {
+    profilePic.src = user.profilePic ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=72B340&color=fff`;
+  }
+  
+  // ✅ Actualizar biografía dinámicamente
+  const bioContent = user.bio || 'Sin biografía disponible';
+  if (bioEditor) bioEditor.value = bioContent;
+  if (bioText) {
+    bioText.textContent = bioContent;
+    bioText.style.fontStyle = user.bio ? 'normal' : 'italic';
+    bioText.style.color = user.bio ? 'var(--text-light)' : '#999';
+  }
+  
+  if (recipesCount) recipesCount.textContent = stats.posts || 0;
+  if (followersCount) followersCount.textContent = stats.followers || 0;
+  if (likesCount) likesCount.textContent = stats.totalLikes || 0;
+  
+  // ✅ Actualizar banner desde Cloudinary
+  if (bannerImage && user.bannerImage) {
+    bannerImage.src = user.bannerImage;
+  }
+  
+  if (isOwner && statusSelect && user.status) {
+    statusSelect.value = user.status;
+  }
+  
+  console.log('✅ UI actualizada con stats:', stats);
 }
 
 // ============================================================
@@ -217,6 +352,7 @@ function updateProfileUI(user) {
 // ============================================================
 function adjustPermissions() {
   const userLinks = document.querySelector('.user-links');
+  const changeBannerBtn = document.getElementById('change-banner-btn');
 
   if (!isOwner) {
     console.log('👀 Modo visitante activado');
@@ -226,10 +362,10 @@ function adjustPermissions() {
       '#save-bio-btn',
       '#logout-button',
       '#status-select',
+      '.status-label',
       '#bio-editor',
       '.upload-section',
-      '.upload-button',
-      '#photoModal',
+      '#change-banner-btn',
     ];
 
     hideSelectors.forEach(sel => {
@@ -237,25 +373,57 @@ function adjustPermissions() {
       if (el) el.style.display = 'none';
     });
 
-    // 🧩 Botón "Seguir"
     const followBtn = document.createElement('button');
-    followBtn.textContent = '👥 Seguir';
+    followBtn.id = 'follow-btn';
+    followBtn.textContent = viewedUser.alreadyFollowing ? '✓ Siguiendo' : '👥 Seguir';
     followBtn.className = 'feed-btn';
-    followBtn.addEventListener('click', () => {
-      showNotification(`Ahora sigues a ${viewedUser.username}`, 'success');
-    });
-    userLinks.appendChild(followBtn);
+    followBtn.style.background = viewedUser.alreadyFollowing 
+      ? 'linear-gradient(90deg, #7b8e62, #a0b38b)' 
+      : 'linear-gradient(90deg, var(--primary), var(--accent))';
 
-    // 💬 Botón de chat directo
+    followBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/users/${viewedUser._id}/follow`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+
+        if (!res.ok) throw new Error('Error al seguir');
+
+        const data = await res.json();
+        const isFollowing = data.following;
+
+        followBtn.textContent = isFollowing ? '✓ Siguiendo' : '👥 Seguir';
+        followBtn.style.background = isFollowing
+          ? 'linear-gradient(90deg, #7b8e62, #a0b38b)'
+          : 'linear-gradient(90deg, var(--primary), var(--accent))';
+
+        document.getElementById('followers-count').textContent = data.followersCount;
+        
+        showNotification(data.message, 'success');
+      } catch (err) {
+        console.error('❌ Error:', err);
+        showNotification('Error al seguir usuario', 'error');
+      }
+    });
+    userLinks.insertBefore(followBtn, userLinks.firstChild);
+
     const chatBtn = document.createElement('button');
     chatBtn.textContent = '💬 Enviar mensaje';
     chatBtn.className = 'feed-btn';
     chatBtn.addEventListener('click', () => {
-      window.location.href = `/Messages?chat=${viewedUser._id}`;
+      window.location.href = `/Messages?user=${viewedUser._id}`;
     });
-    userLinks.appendChild(chatBtn);
+    userLinks.insertBefore(chatBtn, userLinks.children[1]);
   } else {
     console.log('✅ Modo propietario activado');
+    if (changeBannerBtn) {
+      changeBannerBtn.style.display = 'flex';
+    }
   }
 }
 
@@ -285,14 +453,43 @@ document.getElementById('status-select')?.addEventListener('change', async e => 
 document.getElementById('save-bio-btn')?.addEventListener('click', async () => {
   try {
     const newBio = document.getElementById('bio-editor').value.trim();
-    const res = await fetch('http://localhost:3000/profile/bio', {
+    
+    if (newBio.length > 500) {
+      showNotification('La biografía no puede superar 500 caracteres', 'error');
+      return;
+    }
+    
+    const res = await fetch('http://localhost:3000/api/users/me/bio', {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bio: newBio }),
     });
+    
     if (!res.ok) throw new Error('Error al guardar bio');
-    document.getElementById('bio-description').textContent = newBio || 'Sin biografía';
+    
+    const data = await res.json();
+    
+    // ✅ Actualizar biografía dinámicamente
+    const bioText = document.getElementById('bio-text');
+    const bioEditor = document.getElementById('bio-editor');
+    
+    if (bioEditor) bioEditor.value = data.bio || '';
+    if (bioText) {
+      bioText.textContent = data.bio || 'Sin biografía disponible';
+      bioText.style.fontStyle = data.bio ? 'normal' : 'italic';
+      bioText.style.color = data.bio ? 'var(--text-light)' : '#999';
+      
+      // Animación de actualización
+      bioText.style.animation = 'pulse 0.5s ease';
+      setTimeout(() => {
+        bioText.style.animation = '';
+      }, 500);
+    }
+    
+    if (currentUser) currentUser.bio = data.bio;
+    if (viewedUser) viewedUser.bio = data.bio;
+    
     showNotification('Biografía actualizada correctamente');
   } catch (err) {
     console.error('❌', err);
@@ -315,13 +512,47 @@ uploadBtn?.addEventListener('click', () => photoModal?.classList.remove('hidden'
 closeModalBtn?.addEventListener('click', () => {
   photoModal?.classList.add('hidden');
   urlForm?.classList.add('hidden');
+  document.getElementById('imageUrl').value = '';
 });
 uploadFileBtn?.addEventListener('click', () => uploadInput?.click());
 uploadUrlBtn?.addEventListener('click', () => urlForm?.classList.remove('hidden'));
 
+// ============================================================
+// 🎨 Modal de cambio de banner/portada
+// ============================================================
+const bannerModal = document.getElementById('bannerModal');
+const changeBannerBtn = document.getElementById('change-banner-btn');
+const closeBannerModalBtn = document.getElementById('closeBannerModalBtn');
+const bannerUploadFileBtn = document.getElementById('banner-upload-file-btn');
+const bannerUploadUrlBtn = document.getElementById('banner-upload-url-btn');
+const bannerUploadInput = document.getElementById('banner-upload-input');
+const bannerUrlForm = document.getElementById('bannerUrlForm');
+
+changeBannerBtn?.addEventListener('click', () => bannerModal?.classList.remove('hidden'));
+closeBannerModalBtn?.addEventListener('click', () => {
+  bannerModal?.classList.add('hidden');
+  bannerUrlForm?.classList.add('hidden');
+  document.getElementById('bannerImageUrl').value = '';
+});
+bannerUploadFileBtn?.addEventListener('click', () => bannerUploadInput?.click());
+bannerUploadUrlBtn?.addEventListener('click', () => bannerUrlForm?.classList.remove('hidden'));
+
+// ✅ Subir archivo de perfil con validación
 uploadInput?.addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
+  
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    showNotification('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showNotification('La imagen no debe superar 5MB', 'error');
+    return;
+  }
+  
   try {
     const formData = new FormData();
     formData.append('profilePic', file);
@@ -335,19 +566,132 @@ uploadInput?.addEventListener('change', async e => {
     document.getElementById('profile-pic').src = data.profilePic;
     showNotification('Foto de perfil actualizada');
     photoModal?.classList.add('hidden');
+    uploadInput.value = '';
   } catch (err) {
     console.error('❌', err);
     showNotification('Error al subir imagen', 'error');
   }
 });
 
+// ✅ Guardar URL de foto de perfil
 urlForm?.addEventListener('submit', async e => {
   e.preventDefault();
   const imageUrl = document.getElementById('imageUrl').value.trim();
-  if (!imageUrl) return showNotification('URL inválida', 'error');
-  document.getElementById('profile-pic').src = imageUrl;
-  photoModal?.classList.add('hidden');
-  showNotification('Foto actualizada desde URL');
+  
+  if (!imageUrl) {
+    return showNotification('URL inválida', 'error');
+  }
+
+  try {
+    new URL(imageUrl);
+    
+    const res = await fetch('http://localhost:3000/profile/update-pic-url', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    if (!res.ok) throw new Error('Error al actualizar foto');
+    
+    const data = await res.json();
+    document.getElementById('profile-pic').src = data.profilePic;
+    photoModal?.classList.add('hidden');
+    urlForm?.classList.add('hidden');
+    document.getElementById('imageUrl').value = '';
+    showNotification('Foto actualizada correctamente');
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('URL inválida o error al actualizar', 'error');
+  }
+});
+
+// ============================================================
+// 🎨 Subir banner desde archivo (CON CLOUDINARY)
+// ============================================================
+bannerUploadInput?.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    showNotification('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showNotification('La imagen no debe superar 5MB', 'error');
+    return;
+  }
+  
+  try {
+    showNotification('Subiendo portada...', 'success');
+    
+    const formData = new FormData();
+    formData.append('bannerImage', file);
+    
+    // ✅ CAMBIO CRÍTICO: Usar endpoint correcto que sube a Cloudinary
+    const res = await fetch('http://localhost:3000/api/users/me/banner', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    
+    if (!res.ok) throw new Error('Error al subir banner');
+    
+    const data = await res.json();
+    
+    // ✅ Actualizar imagen del banner con la URL de Cloudinary
+    document.getElementById('banner-image').src = data.bannerImage;
+    
+    showNotification('Portada actualizada y guardada');
+    bannerModal?.classList.add('hidden');
+    bannerUploadInput.value = '';
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('Error al subir portada', 'error');
+  }
+});
+
+// ============================================================
+// 🎨 Cambiar banner desde URL (CON CLOUDINARY)
+// ============================================================
+bannerUrlForm?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const imageUrl = document.getElementById('bannerImageUrl').value.trim();
+  
+  if (!imageUrl) {
+    return showNotification('URL inválida', 'error');
+  }
+
+  try {
+    new URL(imageUrl);
+    
+    showNotification('Guardando portada...', 'success');
+    
+    // ✅ Usar endpoint que guarda en Cloudinary
+    const res = await fetch('http://localhost:3000/api/users/me/banner-url', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl }),
+    });
+
+    if (!res.ok) throw new Error('Error al actualizar portada');
+    
+    const data = await res.json();
+    
+    // ✅ Actualizar con la URL guardada en Cloudinary
+    document.getElementById('banner-image').src = data.bannerImage;
+    
+    bannerModal?.classList.add('hidden');
+    bannerUrlForm?.classList.add('hidden');
+    document.getElementById('bannerImageUrl').value = '';
+    showNotification('Portada actualizada y guardada');
+  } catch (err) {
+    console.error('❌', err);
+    showNotification('URL inválida o error al actualizar', 'error');
+  }
 });
 
 // ============================================================
@@ -360,7 +704,13 @@ const profileSearchResults = document.getElementById('profile-search-results');
 profileSearch?.addEventListener('input', e => {
   clearTimeout(searchTimeout);
   const query = e.target.value.trim();
-  if (query.length < 2) return (profileSearchResults.innerHTML = '');
+  
+  if (query.length < 2) {
+    profileSearchResults.innerHTML = '';
+    profileSearchResults.classList.add('hidden');
+    return;
+  }
+  
   searchTimeout = setTimeout(async () => {
     try {
       const res = await fetch(
@@ -376,7 +726,7 @@ profileSearch?.addEventListener('input', e => {
               .map(
                 u => `
               <div class="search-result-item" data-user-id="${u._id}">
-                <img src="${u.profilePic || `https://ui-avatars.com/api/?name=${u.username}`}" alt="${u.username}" />
+                <img src="${u.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}`}" alt="${u.username}" />
                 <div>
                   <strong>${u.username}</strong>
                   <p>${u.email || ''}</p>
@@ -392,58 +742,498 @@ profileSearch?.addEventListener('input', e => {
       profileSearchResults.classList.remove('hidden');
     } catch (err) {
       console.error('❌ Error en búsqueda:', err);
+      showNotification('Error al buscar usuarios', 'error');
     }
   }, 300);
 });
 
 // ============================================================
-// 👥 Ver seguidores y likes
+// 🔄 Refrescar estadísticas del perfil
 // ============================================================
-document.getElementById('followers-count')?.addEventListener('click', async () => {
-  if (!currentUser) return;
-  const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}/followers`, {
-    credentials: 'include',
-  });
-  const followers = await res.json();
-  const followersList = document.getElementById('followersList');
-  followersList.innerHTML =
-    followers.length > 0
-      ? followers
-          .map(
-            f => `
-        <div class="follower-item">
-          <img src="${f.profilePic || `https://ui-avatars.com/api/?name=${f.username}`}" />
-          <span>${f.username}</span>
-        </div>`
-          )
-          .join('')
-      : '<p>No tienes seguidores aún</p>';
-  document.getElementById('followersModal')?.classList.remove('hidden');
+async function refreshProfileStats() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/users/${viewedUser._id}/profile`, {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    
+    if (!res.ok) return;
+    
+    const data = await res.json();
+    const stats = data.stats || {};
+    
+    document.getElementById('recipes-count').textContent = stats.posts || 0;
+    document.getElementById('followers-count').textContent = stats.followers || 0;
+    document.getElementById('likes-count').textContent = stats.totalLikes || 0;
+    
+    console.log('✅ Estadísticas actualizadas');
+  } catch (err) {
+    console.error('❌ Error actualizando estadísticas:', err);
+  }
+}
+
+// ============================================================
+// 📊 Ver publicaciones del usuario
+// ============================================================
+document.getElementById('recipes-stat')?.addEventListener('click', async () => {
+  if (!viewedUser) return;
+  try {
+    await refreshProfileStats();
+    
+    const res = await fetch(`http://localhost:3000/api/users/${viewedUser._id}/posts`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al obtener publicaciones');
+    
+    const posts = await res.json();
+    const postsList = document.getElementById('postsList');
+    postsList.innerHTML =
+      posts.length > 0
+        ? posts
+            .map(
+              p => `
+          <div class="post-item" onclick="window.location.href='/Social?post=${p._id}'">
+            ${p.images?.[0] ? `<img src="${p.images[0]}" alt="Post" />` : '<div class="no-image">📝</div>'}
+            <div>
+              <p>${p.caption || 'Sin descripción'}</p>
+              <div class="post-stats">
+                <span>❤️ ${p.likes?.length || 0}</span>
+                <span>💬 ${p.comments?.length || 0}</span>
+                <span>📅 ${new Date(p.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>`
+            )
+            .join('')
+        : `<p>${isOwner ? 'No has publicado' : 'No ha publicado'} nada aún</p>`;
+    document.getElementById('postsModal')?.classList.remove('hidden');
+  } catch (err) {
+    console.error('❌ Error cargando posts:', err);
+    showNotification('Error al cargar publicaciones', 'error');
+  }
 });
 
-document.getElementById('likes-count')?.addEventListener('click', async () => {
-  if (!currentUser) return;
-  const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}/liked-posts`, {
-    credentials: 'include',
-  });
-  const liked = await res.json();
-  const likesList = document.getElementById('likesList');
-  likesList.innerHTML =
-    liked.length > 0
-      ? liked
-          .map(
-            p => `
-        <div class="like-item">
-          <img src="${p.images?.[0] || '/placeholder.jpg'}" />
-          <div>
-            <p>${p.caption || 'Sin descripción'}</p>
-            <span>${p.likes?.length || 0} likes</span>
+// ============================================================
+// 👥 Ver seguidores
+// ============================================================
+document.getElementById('followers-stat')?.addEventListener('click', async () => {
+  if (!viewedUser) return;
+  try {
+    await refreshProfileStats();
+    
+    const res = await fetch(`http://localhost:3000/api/users/${viewedUser._id}/followers`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al obtener seguidores');
+    
+    const followers = await res.json();
+    const followersList = document.getElementById('followersList');
+    followersList.innerHTML =
+      followers.length > 0
+        ? followers
+            .map(
+              f => `
+          <div class="follower-item" onclick="window.location.href='/Profile?user=${f._id}'">
+            <img src="${f.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(f.username)}`}" alt="${f.username}" />
+            <span>${f.username}</span>
+          </div>`
+            )
+            .join('')
+        : `<p>${isOwner ? 'No tienes' : 'No tiene'} seguidores aún</p>`;
+    document.getElementById('followersModal')?.classList.remove('hidden');
+  } catch (err) {
+    console.error('❌ Error cargando seguidores:', err);
+    showNotification('Error al cargar seguidores', 'error');
+  }
+});
+
+// ============================================================
+// ❤️ Ver publicaciones con like
+// ============================================================
+document.getElementById('likes-stat')?.addEventListener('click', async () => {
+  if (!viewedUser) return;
+  try {
+    await refreshProfileStats();
+    
+    const res = await fetch(`http://localhost:3000/api/users/${viewedUser._id}/liked-posts`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al obtener likes');
+    
+    const liked = await res.json();
+    const likesList = document.getElementById('likesList');
+    likesList.innerHTML =
+      liked.length > 0
+        ? liked
+            .map(
+              p => `
+          <div class="like-item" onclick="window.location.href='/Social?post=${p._id}'">
+            ${p.images?.[0] ? `<img src="${p.images[0]}" alt="Post" />` : '<div class="no-image">📝</div>'}
+            <div>
+              <p>${p.caption || 'Sin descripción'}</p>
+              <span>${p.likes?.length || 0} likes • ${p.comments?.length || 0} comentarios</span>
+              <small>Por ${p.author?.username || 'Usuario'}</small>
+            </div>
+          </div>`
+            )
+            .join('')
+        : `<p>${isOwner ? 'No has dado' : 'No ha dado'} likes aún</p>`;
+    document.getElementById('likesModal')?.classList.remove('hidden');
+  } catch (err) {
+    console.error('❌ Error cargando likes:', err);
+    showNotification('Error al cargar publicaciones con like', 'error');
+  }
+});
+
+// ============================================================
+// 👥 Unirse al grupo Royal UI Force
+// ============================================================
+document.getElementById('join-team-button')?.addEventListener('click', async () => {
+  try {
+    const btn = document.getElementById('join-team-button');
+    const currentState = btn.dataset.joined === 'true';
+    
+    const res = await fetch('http://localhost:3000/api/groups/royal-ui-force/join', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    
+    if (!res.ok) throw new Error('Error al unirse al grupo');
+    
+    const data = await res.json();
+    
+    btn.dataset.joined = data.joined;
+    
+    if (data.joined) {
+      btn.textContent = '✓ Miembro del grupo';
+      btn.style.background = 'linear-gradient(90deg, #7b8e62, #a0b38b)';
+      btn.style.color = 'white';
+      showNotification('Te has unido al grupo exitosamente');
+    } else {
+      btn.textContent = '👥 Unirse al grupo';
+      btn.style.background = 'white';
+      btn.style.color = 'var(--primary-dark)';
+      showNotification('Has salido del grupo');
+    }
+    
+    const membersCountEl = document.getElementById('team-members-count');
+    if (membersCountEl && data.memberCount) {
+      membersCountEl.textContent = data.memberCount.toLocaleString();
+    }
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification('Error al procesar solicitud', 'error');
+  }
+});
+
+// ✅ Cargar estado del grupo al iniciar
+async function loadGroupStatus() {
+  try {
+    const res = await fetch('http://localhost:3000/api/groups/royal-ui-force', {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) return;
+    
+    const data = await res.json();
+    const btn = document.getElementById('join-team-button');
+    const membersCountEl = document.getElementById('team-members-count');
+    
+    if (btn) {
+      btn.dataset.joined = data.isMember;
+      
+      if (data.isMember) {
+        btn.textContent = '✓ Miembro del grupo';
+        btn.style.background = 'linear-gradient(90deg, #7b8e62, #a0b38b)';
+        btn.style.color = 'white';
+      } else {
+        btn.textContent = '👥 Unirse al grupo';
+        btn.style.background = 'white';
+        btn.style.color = 'var(--primary-dark)';
+      }
+    }
+    
+    if (membersCountEl && data.memberCount) {
+      membersCountEl.textContent = data.memberCount.toLocaleString();
+    }
+  } catch (err) {
+    console.error('❌ Error cargando estado del grupo:', err);
+  }
+}
+
+// ============================================================
+// 👥 SISTEMA COMPLETO DE GRUPOS
+// ============================================================
+
+// 🔹 Cargar todos los grupos disponibles
+async function loadAllGroups() {
+  try {
+    const res = await fetch('http://localhost:3000/api/groups', {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) return;
+    
+    const groups = await res.json();
+    const groupsList = document.getElementById('groups-list');
+    
+    if (!groupsList) return;
+    
+    const otherGroups = groups.filter(g => g.slug !== 'royal-ui-force');
+    
+    if (otherGroups.length === 0) {
+      groupsList.innerHTML = '<p class="no-groups">No hay otros grupos disponibles</p>';
+      return;
+    }
+    
+    groupsList.innerHTML = otherGroups.map(group => `
+      <div class="group-card-small" data-slug="${group.slug}">
+        ${group.image ? `<img src="${group.image}" alt="${group.name}" class="group-small-image" />` : `<div class="group-icon">👥</div>`}
+        <div class="group-info">
+          <h5>${group.name}</h5>
+          <p>${group.memberCount || 0} miembros</p>
+        </div>
+        <button class="view-group-btn" data-slug="${group.slug}">Ver</button>
+      </div>
+    `).join('');
+    
+    document.querySelectorAll('.view-group-btn').forEach(btn => {
+      btn.addEventListener('click', () => viewGroupDetails(btn.dataset.slug));
+    });
+    
+  } catch (err) {
+    console.error('❌ Error cargando grupos:', err);
+  }
+}
+
+// 🔹 Ver detalles completos de un grupo
+async function viewGroupDetails(slug) {
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${slug}`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Grupo no encontrado');
+    
+    const group = await res.json();
+    const modal = document.getElementById('groupDetailsModal');
+    const content = document.getElementById('group-details-content');
+    
+    // ✅ Verificar si el usuario es el creador
+    const isCreator = currentUser && group.creator && (currentUser._id === group.creator._id || currentUser._id === group.creator);
+    
+    content.innerHTML = `
+      <div class="group-details">
+        ${group.image ? `<img src="${group.image}" alt="${group.name}" class="group-detail-image" />` : '<div class="group-detail-placeholder">👥</div>'}
+        <h2>${group.name}</h2>
+        <p class="group-description">${group.description || 'Sin descripción'}</p>
+        
+        <div class="group-stats">
+          <div class="stat">
+            <span class="stat-number">${group.memberCount || 0}</span>
+            <span class="stat-label">Miembros</span>
           </div>
-        </div>`
-          )
-          .join('')
-      : '<p>No has dado likes aún</p>';
-  document.getElementById('likesModal')?.classList.remove('hidden');
+          <div class="stat">
+            <span class="stat-number">${new Date(group.createdAt).toLocaleDateString()}</span>
+            <span class="stat-label">Creado</span>
+          </div>
+        </div>
+        
+        <div class="group-actions">
+          <button id="toggle-group-membership" class="modal-btn confirm" data-slug="${slug}" data-member="${group.isMember}">
+            ${group.isMember ? '✓ Miembro' : '👥 Unirse'}
+          </button>
+          
+          ${isCreator ? `
+            <button id="delete-group-btn" class="modal-btn delete-btn" data-slug="${slug}">
+              🗑️ Eliminar Grupo
+            </button>
+          ` : ''}
+        </div>
+        
+        ${group.members && group.members.length > 0 ? `
+          <div class="group-members">
+            <h3>Miembros (${group.members.length})</h3>
+            <div class="members-grid">
+              ${group.members.slice(0, 12).map(member => `
+                <div class="member-item" onclick="window.location.href='/Profile?user=${member._id}'">
+                  <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
+                  <span>${member.username}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    
+    // Event listener para unirse/salir
+    document.getElementById('toggle-group-membership')?.addEventListener('click', async (e) => {
+      const btn = e.target;
+      const groupSlug = btn.dataset.slug;
+      
+      try {
+        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/join`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!res.ok) throw new Error('Error al procesar solicitud');
+        
+        const data = await res.json();
+        
+        btn.textContent = data.joined ? '✓ Miembro' : '👥 Unirse';
+        btn.dataset.member = data.joined;
+        
+        showNotification(data.message);
+        
+        setTimeout(() => viewGroupDetails(groupSlug), 500);
+      } catch (err) {
+        console.error('❌ Error:', err);
+        showNotification('Error al procesar solicitud', 'error');
+      }
+    });
+    
+    // ✅ Event listener para eliminar grupo
+    document.getElementById('delete-group-btn')?.addEventListener('click', async (e) => {
+      const groupSlug = e.target.dataset.slug;
+      
+      if (!confirm('¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.')) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Error al eliminar grupo');
+        }
+        
+        showNotification('Grupo eliminado exitosamente');
+        modal.classList.add('hidden');
+        
+        // Recargar lista de grupos
+        await loadAllGroups();
+      } catch (err) {
+        console.error('❌ Error eliminando grupo:', err);
+        showNotification(err.message || 'Error al eliminar grupo', 'error');
+      }
+    });
+    
+  } catch (err) {
+    console.error('❌ Error cargando detalles del grupo:', err);
+    showNotification('Error al cargar detalles del grupo', 'error');
+  }
+}
+
+// 🔹 Preview de imagen al crear grupo
+document.getElementById('select-group-image')?.addEventListener('click', () => {
+  document.getElementById('group-image-file')?.click();
+});
+
+document.getElementById('group-image-file')?.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    showNotification('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+    e.target.value = '';
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showNotification('La imagen no debe superar 5MB', 'error');
+    e.target.value = '';
+    return;
+  }
+  
+  // Mostrar preview
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const preview = document.getElementById('group-image-preview');
+    const text = document.getElementById('image-preview-text');
+    
+    if (preview && text) {
+      preview.src = event.target.result;
+      preview.classList.remove('hidden');
+      text.textContent = '✓ Imagen seleccionada';
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+// 🔹 Crear nuevo grupo
+document.getElementById('create-group-btn')?.addEventListener('click', () => {
+  document.getElementById('createGroupModal')?.classList.remove('hidden');
+  
+  // Limpiar preview
+  const preview = document.getElementById('group-image-preview');
+  const text = document.getElementById('image-preview-text');
+  if (preview) preview.classList.add('hidden');
+  if (text) text.textContent = '📷 Seleccionar imagen';
+});
+
+document.getElementById('create-group-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  try {
+    const name = document.getElementById('group-name').value.trim();
+    const description = document.getElementById('group-description').value.trim();
+    const imageFile = document.getElementById('group-image-file').files[0];
+    
+    if (!name) {
+      showNotification('El nombre del grupo es requerido', 'error');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('name', name);
+    if (description) formData.append('description', description);
+    if (imageFile) formData.append('image', imageFile);
+    
+    showNotification('Creando grupo...', 'success');
+    
+    const res = await fetch('http://localhost:3000/api/groups/create', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Error al crear grupo');
+    }
+    
+    const data = await res.json();
+    
+    showNotification('Grupo creado exitosamente');
+    document.getElementById('createGroupModal')?.classList.add('hidden');
+    document.getElementById('create-group-form').reset();
+    
+    // Limpiar preview
+    const preview = document.getElementById('group-image-preview');
+    const text = document.getElementById('image-preview-text');
+    if (preview) preview.classList.add('hidden');
+    if (text) text.textContent = '📷 Seleccionar imagen';
+    
+    await loadAllGroups();
+    
+  } catch (err) {
+    console.error('❌ Error creando grupo:', err);
+    showNotification(err.message || 'Error al crear grupo', 'error');
+  }
 });
 
 // ============================================================
@@ -463,25 +1253,38 @@ document.getElementById('logout-button')?.addEventListener('click', async () => 
 // 🪟 Cerrar modales al hacer clic fuera
 // ============================================================
 document.addEventListener('click', e => {
-  if (e.target.classList.contains('modal')) e.target.classList.add('hidden');
+  if (e.target.classList.contains('modal')) {
+    e.target.classList.add('hidden');
+  }
+  
+  if (!e.target.closest('#profile-search') && 
+      !e.target.closest('#profile-search-results')) {
+    profileSearchResults?.classList.add('hidden');
+  }
 });
 
 // ============================================================
 // 🚀 Inicializar
 // ============================================================
+async function initialize() {
+  await loadProfileData();
+  await loadGroupStatus();
+  await loadAllGroups();
+}
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadProfileData);
+  document.addEventListener('DOMContentLoaded', initialize);
 } else {
-  loadProfileData();
+  initialize();
 }
 </script>
 
 <style>
-  :root {
-  --primary: #687450;           /* Verde claro */
-  --primary-dark: #425638;      /* Verde oscuro */
-  --accent: #7b8e62;            /* Verde intermedio para detalles */
-  --secondary: #a0b38b;         /* Verde suave complementario */
+:root {
+  --primary: #687450;
+  --primary-dark: #425638;
+  --accent: #7b8e62;
+  --secondary: #a0b38b;
   --bg-light: #f4f7f3;
   --bg-dark: #2d332b;
   --card-bg: #ffffff;
@@ -495,12 +1298,34 @@ if (document.readyState === 'loading') {
   font-family: "Poppins", sans-serif;
 }
 
-/* === LAYOUT GENERAL === */
 body {
   background: var(--bg-light);
   color: var(--text-dark);
 }
 
+/* === ANIMACIONES === */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(300px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* === CONTENEDOR PRINCIPAL === */
 .profile-container {
   display: grid;
   grid-template-columns: 1.1fr 2fr 1fr;
@@ -596,7 +1421,6 @@ body {
   flex-direction: column;
   gap: 6px;
 }
-
 .user-stats span {
   color: #cce5b5;
   font-weight: 700;
@@ -610,26 +1434,38 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+.user-stats p:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(3px);
 }
 .user-stats p:hover span {
   filter: brightness(1.2);
   transform: scale(1.05);
-  transition: 0.2s;
 }
 
 .user-links {
   margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 .user-links a {
   display: block;
-  margin-top: 8px;
   color: #d4e2c2;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.25s;
+  padding: 8px;
+  border-radius: 6px;
 }
 .user-links a:hover {
   color: var(--secondary);
+  background: rgba(255, 255, 255, 0.05);
   transform: translateX(3px);
 }
 
@@ -649,6 +1485,64 @@ body {
   margin-bottom: 20px;
   font-size: 1rem;
   outline-color: var(--primary);
+  transition: all 0.3s;
+}
+.search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
+}
+
+/* ✅ CORRECCIÓN: Fotos de perfil en resultados de búsqueda */
+.search-results {
+  position: absolute;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  max-height: 400px;
+  overflow-y: auto;
+  width: calc(100% - 52px);
+  z-index: 100;
+  margin-top: -10px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid var(--bg-light);
+}
+.search-result-item:hover {
+  background: var(--bg-light);
+}
+
+/* ✅ FIX: Imágenes circulares y tamaño correcto */
+.search-result-item img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  flex-shrink: 0;
+}
+
+.search-result-item strong {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+.search-result-item p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #666;
 }
 
 .banner {
@@ -656,52 +1550,408 @@ body {
   overflow: hidden;
   margin-bottom: 20px;
   box-shadow: var(--shadow-sm);
+  position: relative;
+  height: 250px;
 }
 .banner-image {
   width: 100%;
-  height: 180px;
+  height: 100%;
   object-fit: cover;
   filter: brightness(0.95);
   transition: all 0.3s ease;
 }
-.banner-image:hover {
+.banner:hover .banner-image {
   filter: brightness(1.05);
+}
+.change-banner-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: rgba(104, 116, 80, 0.95);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+}
+.change-banner-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* === TARJETA DEL EQUIPO === */
+.team-info h3 {
+  color: var(--primary-dark);
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.create-group-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.create-group-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.groups-list {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ✅ CORRECCIÓN: UI mejorada para tarjetas de grupo */
+.group-card-small {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.group-card-small:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+/* ✅ FIX: Imagen circular y bien proporcionada */
+.group-small-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  flex-shrink: 0;
+}
+
+.group-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.group-info {
+  flex: 1;
+  min-width: 0;
+}
+.group-info h5 {
+  margin: 0 0 4px 0;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.group-info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.view-group-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.view-group-btn:hover {
+  background: var(--primary-dark);
+}
+
+.no-groups {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-style: italic;
+}
+
 .team-card {
   background: linear-gradient(120deg, var(--primary), var(--accent));
   color: white;
-  padding: 18px;
+  padding: 20px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   text-align: center;
-  margin-top: 24px;
+  margin-top: 10px;
   transition: all 0.3s ease;
 }
 .team-card:hover {
   transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 .team-card h4 {
   font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 4px;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
-.team-card button {
-  margin-top: 10px;
+.team-card p {
+  margin: 6px 0;
+  opacity: 0.95;
+}
+.team-action-btn {
+  margin-top: 14px;
   background: white;
   color: var(--primary-dark);
   border: none;
   border-radius: 8px;
-  padding: 8px 14px;
+  padding: 10px 20px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+  width: 100%;
+  font-size: 1rem;
 }
-.team-card button:hover {
+.team-action-btn:hover {
   background: var(--secondary);
   color: #fff;
-  transform: scale(1.05);
+  transform: scale(1.03);
+}
+
+/* === MODAL DE GRUPOS === */
+.group-details-modal {
+  max-width: 800px;
+}
+
+.group-details {
+  text-align: center;
+}
+
+/* ✅ Imagen del grupo con mejor UI */
+.group-detail-image {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.group-detail-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.group-description {
+  color: #666;
+  margin: 16px 0;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.group-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--bg-light);
+  border-radius: var(--radius);
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* ✅ Acciones del grupo */
+.group-actions {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.group-actions .modal-btn {
+  flex: 1;
+  min-width: 150px;
+}
+
+.delete-btn {
+  background: #d32f2f !important;
+  color: white !important;
+  border: none !important;
+}
+.delete-btn:hover {
+  background: #b71c1c !important;
+  transform: translateY(-2px);
+}
+
+.group-members {
+  margin-top: 30px;
+  text-align: left;
+}
+.group-members h3 {
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 16px;
+}
+.member-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+}
+.member-item:hover {
+  background: var(--bg-light);
+  transform: translateY(-2px);
+}
+.member-item img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+.member-item span {
+  font-size: 0.8rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  text-align: center;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === FORMULARIO DE CREAR GRUPO === */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
+}
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ✅ Preview de imagen mejorado */
+.image-upload-container {
+  width: 100%;
+}
+
+.image-preview-btn {
+  width: 100%;
+  min-height: 150px;
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius);
+  background: var(--bg-light);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-preview-btn:hover {
+  border-color: var(--primary);
+  background: white;
+}
+
+#image-preview-text {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+#group-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--radius);
+}
+
+#group-image-preview.hidden {
+  display: none;
 }
 
 /* === COLUMNA DERECHA === */
@@ -713,6 +1963,102 @@ body {
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
+}
+
+/* ✅ COMPONENTE BIBLIOGRAPHY DINÁMICO */
+.bibliography-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.bibliography-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.bio-header {
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.bio-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bio-content {
+  margin-bottom: 15px;
+  min-height: 60px;
+}
+
+#bio-text {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+
+.bio-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bio-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.bio-meta:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.bio-icon {
+  font-size: 1.2rem;
+}
+
+#bio-website {
+  color: #cce5b5;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+#bio-website:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.bio-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bio-skill-tag {
+  background: var(--accent);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .bio-editor {
@@ -727,6 +2073,7 @@ body {
   resize: vertical;
   min-height: 100px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-family: inherit;
 }
 
 .save-bio-btn {
@@ -746,13 +2093,219 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* === MODALES Y NOTIFICACIONES === */
+/* === MODALES === */
 .modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
   background: var(--card-bg);
   border-radius: var(--radius);
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: var(--shadow-lg);
-  padding: 24px;
+  position: relative;
+  animation: modalSlideIn 0.3s ease;
 }
+
+.modal-content h2 {
+  color: var(--primary-dark);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 10px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--text-dark);
+  transition: all 0.3s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.close-modal:hover {
+  background: var(--primary);
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* === BOTONES DEL MODAL === */
+.modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.modal-btn {
+  padding: 12px 20px;
+  border: 2px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+}
+.modal-btn:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateX(5px);
+}
+.modal-btn.confirm {
+  background: var(--primary);
+  color: white;
+  border: none;
+  text-align: center;
+}
+.modal-btn.confirm:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+#urlForm, #bannerUrlForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+}
+#urlForm input, #bannerUrlForm input {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  font-size: 1rem;
+}
+
+/* === ITEMS DE MODALES === */
+.follower-item, .like-item, .post-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  background: var(--bg-light);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.follower-item:hover, .like-item:hover, .post-item:hover {
+  background: var(--secondary);
+  transform: translateX(5px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ✅ FIX: Imágenes circulares y bien proporcionadas en modales */
+.follower-item img, .like-item img, .post-item img {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  flex-shrink: 0;
+}
+
+.follower-item span {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+.like-item div, .post-item div {
+  flex: 1;
+  min-width: 0;
+}
+.like-item p, .post-item p {
+  margin: 0 0 5px 0;
+  color: var(--text-dark);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.like-item span {
+  font-size: 0.9rem;
+  color: #666;
+}
+.post-stats {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+.post-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.like-item small {
+  display: block;
+  margin-top: 5px;
+  color: var(--primary);
+  font-size: 0.85rem;
+}
+.no-image {
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary);
+  border-radius: 50%;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* === MENSAJE VACÍO === */
+.followers-list p, .likes-list p, .posts-list p {
+  text-align: center;
+  color: #666;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* === SCROLLBAR === */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: var(--bg-light);
+  border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* === NOTIFICACIONES === */
 .notification {
   position: fixed;
   top: 24px;
@@ -763,6 +2316,7 @@ body {
   font-weight: 600;
   z-index: 9999;
   animation: slideIn 0.3s ease;
+  box-shadow: var(--shadow-lg);
 }
 .notification.success {
   background: var(--primary);
@@ -773,10 +2327,6 @@ body {
 .notification.hidden {
   display: none;
 }
-@keyframes slideIn {
-  from { transform: translateX(300px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
 
 /* === RESPONSIVE === */
 @media (max-width: 992px) {
@@ -784,10 +2334,56 @@ body {
     grid-template-columns: 1fr;
     margin-top: 60px;
     gap: 16px;
+    padding: 16px;
   }
-  .left-section,
-  .right-section {
+  .left-section, .right-section {
     text-align: center;
+  }
+  .search-results {
+    width: calc(100% - 32px);
+  }
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+  .banner {
+    height: 180px;
+  }
+  .change-banner-btn {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+  .group-actions {
+    flex-direction: column;
+  }
+  .group-actions .modal-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-image {
+    width: 120px;
+    height: 120px;
+  }
+  .modal-content h2 {
+    font-size: 1.2rem;
+  }
+  .follower-item img, .like-item img, .post-item img, .no-image {
+    width: 45px;
+    height: 45px;
+  }
+  .banner {
+    height: 150px;
+  }
+  .change-banner-btn {
+    bottom: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
 }
 </style>

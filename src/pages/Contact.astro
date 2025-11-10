@@ -7,37 +7,42 @@ import Layout from "../layouts/Layout.astro";
   <Header />
 
   <section class="contact-container">
-    <h1 class="contact-title">Contact US</h1>
+    <h1 class="contact-title">Contact Us</h1>
     <p class="contact-subtitle">
-      Have questions or want to learn more about Food Emotions? Fill out the form below, and we'll be in touch shortly.
+      Have questions or want to learn more about FoodEmotions? Fill out the form below, and we'll be in touch shortly.
     </p>
-    <form class="contact-form">
-      <input type="text" placeholder="Name" class="form-input" required />
-      <input type="email" placeholder="Email" class="form-input" required />
-      <textarea placeholder="Message" class="form-textarea" required></textarea>
+
+    <!-- 🔹 Formulario vinculado a tu correo con Formspree -->
+    <form 
+      action="https://formspree.io/f/xrbrzdjd" 
+      method="POST" 
+      class="contact-form"
+    >
+      <input type="text" name="name" placeholder="Name" class="form-input" required />
+      <input type="email" name="email" placeholder="Email" class="form-input" required />
+      <textarea name="message" placeholder="Message" class="form-textarea" required></textarea>
       <button type="submit" class="form-button">Send Message</button>
     </form>
   </section>
 </Layout>
 
 <style>
-
-.contact-container {
+  .contact-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     padding: 3rem;
-    background-color: #647d4b; /* color de fondo similar al de la imagen */
+    background-color: #647d4b;
   }
-  
+
   .contact-title {
     font-size: 3rem;
     color: white;
     margin-bottom: 1rem;
   }
-  
+
   .contact-subtitle {
     font-size: 1.25rem;
     color: white;
@@ -45,7 +50,7 @@ import Layout from "../layouts/Layout.astro";
     max-width: 600px;
     margin-bottom: 2rem;
   }
-  
+
   .contact-form {
     display: flex;
     flex-direction: column;
@@ -53,7 +58,7 @@ import Layout from "../layouts/Layout.astro";
     width: 100%;
     max-width: 400px;
   }
-  
+
   .form-input, .form-textarea {
     padding: 1rem;
     border: 1px solid #ccc;
@@ -62,25 +67,25 @@ import Layout from "../layouts/Layout.astro";
     width: 100%;
     box-sizing: border-box;
   }
-  
+
   .form-textarea {
     resize: none;
     height: 150px;
   }
-  
+
   .form-button {
     padding: 1rem;
-    background-color: #3b82f6;
+    background-color: #687450;
     color: white;
     border: none;
     border-radius: 0.5rem;
     font-size: 1.25rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
   }
-  
+
   .form-button:hover {
-    background-color: #2563eb;
+    background-color: #425638;
+    transform: scale(1.03);
   }
-  
 </style>
