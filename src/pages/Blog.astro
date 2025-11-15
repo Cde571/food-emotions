@@ -1,150 +1,2103 @@
 ---
-import ProfileCard from '../components/ProfileCard.astro'; 
-import BlogCard from '../components/BlogCard.astro'; 
-import ProfilePic from '../components/ProfilePic.astro';
+// Blog.astro - Sistema de blog con UI/UX mejorada
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/shared/Navigation.astro';
 ---
 
+<Layout title="Mi Blog">
+  <Navigation />
+
+  <div class="blog-container">
+    <!-- 🔹 HEADER MEJORADO -->
+    <header class="blog-header">
+      <div class="header-background">
+        <div class="floating-elements">
+          <span class="float-emoji">✍️</span>
+          <span class="float-emoji">📝</span>
+          <span class="float-emoji">💭</span>
+          <span class="float-emoji">📖</span>
+        </div>
+      </div>
+      <div class="header-content">
+        <div class="header-icon">📝</div>
+        <h1 class="animate-fade-in">Mi Blog Personal</h1>
+        <p class="subtitle animate-fade-in-delay">Comparte tus pensamientos, historias y conocimientos con el mundo</p>
+        <button id="create-post-btn" class="create-btn animate-bounce-in">
+          <span class="btn-icon">✨</span>
+          <span>Nueva Entrada</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 🔹 FILTROS Y BÚSQUEDA MEJORADOS -->
+    <div class="blog-controls">
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="blog-search" 
+          placeholder="Buscar en tu blog..." 
+          class="search-input"
+        />
+        <div class="search-results-count" id="results-count"></div>
+      </div>
+      
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">
+          <span class="filter-icon">📚</span>
+          <span>Todas</span>
+        </button>
+        <button class="filter-btn" data-filter="published">
+          <span class="filter-icon">✅</span>
+          <span>Publicadas</span>
+        </button>
+        <button class="filter-btn" data-filter="draft">
+          <span class="filter-icon">📝</span>
+          <span>Borradores</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 🔹 LISTA DE ENTRADAS MEJORADA -->
+    <div id="blog-posts-container" class="blog-posts-grid">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando entradas...</p>
+      </div>
+    </div>
+
+    <!-- 🔹 ESTADO VACÍO MEJORADO -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-animation">
+        <div class="empty-icon">📝</div>
+        <div class="empty-circles">
+          <div class="circle"></div>
+          <div class="circle"></div>
+          <div class="circle"></div>
+        </div>
+      </div>
+      <h3>No hay entradas aún</h3>
+      <p>Comienza a escribir tu primera entrada de blog y comparte tus ideas</p>
+      <button class="create-btn" onclick="document.getElementById('create-post-btn').click()">
+        <span class="btn-icon">✨</span>
+        Crear Primera Entrada
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL CREAR/EDITAR MEJORADO -->
+  <div id="blogModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeBlogModal()"></div>
+    <div class="modal-content blog-modal">
+      <button class="close-modal" onclick="closeBlogModal()">×</button>
+      <div class="modal-header">
+        <div class="modal-icon">✍️</div>
+        <h2 id="modal-title">Nueva Entrada de Blog</h2>
+      </div>
+      
+      <form id="blog-form">
+        <div class="form-group floating-label">
+          <input 
+            type="text" 
+            id="blog-title" 
+            required 
+            placeholder=" "
+            maxlength="150"
+          />
+          <label for="blog-title">Título de la entrada *</label>
+          <div class="input-border"></div>
+          <div class="char-counter" id="title-counter">0/150</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="label-icon">🏷️</span>
+              Categoría
+            </label>
+            <select id="blog-category" class="styled-select">
+              <option value="General">📌 General</option>
+              <option value="Tecnología">💻 Tecnología</option>
+              <option value="Cocina">🍳 Cocina</option>
+              <option value="Viajes">✈️ Viajes</option>
+              <option value="Salud">💪 Salud</option>
+              <option value="Lifestyle">🌟 Lifestyle</option>
+              <option value="Negocios">💼 Negocios</option>
+              <option value="Personal">❤️ Personal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">🖼️</span>
+            Imagen de portada
+          </label>
+          <div class="image-input-group">
+            <input 
+              type="url" 
+              id="blog-cover" 
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="image-url-input"
+            />
+            <button type="button" id="preview-cover-btn" class="preview-btn">
+              <span>👁️</span> Vista previa
+            </button>
+          </div>
+          <div id="cover-preview" class="cover-preview hidden">
+            <div class="preview-overlay">
+              <span class="preview-label">Vista previa</span>
+              <button type="button" class="remove-preview-btn" onclick="removePreview()">×</button>
+            </div>
+            <img id="cover-preview-img" src="" alt="Preview" />
+          </div>
+        </div>
+
+        <div class="form-group floating-label">
+          <textarea 
+            id="blog-excerpt" 
+            rows="2" 
+            placeholder=" "
+            maxlength="200"
+          ></textarea>
+          <label for="blog-excerpt">Extracto (Resumen)</label>
+          <div class="input-border"></div>
+          <div class="char-counter" id="excerpt-counter">0/200</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">📄</span>
+            Contenido *
+          </label>
+          <div class="editor-toolbar">
+            <button type="button" class="toolbar-btn" onclick="insertMarkdown('**', '**')" title="Negrita">
+              <strong>B</strong>
+            </button>
+            <button type="button" class="toolbar-btn" onclick="insertMarkdown('*', '*')" title="Cursiva">
+              <em>I</em>
+            </button>
+            <button type="button" class="toolbar-btn" onclick="insertMarkdown('# ', '')" title="Título">
+              H
+            </button>
+            <button type="button" class="toolbar-btn" onclick="insertMarkdown('- ', '')" title="Lista">
+              ☰
+            </button>
+          </div>
+          <textarea 
+            id="blog-content" 
+            rows="14" 
+            required 
+            placeholder="Escribe tu historia aquí... Usa Markdown para dar formato."
+            class="editor-textarea"
+          ></textarea>
+          <div class="editor-help">
+            💡 <strong>Tips de formato:</strong> **negrita**, *cursiva*, # títulos, - listas, [enlace](url)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <span class="label-icon">🏷️</span>
+            Etiquetas
+          </label>
+          <div class="tags-input-container">
+            <input 
+              type="text" 
+              id="blog-tags" 
+              placeholder="Presiona Enter para agregar etiquetas"
+              class="tags-input"
+            />
+            <div id="tags-display" class="tags-display"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <label class="toggle-label publish-toggle">
+            <input type="checkbox" id="blog-published" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">
+              <strong>Publicar inmediatamente</strong>
+              <small>La entrada será visible públicamente</small>
+            </span>
+          </label>
+          
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="closeBlogModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary">
+              <span class="btn-icon">💾</span>
+              <span id="submit-text">Guardar</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL VER ENTRADA MEJORADO -->
+  <div id="viewPostModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeViewModal()"></div>
+    <div class="modal-content view-post-modal">
+      <button class="close-modal" onclick="closeViewModal()">×</button>
+      <article id="post-content" class="blog-post-full">
+        <!-- Se llenará dinámicamente -->
+      </article>
+      <div class="post-actions-bar">
+        <button class="post-action-btn" onclick="likeCurrentPost()">
+          <span class="action-icon">❤️</span>
+          <span>Me gusta</span>
+        </button>
+        <button class="post-action-btn" onclick="shareCurrentPost()">
+          <span class="action-icon">🔗</span>
+          <span>Compartir</span>
+        </button>
+        <button class="post-action-btn" onclick="editCurrentPost()">
+          <span class="action-icon">✏️</span>
+          <span>Editar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification hidden"></div>
+</Layout>
+
 <style>
-  :global(body) {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #e8f5e9; 
+  * {
+    box-sizing: border-box;
   }
 
-  .container {
+  .blog-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* ================================
+     HEADER MEJORADO
+     ================================ */
+  .blog-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 4rem 2rem;
+    border-radius: 24px;
+    color: white;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(114, 179, 64, 0.3);
+  }
+
+  .header-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    animation: gradientShift 8s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+  .float-emoji {
+    position: absolute;
+    font-size: 2.5rem;
+    opacity: 0.2;
+    animation: float 20s infinite;
+  }
+
+  .float-emoji:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+
+  .float-emoji:nth-child(2) {
+    top: 60%;
+    right: 15%;
+    animation-delay: 5s;
+  }
+
+  .float-emoji:nth-child(3) {
+    bottom: 30%;
+    left: 20%;
+    animation-delay: 10s;
+  }
+
+  .float-emoji:nth-child(4) {
+    top: 40%;
+    right: 25%;
+    animation-delay: 15s;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-20px) rotate(5deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(-5deg);
+    }
+    75% {
+      transform: translateY(-15px) rotate(3deg);
+    }
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+
+  .header-content h1 {
+    font-size: 2.8rem;
+    margin-bottom: 0.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 0.8s ease 0.2s both;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.8s ease 0.4s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .create-btn {
+    background: white;
+    color: #72b340;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+  }
+
+  .create-btn:active {
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .btn-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .create-btn:hover .btn-icon {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  /* ================================
+     CONTROLES MEJORADOS
+     ================================ */
+  .blog-controls {
     display: flex;
-    height: 100vh;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
   }
 
-  .sidebar {
-    width: 20%;
-    background-color: #e8f5e9; 
-    color: #040303;
-    padding: 1rem;
+  .search-container {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
   }
 
-  .main-content {
-    flex-grow: 1;
-    padding: 1rem;
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.5;
+    pointer-events: none;
   }
 
-  .search-bar {
+  .search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #72b340;
+    box-shadow: 0 0 0 4px rgba(114, 179, 64, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .search-results-count {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: #999;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 0.75rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .filter-icon {
+    font-size: 1.1rem;
+  }
+
+  .filter-btn.active {
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(114, 179, 64, 0.4);
+  }
+
+  .filter-btn:hover:not(.active) {
+    background: #f3f4f6;
+    transform: translateY(-2px);
+  }
+
+  /* ================================
+     GRID DE POSTS MEJORADO
+     ================================ */
+  .blog-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .blog-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    animation: cardFadeIn 0.5s ease;
+  }
+
+  @keyframes cardFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .blog-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(114, 179, 64, 0.1) 0%, rgba(90, 144, 50, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .blog-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(114, 179, 64, 0.2);
+  }
+
+  .blog-card:hover::before {
+    opacity: 1;
+  }
+
+  .blog-card-cover {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    transition: transform 0.5s ease;
+  }
+
+  .blog-card:hover .blog-card-cover {
+    transform: scale(1.1);
+  }
+
+  .blog-card-content {
+    padding: 1.75rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .blog-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
   }
 
-  .search-bar input {
-    width: 70%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  .blog-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 1rem;
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    color: white;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(114, 179, 64, 0.3);
   }
 
-  .tabs {
+  .blog-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .status-published { 
+    background: #22c55e;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+  }
+  
+  .status-draft { 
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+  }
+
+  .blog-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    line-height: 1.4;
+    font-weight: 700;
+    transition: color 0.3s ease;
+  }
+
+  .blog-card:hover h3 {
+    color: #72b340;
+  }
+
+  .blog-excerpt {
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .blog-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.25rem;
+    border-top: 2px solid #f3f4f6;
+  }
+
+  .blog-meta {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 600;
+  }
+
+  .blog-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-btn:hover {
+    background: #f3f4f6;
+    transform: scale(1.2) rotate(10deg);
+  }
+
+  /* ================================
+     ESTADO VACÍO MEJORADO
+     ================================ */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+
+  .empty-animation {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .empty-circles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .circle {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 3px solid #72b340;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .circle:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+
+  .circle:nth-child(3) {
+    animation-delay: 1s;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .empty-state h3 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+  }
+
+  .empty-state p {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+
+  /* ================================
+     MODALES MEJORADOS
+     ================================ */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    position: relative;
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 750px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8) translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .modal-content.view-post-modal {
+    max-width: 900px;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10;
+  }
+
+  .close-modal:hover {
+    background: #72b340;
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .modal-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(114, 179, 64, 0.3);
+  }
+
+  .modal-header h2 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  /* ================================
+     FORMULARIOS MEJORADOS
+     ================================ */
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-group.floating-label {
+    position: relative;
+  }
+
+  .floating-label input,
+  .floating-label textarea {
+    width: 100%;
+    padding: 1.25rem 1rem 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .floating-label label {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+
+  .floating-label input:focus,
+  .floating-label input:not(:placeholder-shown),
+  .floating-label textarea:focus,
+  .floating-label textarea:not(:placeholder-shown) {
+    border-color: #72b340;
+  }
+
+  .floating-label input:focus ~ label,
+  .floating-label input:not(:placeholder-shown) ~ label,
+  .floating-label textarea:focus ~ label,
+  .floating-label textarea:not(:placeholder-shown) ~ label {
+    top: 0.5rem;
+    font-size: 0.75rem;
+    color: #72b340;
+    font-weight: 600;
+  }
+
+  .input-border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #72b340, #5a9032);
+    transition: width 0.4s ease;
+  }
+
+  .floating-label input:focus ~ .input-border,
+  .floating-label textarea:focus ~ .input-border {
+    width: 100%;
+  }
+
+  .char-counter {
+    position: absolute;
+    right: 1rem;
+    bottom: -1.5rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+
+  .label-icon {
+    font-size: 1.2rem;
+  }
+
+  .styled-select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    cursor: pointer;
+  }
+
+  .styled-select:focus {
+    outline: none;
+    border-color: #72b340;
+    box-shadow: 0 0 0 3px rgba(114, 179, 64, 0.1);
+  }
+
+  .image-input-group {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .image-url-input {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .image-url-input:focus {
+    outline: none;
+    border-color: #72b340;
+    box-shadow: 0 0 0 3px rgba(114, 179, 64, 0.1);
+  }
+
+  .preview-btn {
+    padding: 0.875rem 1.5rem;
+    background: #72b340;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .preview-btn:hover {
+    background: #5a9032;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(114, 179, 64, 0.3);
+  }
+
+  .cover-preview {
+    margin-top: 1.25rem;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .preview-label {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .remove-preview-btn {
+    background: rgba(255,255,255,0.9);
+    color: #ef4444;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .remove-preview-btn:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .cover-preview img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Editor de contenido mejorado */
+  .editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 12px 12px 0 0;
+    border: 2px solid #e5e7eb;
+    border-bottom: none;
+  }
+
+  .toolbar-btn {
+    padding: 0.5rem 0.75rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toolbar-btn:hover {
+    background: #72b340;
+    color: white;
+    border-color: #72b340;
+    transform: translateY(-2px);
+  }
+
+  .editor-textarea {
+    border-radius: 0 0 12px 12px !important;
+    border-top: none !important;
+    font-family: 'Courier New', monospace;
+    line-height: 1.8;
+  }
+
+  .editor-help {
+    margin-top: 0.75rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 4px solid #72b340;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #374151;
+  }
+
+  /* Sistema de etiquetas mejorado */
+  .tags-input-container {
+    position: relative;
+  }
+
+  .tags-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .tags-input:focus {
+    outline: none;
+    border-color: #72b340;
+    box-shadow: 0 0 0 3px rgba(114, 179, 64, 0.1);
+  }
+
+  .tags-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    min-height: 20px;
+  }
+
+  .tag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    color: white;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    animation: tagAppear 0.3s ease;
+  }
+
+  @keyframes tagAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .tag-remove {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .tag-remove:hover {
+    background: rgba(255,255,255,0.4);
+    transform: scale(1.1);
+  }
+
+  /* Toggle mejorado */
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .toggle-label:hover {
+    background: #f3f4f6;
+  }
+
+  .toggle-label input[type="checkbox"] {
+    display: none;
+  }
+
+  .toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #d1d5db;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle-label input[type="checkbox"]:checked ~ .toggle-slider {
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+  }
+
+  .toggle-label input[type="checkbox"]:checked ~ .toggle-slider::before {
+    transform: translateX(24px);
+  }
+
+  .toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .toggle-text strong {
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+
+  .toggle-text small {
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+
+  /* Acciones del formulario */
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f3f4f6;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .button-group {
     display: flex;
     gap: 1rem;
-    margin-bottom: 1rem;
   }
 
-  .tabs span {
+  .btn-secondary,
+  .btn-primary {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
-    padding: 0.5rem 1rem;
-    background-color: #a5d6a7; /* Verde suave */
-    border-radius: 5px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-  .tabs span.active {
-    background-color: #4caf50; 
-    color: #fff;
+  .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
   }
 
-  .recipes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .btn-secondary:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #72b340 0%, #5a9032 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(114, 179, 64, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(114, 179, 64, 0.4);
+  }
+
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: translateY(-1px);
+  }
+
+  /* ================================
+     VISTA DE POST COMPLETO
+     ================================ */
+  .blog-post-full {
+    line-height: 1.8;
+  }
+
+  .blog-post-full h1 {
+    font-size: 2.5rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .blog-post-full img {
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .post-actions-bar {
+    display: flex;
     gap: 1rem;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 16px;
+    flex-wrap: wrap;
+  }
+
+  .post-action-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 2px solid #72b340;
+    color: #72b340;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .post-action-btn:hover {
+    background: #72b340;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(114, 179, 64, 0.3);
+  }
+
+  .action-icon {
+    font-size: 1.2rem;
+  }
+
+  /* ================================
+     LOADING Y NOTIFICACIONES
+     ================================ */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1.5rem;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #72b340;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-container p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1.25rem 1.75rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+    z-index: 10000;
+    animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 250px;
+  }
+
+  .notification.success {
+    border-left: 5px solid #22c55e;
+  }
+
+  .notification.success::before {
+    content: '✓';
+    background: #22c55e;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .notification.error {
+    border-left: 5px solid #ef4444;
+  }
+
+  .notification.error::before {
+    content: '✕';
+    background: #ef4444;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(450px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* ================================
+     UTILIDADES
+     ================================ */
+  .hidden {
+    display: none !important;
+  }
+
+  /* ================================
+     RESPONSIVE
+     ================================ */
+  @media (max-width: 768px) {
+    .blog-header {
+      padding: 3rem 1.5rem;
+    }
+
+    .header-content h1 {
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+
+    .blog-posts-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .blog-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-buttons {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-content {
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+
+    .button-group {
+      flex-direction: column;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .post-actions-bar {
+      flex-direction: column;
+    }
+
+    .notification {
+      bottom: 1rem;
+      right: 1rem;
+      left: 1rem;
+    }
+
+    .editor-toolbar {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header-icon {
+      font-size: 3rem;
+    }
+
+    .header-content h1 {
+      font-size: 1.75rem;
+    }
+
+    .create-btn {
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .blog-post-full h1 {
+      font-size: 2rem;
+    }
   }
 </style>
 
-<div class="container">
-  <!-- Barra lateral -->
-  <div class="sidebar">
-    <ProfilePic/>
-    <ProfileCard
-      name="Elena Reygadas"
-      username="@elena_reyg_20"
-      notifications="107"
-      messages="15"
-      followers="240"
-    />
-    <!-- Logo -->
-    <div class="logo">
-      <img src="/src/img/logo_saludable.png" alt="Logo" />
-    </div>
-  </div>
+<script>
+  let currentEditId = null;
+  let allPosts = [];
+  let currentFilter = 'all';
+  let tagsArray = [];
+  let currentPostId = null;
 
-  <!-- Contenido principal -->
-  <div class="main-content">
-    <!-- Barra de búsqueda -->
-    <div class="search-bar">
-      <div class="tabs">
-        <span class="active">For you</span>
-        <span>Following</span>
+  // ============================================================
+  // 🔔 Notificaciones Mejoradas
+  // ============================================================
+  function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.remove('hidden');
+    setTimeout(() => notification.classList.add('hidden'), 3500);
+  }
+
+  // ============================================================
+  // 📊 Cargar entradas del blog
+  // ============================================================
+  async function loadBlogPosts() {
+    try {
+      const res = await fetch('http://localhost:3000/api/blog', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al cargar entradas');
+
+      allPosts = await res.json();
+      renderPosts();
+      updateResultsCount(allPosts.length);
+    } catch (err) {
+      console.error('❌ Error:', err);
+      document.getElementById('blog-posts-container').innerHTML = 
+        '<div class="loading-container"><p style="color: #ef4444;">Error al cargar las entradas del blog</p></div>';
+    }
+  }
+
+  // ============================================================
+  // 📈 Actualizar contador de resultados
+  // ============================================================
+  function updateResultsCount(count) {
+    const counter = document.getElementById('results-count');
+    if (count > 0) {
+      counter.textContent = `${count} ${count === 1 ? 'entrada' : 'entradas'}`;
+      counter.style.display = 'block';
+    } else {
+      counter.style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // 🎨 Renderizar posts con animaciones
+  // ============================================================
+  function renderPosts(posts = allPosts) {
+    const container = document.getElementById('blog-posts-container');
+    const emptyState = document.getElementById('empty-state');
+
+    // Aplicar filtro
+    let filteredPosts = posts;
+    if (currentFilter === 'published') {
+      filteredPosts = posts.filter(p => p.isPublished);
+    } else if (currentFilter === 'draft') {
+      filteredPosts = posts.filter(p => !p.isPublished);
+    }
+
+    if (filteredPosts.length === 0) {
+      container.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      updateResultsCount(0);
+      return;
+    }
+
+    container.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    updateResultsCount(filteredPosts.length);
+
+    container.innerHTML = filteredPosts.map((post, index) => `
+      <div class="blog-card" data-id="${post._id}" onclick="viewPost('${post._id}')" style="animation-delay: ${index * 0.1}s;">
+        ${post.coverImage ? 
+          `<img src="${post.coverImage}" alt="${post.title}" class="blog-card-cover" />` :
+          `<div class="blog-card-cover"></div>`
+        }
+        <div class="blog-card-content">
+          <div class="blog-card-header">
+            <span class="blog-category">${post.category || 'General'}</span>
+            <div class="blog-status">
+              <span class="status-dot ${post.isPublished ? 'status-published' : 'status-draft'}"></span>
+              ${post.isPublished ? 'Publicado' : 'Borrador'}
+            </div>
+          </div>
+          
+          <h3>${post.title}</h3>
+          <p class="blog-excerpt">${post.excerpt || post.content.substring(0, 150) + '...'}</p>
+          
+          <div class="blog-card-footer">
+            <div class="blog-meta">
+              <span>👁️ ${post.views || 0}</span>
+              <span>❤️ ${post.likes?.length || 0}</span>
+              <span>📅 ${new Date(post.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+            </div>
+            <div class="blog-actions" onclick="event.stopPropagation()">
+              <button class="action-btn" onclick="viewPost('${post._id}')" title="Ver">👁️</button>
+              <button class="action-btn" onclick="editPost('${post._id}')" title="Editar">✏️</button>
+              <button class="action-btn" onclick="deletePost('${post._id}')" title="Eliminar">🗑️</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <input type="text" placeholder="What are you looking for?" />
-    </div>
+    `).join('');
+  }
 
-    <!-- Recetas -->
-    <div class="recipes-grid">
-      <BlogCard
-        author="steveh.cook"
-        title="Quinoa and vegetable salad"
-        description="My favorite breakfast"
-        time="Just now"
-        image="/src/img/quinoa_salad.jpg"
-        profilePic="/src/img/perfil6.png" 
-      />
-      <BlogCard
-        author="cocinaencasa"
-        title="Spinach and avocado smoothie"
-        description="This smoothie will help you lose weight"
-        time="5 minutes ago"
-        image="/src/img/spinach_avocado_smoothie.jpg"
-        profilePic="/src/img/perfil3.jpg" 
-      />
-      <BlogCard
-        author="juliananavarro1999"
-        title="Zucchini cream"
-        description="This cream is good and easy to make"
-        time="2 hours ago"
-        image="/src/img/crema-de-calabaza.jpg"
-        profilePic="/src/img/perfil2.jpg" 
-      />
-      <BlogCard
-        author="cake.shop"
-        title="Orange chicken"
-        description="Eggplant stuffed with vegetables (turkish style)"
-        time="Yesterday"
-        image="/src/img/pollo-a-la-naranja.jpg"
-        profilePic="/src/img/perfil5.png" 
-      />
-      <BlogCard
-        author="elena_reyg_20"
-        title="Rice with almond milk"
-        description="This type of rice will be a good dessert for the afternoons"
-        time="Yesterday"
-        image="/src/img/arroz_leche_almendra.jpg"
-        profilePic="/src/img/elena_profile.jpg" 
-      />
-      <BlogCard
-        author="_sofia_"
-        title="Chicken and black bean salsa burritos"
-        description="A light dinner to share with family or friends"
-        time="Yesterday"
-        image="/src/img/burritos.jpg"
-        profilePic="/src/img/perfil4.png" 
-      />
-    </div>
-  </div>
-</div>
+  // ============================================================
+  // ✍️ Crear entrada
+  // ============================================================
+  document.getElementById('create-post-btn')?.addEventListener('click', () => {
+    currentEditId = null;
+    tagsArray = [];
+    document.getElementById('modal-title').textContent = 'Nueva Entrada de Blog';
+    document.getElementById('blog-form').reset();
+    document.getElementById('cover-preview').classList.add('hidden');
+    document.getElementById('submit-text').textContent = 'Guardar';
+    document.getElementById('title-counter').textContent = '0/150';
+    document.getElementById('excerpt-counter').textContent = '0/200';
+    document.getElementById('tags-display').innerHTML = '';
+    document.getElementById('blogModal').classList.remove('hidden');
+  });
+
+  // ============================================================
+  // ✏️ Editar entrada
+  // ============================================================
+  window.editPost = async function(id) {
+    event?.stopPropagation();
+    try {
+      const post = allPosts.find(p => p._id === id);
+      if (!post) return;
+
+      currentEditId = id;
+      tagsArray = post.tags || [];
+      
+      document.getElementById('modal-title').textContent = 'Editar Entrada';
+      document.getElementById('blog-title').value = post.title;
+      document.getElementById('blog-category').value = post.category || 'General';
+      document.getElementById('blog-cover').value = post.coverImage || '';
+      document.getElementById('blog-excerpt').value = post.excerpt || '';
+      document.getElementById('blog-content').value = post.content;
+      document.getElementById('blog-published').checked = post.isPublished;
+      document.getElementById('submit-text').textContent = 'Actualizar';
+      
+      document.getElementById('title-counter').textContent = `${post.title.length}/150`;
+      document.getElementById('excerpt-counter').textContent = `${(post.excerpt || '').length}/200`;
+
+      renderTags();
+
+      if (post.coverImage) {
+        document.getElementById('cover-preview-img').src = post.coverImage;
+        document.getElementById('cover-preview').classList.remove('hidden');
+      }
+
+      document.getElementById('blogModal').classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error:', err);
+    }
+  };
+
+  // ============================================================
+  // 💾 Guardar entrada
+  // ============================================================
+  document.getElementById('blog-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = {
+        title: document.getElementById('blog-title').value.trim(),
+        category: document.getElementById('blog-category').value,
+        coverImage: document.getElementById('blog-cover').value.trim(),
+        excerpt: document.getElementById('blog-excerpt').value.trim(),
+        content: document.getElementById('blog-content').value.trim(),
+        tags: tagsArray,
+        isPublished: document.getElementById('blog-published').checked,
+      };
+
+      const url = currentEditId 
+        ? `http://localhost:3000/api/blog/${currentEditId}`
+        : 'http://localhost:3000/api/blog';
+
+      const res = await fetch(url, {
+        method: currentEditId ? 'PUT' : 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error('Error al guardar');
+
+      showNotification(currentEditId ? '✨ Entrada actualizada exitosamente' : '🎉 Entrada creada exitosamente');
+      closeBlogModal();
+      await loadBlogPosts();
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al guardar entrada', 'error');
+    }
+  });
+
+  // ============================================================
+  // 🗑️ Eliminar entrada
+  // ============================================================
+  window.deletePost = async function(id) {
+    event?.stopPropagation();
+    if (!confirm('¿Estás seguro de eliminar esta entrada? Esta acción no se puede deshacer.')) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/blog/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al eliminar');
+
+      showNotification('🗑️ Entrada eliminada exitosamente');
+      await loadBlogPosts();
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al eliminar entrada', 'error');
+    }
+  };
+
+  // ============================================================
+  // 👁️ Ver entrada completa
+  // ============================================================
+  window.viewPost = async function(id) {
+    event?.stopPropagation();
+    try {
+      currentPostId = id;
+      const res = await fetch(`http://localhost:3000/api/blog/${id}`, {
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al cargar');
+
+      const post = await res.json();
+      
+      document.getElementById('post-content').innerHTML = `
+        ${post.coverImage ? `<img src="${post.coverImage}" alt="${post.title}" style="width: 100%; max-height: 400px; object-fit: cover; margin-bottom: 2rem;" />` : ''}
+        <h1>${post.title}</h1>
+        <div style="display: flex; gap: 1.5rem; margin: 1.5rem 0; color: #6b7280; font-weight: 600;">
+          <span>📅 ${new Date(post.publishedAt || post.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span>👁️ ${post.views || 0} vistas</span>
+          <span>❤️ ${post.likes?.length || 0} likes</span>
+        </div>
+        <div style="white-space: pre-wrap; line-height: 1.9; font-size: 1.1rem; color: #374151; margin: 2rem 0;">
+          ${post.content}
+        </div>
+        ${post.tags?.length ? `
+          <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 2px solid #f3f4f6;">
+            <h3 style="font-size: 1.1rem; color: #6b7280; margin-bottom: 1rem;">Etiquetas:</h3>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              ${post.tags.map(tag => `
+                <span style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #72b340 0%, #5a9032 100%); color: white; border-radius: 25px; font-size: 0.9rem; font-weight: 600;">#${tag}</span>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('viewPostModal').classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al cargar entrada', 'error');
+    }
+  };
+
+  // ============================================================
+  // 🔍 Búsqueda con debounce
+  // ============================================================
+  let searchTimeout;
+  document.getElementById('blog-search')?.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allPosts.filter(post => 
+        post.title.toLowerCase().includes(query) ||
+        post.content.toLowerCase().includes(query) ||
+        (post.excerpt && post.excerpt.toLowerCase().includes(query)) ||
+        post.tags?.some(tag => tag.toLowerCase().includes(query))
+      );
+      renderPosts(filtered);
+    }, 300);
+  });
+
+  // ============================================================
+  // 🎯 Filtros
+  // ============================================================
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderPosts();
+    });
+  });
+
+  // ============================================================
+  // 🖼️ Preview de portada
+  // ============================================================
+  document.getElementById('preview-cover-btn')?.addEventListener('click', () => {
+    const url = document.getElementById('blog-cover').value.trim();
+    const preview = document.getElementById('cover-preview');
+    
+    if (!url) {
+      preview.classList.add('hidden');
+      return;
+    }
+
+    document.getElementById('cover-preview-img').src = url;
+    document.getElementById('cover-preview-img').onerror = () => {
+      showNotification('No se pudo cargar la imagen', 'error');
+      preview.classList.add('hidden');
+    };
+    document.getElementById('cover-preview-img').onload = () => {
+      preview.classList.remove('hidden');
+    };
+  });
+
+  // ============================================================
+  // 🗑️ Remover vista previa
+  // ============================================================
+  window.removePreview = function() {
+    document.getElementById('blog-cover').value = '';
+    document.getElementById('cover-preview').classList.add('hidden');
+  };
+
+  // ============================================================
+  // 📊 Contadores de caracteres
+  // ============================================================
+  document.getElementById('blog-title')?.addEventListener('input', (e) => {
+    document.getElementById('title-counter').textContent = `${e.target.value.length}/150`;
+  });
+
+  document.getElementById('blog-excerpt')?.addEventListener('input', (e) => {
+    document.getElementById('excerpt-counter').textContent = `${e.target.value.length}/200`;
+  });
+
+  // ============================================================
+  // 🏷️ Sistema de etiquetas mejorado
+  // ============================================================
+  document.getElementById('blog-tags')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const input = e.target;
+      const tag = input.value.trim();
+      
+      if (tag && !tagsArray.includes(tag)) {
+        tagsArray.push(tag);
+        renderTags();
+        input.value = '';
+      }
+    }
+  });
+
+  function renderTags() {
+    const container = document.getElementById('tags-display');
+    container.innerHTML = tagsArray.map((tag, index) => `
+      <span class="tag-item">
+        #${tag}
+        <button type="button" class="tag-remove" onclick="removeTag(${index})">×</button>
+      </span>
+    `).join('');
+  }
+
+  window.removeTag = function(index) {
+    tagsArray.splice(index, 1);
+    renderTags();
+  };
+
+  // ============================================================
+  // ✍️ Insertar Markdown
+  // ============================================================
+  window.insertMarkdown = function(before, after) {
+    const textarea = document.getElementById('blog-content');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+    const beforeText = textarea.value.substring(0, start);
+    const afterText = textarea.value.substring(end);
+    
+    textarea.value = beforeText + before + selectedText + after + afterText;
+    textarea.focus();
+    textarea.setSelectionRange(start + before.length, end + before.length);
+  };
+
+  // ============================================================
+  // 🚪 Cerrar modales
+  // ============================================================
+  window.closeBlogModal = function() {
+    document.getElementById('blogModal').classList.add('hidden');
+    currentEditId = null;
+    tagsArray = [];
+  };
+
+  window.closeViewModal = function() {
+    document.getElementById('viewPostModal').classList.add('hidden');
+    currentPostId = null;
+  };
+
+  // ============================================================
+  // ❤️ Acciones del post
+  // ============================================================
+  window.likeCurrentPost = async function() {
+    if (!currentPostId) return;
+    try {
+      const res = await fetch(`http://localhost:3000/api/blog/${currentPostId}/like`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al dar like');
+
+      showNotification('❤️ Te gusta esta entrada');
+      await loadBlogPosts();
+      await viewPost(currentPostId);
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al dar like', 'error');
+    }
+  };
+
+  window.shareCurrentPost = function() {
+    if (!currentPostId) return;
+    
+    const url = `${window.location.origin}/blog/${currentPostId}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Entrada de blog',
+        url: url
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        showNotification('🔗 Enlace copiado al portapapeles');
+      }).catch(() => {
+        showNotification('No se pudo copiar el enlace', 'error');
+      });
+    }
+  };
+
+  window.editCurrentPost = function() {
+    if (!currentPostId) return;
+    closeViewModal();
+    editPost(currentPostId);
+  };
+
+  // ============================================================
+  // ⌨️ Cerrar modales con ESC
+  // ============================================================
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modals = document.querySelectorAll('.modal:not(.hidden)');
+      modals.forEach(modal => modal.classList.add('hidden'));
+    }
+  });
+
+  // ============================================================
+  // 🚀 Inicializar
+  // ============================================================
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadBlogPosts);
+  } else {
+    loadBlogPosts();
+  }
+</script>

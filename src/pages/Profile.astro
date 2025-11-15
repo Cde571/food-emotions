@@ -62,9 +62,9 @@ import PopularCollections from '../components/PopularCollections.astro';
         </div>
 
         <div class="user-links">
-          <a href="/blog">Blog</a>
+          <a href="/Blog">Blog</a>
           <a href="/Archives">Archivos</a>
-          <a href="/Recipes">Colecciones</a>
+          <a href="/Colecciones">Colecciones</a>
           <button id="go-to-feed" class="feed-btn">Ir al Feed</button>
           <button id="logout-button" class="logout-button">Cerrar sesión</button>
         </div>
@@ -129,10 +129,10 @@ import PopularCollections from '../components/PopularCollections.astro';
       <div id="createGroupModal" class="modal hidden">
         <div class="modal-content">
           <button class="close-modal" onclick="document.getElementById('createGroupModal').classList.add('hidden')">×</button>
-          <h2>Crear Nuevo Grupo</h2>
+          <h2>Crear nuevo grupo</h2>
           <form id="create-group-form">
             <div class="form-group">
-              <label for="group-name">Nombre del Grupo *</label>
+              <label for="group-name">Nombre del grupo *</label>
               <input type="text" id="group-name" required placeholder="Ej: Amantes de la Cocina" />
             </div>
             <div class="form-group">
@@ -630,7 +630,6 @@ bannerUploadInput?.addEventListener('change', async e => {
     const formData = new FormData();
     formData.append('bannerImage', file);
     
-    // ✅ CAMBIO CRÍTICO: Usar endpoint correcto que sube a Cloudinary
     const res = await fetch('http://localhost:3000/api/users/me/banner', {
       method: 'POST',
       credentials: 'include',
@@ -641,7 +640,6 @@ bannerUploadInput?.addEventListener('change', async e => {
     
     const data = await res.json();
     
-    // ✅ Actualizar imagen del banner con la URL de Cloudinary
     document.getElementById('banner-image').src = data.bannerImage;
     
     showNotification('Portada actualizada y guardada');
@@ -669,7 +667,6 @@ bannerUrlForm?.addEventListener('submit', async e => {
     
     showNotification('Guardando portada...', 'success');
     
-    // ✅ Usar endpoint que guarda en Cloudinary
     const res = await fetch('http://localhost:3000/api/users/me/banner-url', {
       method: 'PUT',
       credentials: 'include',
@@ -681,7 +678,6 @@ bannerUrlForm?.addEventListener('submit', async e => {
     
     const data = await res.json();
     
-    // ✅ Actualizar con la URL guardada en Cloudinary
     document.getElementById('banner-image').src = data.bannerImage;
     
     bannerModal?.classList.add('hidden');
@@ -969,173 +965,17 @@ async function loadGroupStatus() {
 // 👥 SISTEMA COMPLETO DE GRUPOS
 // ============================================================
 
-// 🔹 Cargar todos los grupos disponibles
-async function loadAllGroups() {
-  try {
-    const res = await fetch('http://localhost:3000/api/groups', {
-      credentials: 'include',
-    });
-    
-    if (!res.ok) return;
-    
-    const groups = await res.json();
-    const groupsList = document.getElementById('groups-list');
-    
-    if (!groupsList) return;
-    
-    const otherGroups = groups.filter(g => g.slug !== 'royal-ui-force');
-    
-    if (otherGroups.length === 0) {
-      groupsList.innerHTML = '<p class="no-groups">No hay otros grupos disponibles</p>';
-      return;
-    }
-    
-    groupsList.innerHTML = otherGroups.map(group => `
-      <div class="group-card-small" data-slug="${group.slug}">
-        ${group.image ? `<img src="${group.image}" alt="${group.name}" class="group-small-image" />` : `<div class="group-icon">👥</div>`}
-        <div class="group-info">
-          <h5>${group.name}</h5>
-          <p>${group.memberCount || 0} miembros</p>
-        </div>
-        <button class="view-group-btn" data-slug="${group.slug}">Ver</button>
-      </div>
-    `).join('');
-    
-    document.querySelectorAll('.view-group-btn').forEach(btn => {
-      btn.addEventListener('click', () => viewGroupDetails(btn.dataset.slug));
-    });
-    
-  } catch (err) {
-    console.error('❌ Error cargando grupos:', err);
-  }
-}
-
-// 🔹 Ver detalles completos de un grupo
-async function viewGroupDetails(slug) {
-  try {
-    const res = await fetch(`http://localhost:3000/api/groups/${slug}`, {
-      credentials: 'include',
-    });
-    
-    if (!res.ok) throw new Error('Grupo no encontrado');
-    
-    const group = await res.json();
-    const modal = document.getElementById('groupDetailsModal');
-    const content = document.getElementById('group-details-content');
-    
-    // ✅ Verificar si el usuario es el creador
-    const isCreator = currentUser && group.creator && (currentUser._id === group.creator._id || currentUser._id === group.creator);
-    
-    content.innerHTML = `
-      <div class="group-details">
-        ${group.image ? `<img src="${group.image}" alt="${group.name}" class="group-detail-image" />` : '<div class="group-detail-placeholder">👥</div>'}
-        <h2>${group.name}</h2>
-        <p class="group-description">${group.description || 'Sin descripción'}</p>
-        
-        <div class="group-stats">
-          <div class="stat">
-            <span class="stat-number">${group.memberCount || 0}</span>
-            <span class="stat-label">Miembros</span>
-          </div>
-          <div class="stat">
-            <span class="stat-number">${new Date(group.createdAt).toLocaleDateString()}</span>
-            <span class="stat-label">Creado</span>
-          </div>
-        </div>
-        
-        <div class="group-actions">
-          <button id="toggle-group-membership" class="modal-btn confirm" data-slug="${slug}" data-member="${group.isMember}">
-            ${group.isMember ? '✓ Miembro' : '👥 Unirse'}
-          </button>
-          
-          ${isCreator ? `
-            <button id="delete-group-btn" class="modal-btn delete-btn" data-slug="${slug}">
-              🗑️ Eliminar Grupo
-            </button>
-          ` : ''}
-        </div>
-        
-        ${group.members && group.members.length > 0 ? `
-          <div class="group-members">
-            <h3>Miembros (${group.members.length})</h3>
-            <div class="members-grid">
-              ${group.members.slice(0, 12).map(member => `
-                <div class="member-item" onclick="window.location.href='/Profile?user=${member._id}'">
-                  <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
-                  <span>${member.username}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-      </div>
-    `;
-    
-    modal.classList.remove('hidden');
-    
-    // Event listener para unirse/salir
-    document.getElementById('toggle-group-membership')?.addEventListener('click', async (e) => {
-      const btn = e.target;
-      const groupSlug = btn.dataset.slug;
-      
-      try {
-        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/join`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        
-        if (!res.ok) throw new Error('Error al procesar solicitud');
-        
-        const data = await res.json();
-        
-        btn.textContent = data.joined ? '✓ Miembro' : '👥 Unirse';
-        btn.dataset.member = data.joined;
-        
-        showNotification(data.message);
-        
-        setTimeout(() => viewGroupDetails(groupSlug), 500);
-      } catch (err) {
-        console.error('❌ Error:', err);
-        showNotification('Error al procesar solicitud', 'error');
-      }
-    });
-    
-    // ✅ Event listener para eliminar grupo
-    document.getElementById('delete-group-btn')?.addEventListener('click', async (e) => {
-      const groupSlug = e.target.dataset.slug;
-      
-      if (!confirm('¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.')) {
-        return;
-      }
-      
-      try {
-        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-        
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || 'Error al eliminar grupo');
-        }
-        
-        showNotification('Grupo eliminado exitosamente');
-        modal.classList.add('hidden');
-        
-        // Recargar lista de grupos
-        await loadAllGroups();
-      } catch (err) {
-        console.error('❌ Error eliminando grupo:', err);
-        showNotification(err.message || 'Error al eliminar grupo', 'error');
-      }
-    });
-    
-  } catch (err) {
-    console.error('❌ Error cargando detalles del grupo:', err);
-    showNotification('Error al cargar detalles del grupo', 'error');
-  }
-}
+// 🔹 Abrir modal de crear grupo
+document.getElementById('create-group-btn')?.addEventListener('click', () => {
+  document.getElementById('createGroupModal')?.classList.remove('hidden');
+  
+  // Limpiar formulario y preview
+  document.getElementById('create-group-form')?.reset();
+  const preview = document.getElementById('group-image-preview');
+  const text = document.getElementById('image-preview-text');
+  if (preview) preview.classList.add('hidden');
+  if (text) text.textContent = '📷 Seleccionar imagen';
+});
 
 // 🔹 Preview de imagen al crear grupo
 document.getElementById('select-group-image')?.addEventListener('click', () => {
@@ -1174,17 +1014,9 @@ document.getElementById('group-image-file')?.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-// 🔹 Crear nuevo grupo
-document.getElementById('create-group-btn')?.addEventListener('click', () => {
-  document.getElementById('createGroupModal')?.classList.remove('hidden');
-  
-  // Limpiar preview
-  const preview = document.getElementById('group-image-preview');
-  const text = document.getElementById('image-preview-text');
-  if (preview) preview.classList.add('hidden');
-  if (text) text.textContent = '📷 Seleccionar imagen';
-});
-
+// ============================================================
+// ✅ CREAR GRUPO 
+// ============================================================
 document.getElementById('create-group-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -1198,27 +1030,70 @@ document.getElementById('create-group-form')?.addEventListener('submit', async (
       return;
     }
     
-    const formData = new FormData();
-    formData.append('name', name);
-    if (description) formData.append('description', description);
-    if (imageFile) formData.append('image', imageFile);
-    
+    console.log('🔄 Creando grupo:', { name, description, hasImage: !!imageFile });
     showNotification('Creando grupo...', 'success');
     
-    const res = await fetch('http://localhost:3000/api/groups/create', {
+    let imageUrl = '';
+    
+    // ⚡ Primero subir la imagen a Cloudinary si existe
+    if (imageFile) {
+      try {
+        console.log('📤 Subiendo imagen del grupo...');
+        const imageFormData = new FormData();
+        imageFormData.append('file', imageFile);
+        
+        // Usar el endpoint de subida de banner como referencia
+        const uploadRes = await fetch('http://localhost:3000/api/users/me/banner', {
+          method: 'POST',
+          credentials: 'include',
+          body: imageFormData,
+        });
+        
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.bannerImage;
+          console.log('✅ Imagen subida:', imageUrl);
+        } else {
+          console.warn('⚠️ Error subiendo imagen, continuando sin ella');
+        }
+      } catch (imgErr) {
+        console.warn('⚠️ Error subiendo imagen:', imgErr);
+      }
+    }
+    
+    // 📝 Crear el grupo con JSON (NO FormData)
+    const groupData = {
+      name: name,
+      description: description || '',
+      image: imageUrl || '' // URL de Cloudinary o vacío
+    };
+    
+    console.log('📤 Enviando datos del grupo:', groupData);
+    
+    // ⚠️ RUTA CORRECTA: /api/groups (SIN /create)
+    const res = await fetch('http://localhost:3000/api/groups', {
       method: 'POST',
       credentials: 'include',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json', // ⚡ IMPORTANTE: JSON, no FormData
+      },
+      body: JSON.stringify(groupData),
     });
+    
+    console.log('📡 Respuesta del servidor:', res.status);
     
     if (!res.ok) {
       const error = await res.json();
+      console.error('❌ Error del servidor:', error);
       throw new Error(error.message || 'Error al crear grupo');
     }
     
     const data = await res.json();
+    console.log('✅ Grupo creado exitosamente:', data);
     
-    showNotification('Grupo creado exitosamente');
+    showNotification(`Grupo "${data.group.name}" creado exitosamente`);
+    
+    // Cerrar modal y limpiar
     document.getElementById('createGroupModal')?.classList.add('hidden');
     document.getElementById('create-group-form').reset();
     
@@ -1228,13 +1103,241 @@ document.getElementById('create-group-form')?.addEventListener('submit', async (
     if (preview) preview.classList.add('hidden');
     if (text) text.textContent = '📷 Seleccionar imagen';
     
+    // Recargar lista de grupos
     await loadAllGroups();
     
+    // Opcional: Abrir detalles del grupo recién creado
+    setTimeout(() => {
+      if (data.group.slug) {
+        viewGroupDetails(data.group.slug);
+      }
+    }, 500);
+    
   } catch (err) {
-    console.error('❌ Error creando grupo:', err);
+    console.error('❌ Error completo:', err);
     showNotification(err.message || 'Error al crear grupo', 'error');
   }
 });
+
+// ============================================================
+// 🔧 CARGAR GRUPOS 
+// ============================================================
+async function loadAllGroups() {
+  try {
+    console.log('🔄 Cargando grupos...');
+    
+    const res = await fetch('http://localhost:3000/api/groups', {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!res.ok) {
+      console.error('❌ Error cargando grupos:', res.status);
+      return;
+    }
+    
+    const data = await res.json();
+    
+    const groups = data.groups || data;
+    
+    console.log('✅ Grupos cargados:', groups.length);
+    
+    const groupsList = document.getElementById('groups-list');
+    if (!groupsList) return;
+    
+    // Filtrar el grupo royal-ui-force (ya se muestra por separado)
+    const otherGroups = groups.filter(g => g.slug !== 'royal-ui-force');
+    
+    if (otherGroups.length === 0) {
+      groupsList.innerHTML = '<p class="no-groups">No hay otros grupos disponibles. ¡Crea el primero!</p>';
+      return;
+    }
+    
+    groupsList.innerHTML = otherGroups.map(group => `
+      <div class="group-card-small" data-slug="${group.slug}">
+        ${group.image ? 
+          `<img src="${group.image}" alt="${group.name}" class="group-small-image" />` : 
+          `<div class="group-icon">👥</div>`
+        }
+        <div class="group-info">
+          <h5>${group.name}</h5>
+          <p>${group.memberCount || 0} miembros</p>
+          ${group.isMember ? '<span class="member-badge">✓ Miembro</span>' : ''}
+        </div>
+        <button class="view-group-btn" data-slug="${group.slug}">Ver</button>
+      </div>
+    `).join('');
+    
+    // Event listeners para ver detalles
+    document.querySelectorAll('.view-group-btn').forEach(btn => {
+      btn.addEventListener('click', () => viewGroupDetails(btn.dataset.slug));
+    });
+    
+  } catch (err) {
+    console.error('❌ Error cargando grupos:', err);
+    showNotification('Error al cargar grupos', 'error');
+  }
+}
+
+// ============================================================
+// 🔍 VER DETALLES DE GRUPO - VERSIÓN MEJORADA
+// ============================================================
+async function viewGroupDetails(slug) {
+  try {
+    console.log('🔍 Cargando detalles del grupo:', slug);
+    
+    const res = await fetch(`http://localhost:3000/api/groups/${slug}`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!res.ok) {
+      throw new Error('Grupo no encontrado');
+    }
+    
+    const group = await res.json();
+    console.log('✅ Grupo cargado:', group);
+    
+    const modal = document.getElementById('groupDetailsModal');
+    const content = document.getElementById('group-details-content');
+    
+    if (!modal || !content) return;
+    
+    // ✅ Verificar si el usuario es el creador
+    const isCreator = currentUser && group.createdBy && 
+      (currentUser._id === group.createdBy._id || currentUser._id === group.createdBy);
+    
+    content.innerHTML = `
+      <div class="group-details">
+        ${group.image ? 
+          `<img src="${group.image}" alt="${group.name}" class="group-detail-image" />` : 
+          '<div class="group-detail-placeholder">👥</div>'
+        }
+        <h2>${group.name}</h2>
+        <p class="group-description">${group.description || 'Sin descripción'}</p>
+        
+        <div class="group-stats">
+          <div class="stat">
+            <span class="stat-number">${group.memberCount || 0}</span>
+            <span class="stat-label">Miembros</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">${group.postCount || 0}</span>
+            <span class="stat-label">Publicaciones</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">${new Date(group.createdAt).toLocaleDateString()}</span>
+            <span class="stat-label">Creado</span>
+          </div>
+        </div>
+        
+        <div class="group-actions">
+          <button id="toggle-group-membership" class="modal-btn confirm" data-slug="${slug}" data-member="${group.isMember}">
+            ${group.isMember ? '✓ Miembro del Grupo' : '👥 Unirse al Grupo'}
+          </button>
+          
+          ${isCreator ? `
+            <button id="edit-group-btn" class="modal-btn" data-slug="${slug}">
+              ✏️ Editar Grupo
+            </button>
+            <button id="delete-group-btn" class="modal-btn delete-btn" data-slug="${slug}">
+              🗑️ Eliminar Grupo
+            </button>
+          ` : ''}
+        </div>
+        
+        ${group.members && group.members.length > 0 ? `
+          <div class="group-members">
+            <h3>Miembros (${group.members.length})</h3>
+            <div class="members-grid">
+              ${group.members.slice(0, 12).map(member => `
+                <div class="member-item" onclick="window.location.href='/Profile?user=${member._id}'">
+                  <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
+                  <span>${member.username}</span>
+                  ${member.status ? `<span class="status-indicator status-${member.status.toLowerCase()}">${member.status}</span>` : ''}
+                </div>
+              `).join('')}
+            </div>
+            ${group.members.length > 12 ? `<p class="more-members">+${group.members.length - 12} miembros más</p>` : ''}
+          </div>
+        ` : '<p class="no-members">No hay miembros aún. ¡Sé el primero en unirte!</p>'}
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    
+    // ⚡ Event listener para unirse/salir
+    document.getElementById('toggle-group-membership')?.addEventListener('click', async (e) => {
+      const btn = e.target;
+      const groupSlug = btn.dataset.slug;
+      
+      try {
+        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/join`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!res.ok) throw new Error('Error al procesar solicitud');
+        
+        const data = await res.json();
+        console.log('✅ Estado actualizado:', data);
+        
+        btn.textContent = data.joined ? '✓ Miembro del Grupo' : '👥 Unirse al Grupo';
+        btn.dataset.member = data.joined;
+        
+        showNotification(data.message);
+        
+        // Recargar detalles después de 500ms
+        setTimeout(() => viewGroupDetails(groupSlug), 500);
+        
+        // Recargar lista de grupos en el background
+        loadAllGroups();
+      } catch (err) {
+        console.error('❌ Error:', err);
+        showNotification('Error al procesar solicitud', 'error');
+      }
+    });
+    
+    // ⚡ Event listener para eliminar grupo
+    document.getElementById('delete-group-btn')?.addEventListener('click', async (e) => {
+      const groupSlug = e.target.dataset.slug;
+      
+      if (!confirm(`¿Estás seguro de que quieres eliminar el grupo "${group.name}"? Esta acción no se puede deshacer.`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Error al eliminar grupo');
+        }
+        
+        showNotification('Grupo eliminado exitosamente');
+        modal.classList.add('hidden');
+        
+        // Recargar lista de grupos
+        await loadAllGroups();
+      } catch (err) {
+        console.error('❌ Error eliminando grupo:', err);
+        showNotification(err.message || 'Error al eliminar grupo', 'error');
+      }
+    });
+    
+  } catch (err) {
+    console.error('❌ Error cargando detalles del grupo:', err);
+    showNotification('Error al cargar detalles del grupo', 'error');
+  }
+}
 
 // ============================================================
 // 🚪 Ir al feed / cerrar sesión
@@ -1298,9 +1401,16 @@ if (document.readyState === 'loading') {
   font-family: "Poppins", sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: var(--bg-light);
   color: var(--text-dark);
+  min-height: 100vh;
 }
 
 /* === ANIMACIONES === */
@@ -1310,19 +1420,30 @@ body {
 }
 
 @keyframes slideIn {
-  from { transform: translateX(300px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(300px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes modalSlideIn {
   from {
-    transform: translateY(-50px);
+    transform: translateY(-50px) scale(0.95);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* === CONTENEDOR PRINCIPAL === */
@@ -1332,7 +1453,7 @@ body {
   gap: 24px;
   padding: 30px;
   max-width: 1400px;
-  margin: 80px auto;
+  margin: 80px auto 30px;
 }
 
 /* === COLUMNA IZQUIERDA === */
@@ -1346,6 +1467,16 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.profile-pic-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .profile-image {
@@ -1355,49 +1486,77 @@ body {
   border: 4px solid var(--secondary);
   object-fit: cover;
   margin-bottom: 16px;
-  box-shadow: 0 0 15px rgba(104, 116, 80, 0.4);
+  box-shadow: 0 0 20px rgba(104, 116, 80, 0.5);
   transition: all 0.3s ease;
 }
+
 .profile-image:hover {
-  transform: scale(1.05);
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(104, 116, 80, 0.7);
+}
+
+.upload-section {
+  width: 100%;
 }
 
 .upload-button,
 .feed-btn,
 .logout-button {
   border: none;
-  padding: 10px 14px;
+  padding: 11px 16px;
   border-radius: 8px;
   color: white;
   font-weight: 600;
   margin-top: 10px;
   width: 100%;
-  transition: all 0.25s;
+  transition: all 0.3s ease;
   cursor: pointer;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
 }
 
 .upload-button,
 .feed-btn {
   background: linear-gradient(90deg, var(--primary), var(--accent));
+  box-shadow: 0 3px 8px rgba(104, 116, 80, 0.3);
 }
+
 .upload-button:hover,
 .feed-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
+  transform: translateY(-3px);
+  filter: brightness(1.15);
+  box-shadow: 0 5px 15px rgba(104, 116, 80, 0.4);
 }
 
 .logout-button {
   background: linear-gradient(90deg, #b83c3c, #933232);
+  box-shadow: 0 3px 8px rgba(184, 60, 60, 0.3);
 }
+
 .logout-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(184, 60, 60, 0.4);
+}
+
+.user-info {
+  width: 100%;
 }
 
 .user-info h2 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: block;
   margin-top: 8px;
   margin-bottom: 4px;
+  opacity: 0.9;
 }
 
 #status-select {
@@ -1405,27 +1564,46 @@ body {
   color: var(--text-light);
   border: 1px solid #4e5748;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   margin-top: 6px;
   font-size: 0.9rem;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* === ESTADÍSTICAS === */
+#status-select:hover {
+  background: #424b36;
+  border-color: var(--secondary);
+}
+
+#status-select:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(160, 179, 139, 0.2);
+}
+
+/* === ESTADÍSTICAS MEJORADAS === */
 .user-stats {
-  margin-top: 16px;
+  margin-top: 20px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px;
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .user-stats span {
   color: #cce5b5;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+
 .user-stats p {
   margin: 0;
   font-weight: 600;
@@ -1434,39 +1612,51 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
+
 .user-stats p:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
 .user-stats p:hover span {
-  filter: brightness(1.2);
-  transform: scale(1.05);
+  filter: brightness(1.3);
+  transform: scale(1.08);
+}
+
+.user-stats p:active {
+  transform: translateX(3px) scale(0.98);
 }
 
 .user-links {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
 }
+
 .user-links a {
   display: block;
   color: #d4e2c2;
   font-weight: 500;
   text-decoration: none;
-  transition: all 0.25s;
-  padding: 8px;
-  border-radius: 6px;
+  transition: all 0.3s ease;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
 }
+
 .user-links a:hover {
-  color: var(--secondary);
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateX(3px);
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* === COLUMNA CENTRAL === */
@@ -1475,204 +1665,253 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 26px;
+  animation: fadeIn 0.5s ease;
 }
 
+/* === BÚSQUEDA MEJORADA === */
 .search-input {
   width: 100%;
-  padding: 12px;
+  padding: 14px 18px;
   border-radius: var(--radius);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   margin-bottom: 20px;
   font-size: 1rem;
-  outline-color: var(--primary);
-  transition: all 0.3s;
-}
-.search-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
-/* ✅ CORRECCIÓN: Fotos de perfil en resultados de búsqueda */
+.search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.15);
+  transform: translateY(-2px);
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+/* === RESULTADOS DE BÚSQUEDA MEJORADOS === */
 .search-results {
   position: absolute;
   background: white;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--primary);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  max-height: 400px;
+  box-shadow: var(--shadow-lg);
+  max-height: 450px;
   overflow-y: auto;
   width: calc(100% - 52px);
   z-index: 100;
   margin-top: -10px;
+  animation: modalSlideIn 0.3s ease;
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 14px;
+  padding: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   border-bottom: 1px solid var(--bg-light);
 }
-.search-result-item:hover {
-  background: var(--bg-light);
+
+.search-result-item:last-child {
+  border-bottom: none;
 }
 
-/* ✅ FIX: Imágenes circulares y tamaño correcto */
+.search-result-item:hover {
+  background: var(--bg-light);
+  padding-left: 18px;
+}
+
 .search-result-item img {
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--primary);
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.search-result-item div {
+  flex: 1;
+  min-width: 0;
 }
 
 .search-result-item strong {
   color: var(--text-dark);
   font-weight: 600;
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 2px;
 }
+
 .search-result-item p {
   margin: 0;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .no-results {
-  padding: 20px;
+  padding: 30px 20px;
   text-align: center;
-  color: #666;
+  color: #999;
+  font-style: italic;
 }
 
+/* === BANNER MEJORADO === */
 .banner {
   border-radius: var(--radius);
   overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
   position: relative;
-  height: 250px;
+  height: 280px;
+  border: 3px solid var(--border-color);
 }
+
 .banner-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.95);
-  transition: all 0.3s ease;
+  filter: brightness(0.96);
+  transition: all 0.4s ease;
 }
+
 .banner:hover .banner-image {
   filter: brightness(1.05);
+  transform: scale(1.02);
 }
+
 .change-banner-btn {
   position: absolute;
-  bottom: 15px;
-  right: 15px;
+  bottom: 18px;
+  right: 18px;
   background: rgba(104, 116, 80, 0.95);
   color: white;
   border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(5px);
-}
-.change-banner-btn:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  font-size: 0.95rem;
 }
 
-/* === TARJETA DEL EQUIPO === */
+.change-banner-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* === SECCIÓN DE GRUPOS MEJORADA === */
+.team-info {
+  margin-top: 20px;
+}
+
 .team-info h3 {
   color: var(--primary-dark);
-  font-size: 1.2rem;
-  margin-bottom: 12px;
+  font-size: 1.3rem;
+  margin-bottom: 16px;
   font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .create-group-btn {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 9px 18px;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(104, 116, 80, 0.3);
 }
+
 .create-group-btn:hover {
   background: var(--primary-dark);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(104, 116, 80, 0.4);
 }
 
+/* === LISTA DE GRUPOS MEJORADA === */
 .groups-list {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* ✅ CORRECCIÓN: UI mejorada para tarjetas de grupo */
 .group-card-small {
   background: white;
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
 .group-card-small:hover {
   border-color: var(--primary);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 
-/* ✅ FIX: Imagen circular y bien proporcionada */
 .group-small-image {
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--primary);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .group-icon {
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
-  background: var(--secondary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .group-info {
   flex: 1;
   min-width: 0;
 }
+
 .group-info h5 {
-  margin: 0 0 4px 0;
+  margin: 0 0 5px 0;
   color: var(--text-dark);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
 }
+
 .group-info p {
   margin: 0;
-  color: #666;
+  color: #777;
   font-size: 0.85rem;
 }
 
@@ -1680,242 +1919,130 @@ body {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
+
 .view-group-btn:hover {
   background: var(--primary-dark);
+  transform: translateX(-3px);
 }
 
 .no-groups {
   text-align: center;
   color: #999;
-  padding: 20px;
+  padding: 25px;
   font-style: italic;
+  background: var(--bg-light);
+  border-radius: var(--radius);
 }
 
+/* === TARJETA ROYAL UI FORCE MEJORADA === */
 .team-card {
-  background: linear-gradient(120deg, var(--primary), var(--accent));
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   color: white;
-  padding: 20px;
+  padding: 24px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   text-align: center;
-  margin-top: 10px;
+  margin-top: 12px;
   transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
+
 .team-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
 }
+
 .team-card h4 {
   font-weight: 700;
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
+
 .team-card p {
-  margin: 6px 0;
+  margin: 8px 0;
   opacity: 0.95;
+  font-size: 0.95rem;
 }
+
 .team-action-btn {
-  margin-top: 14px;
+  margin-top: 16px;
   background: white;
   color: var(--primary-dark);
   border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
+  border-radius: 10px;
+  padding: 12px 24px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
   width: 100%;
   font-size: 1rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
+
 .team-action-btn:hover {
   background: var(--secondary);
-  color: #fff;
-  transform: scale(1.03);
-}
-
-/* === MODAL DE GRUPOS === */
-.group-details-modal {
-  max-width: 800px;
-}
-
-.group-details {
-  text-align: center;
-}
-
-/* ✅ Imagen del grupo con mejor UI */
-.group-detail-image {
-  width: 100%;
-  max-height: 250px;
-  object-fit: cover;
-  border-radius: var(--radius);
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
-}
-
-.group-detail-placeholder {
-  width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 5rem;
   color: white;
-  margin-bottom: 20px;
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.group-description {
-  color: #666;
-  margin: 16px 0;
-  line-height: 1.6;
-  font-size: 1rem;
-}
-
-.group-stats {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin: 20px 0;
-  padding: 20px;
-  background: var(--bg-light);
-  border-radius: var(--radius);
-}
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-.stat-label {
-  font-size: 0.85rem;
-  color: #666;
-  margin-top: 4px;
-}
-
-/* ✅ Acciones del grupo */
-.group-actions {
-  display: flex;
-  gap: 12px;
-  margin: 20px 0;
-  flex-wrap: wrap;
-}
-
-.group-actions .modal-btn {
-  flex: 1;
-  min-width: 150px;
-}
-
-.delete-btn {
-  background: #d32f2f !important;
-  color: white !important;
-  border: none !important;
-}
-.delete-btn:hover {
-  background: #b71c1c !important;
-  transform: translateY(-2px);
-}
-
-.group-members {
-  margin-top: 30px;
-  text-align: left;
-}
-.group-members h3 {
-  color: var(--primary-dark);
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-}
-.members-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 16px;
-}
-.member-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: var(--radius);
-  transition: all 0.3s ease;
-}
-.member-item:hover {
-  background: var(--bg-light);
-  transform: translateY(-2px);
-}
-.member-item img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--primary);
-}
-.member-item span {
-  font-size: 0.8rem;
-  color: var(--text-dark);
-  font-weight: 500;
-  text-align: center;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* === FORMULARIO DE CREAR GRUPO === */
+/* === FORMULARIO DE CREAR GRUPO MEJORADO === */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   text-align: left;
 }
+
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: var(--text-dark);
   font-weight: 600;
   font-size: 0.95rem;
 }
+
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
+  padding: 12px 14px;
+  border: 2px solid var(--border-color);
   border-radius: var(--radius);
   font-size: 1rem;
   font-family: inherit;
   transition: all 0.3s ease;
 }
+
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
-}
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
+  box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.15);
 }
 
-/* ✅ Preview de imagen mejorado */
+.form-group textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
+}
+
+/* === PREVIEW DE IMAGEN MEJORADO === */
 .image-upload-container {
   width: 100%;
 }
 
 .image-preview-btn {
   width: 100%;
-  min-height: 150px;
-  border: 2px dashed var(--border-color);
+  min-height: 180px;
+  border: 3px dashed var(--border-color);
   border-radius: var(--radius);
   background: var(--bg-light);
   cursor: pointer;
@@ -1924,34 +2051,209 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .image-preview-btn:hover {
   border-color: var(--primary);
   background: white;
+  transform: translateY(-2px);
 }
 
 #image-preview-text {
   font-size: 1rem;
   color: #666;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
+.image-preview-btn:hover #image-preview-text {
+  color: var(--primary);
+}
+
+/* === FIX: Imagen circular con tamaño controlado === */
 #group-image-preview {
-  width: 100%;
-  height: 100%;
+  width: 130px;
+  height: 130px;
   object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: var(--radius);
+  border-radius: 50%;
+  border: 4px solid var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 10px;
 }
 
 #group-image-preview.hidden {
   display: none;
+}
+
+.image-preview-btn:has(#group-image-preview:not(.hidden)) {
+  min-height: auto;
+  padding: 24px;
+  border-style: solid;
+  border-color: var(--primary);
+  background: white;
+}
+
+/* === MODAL DE DETALLES DEL GRUPO === */
+.group-details-modal {
+  max-width: 850px;
+}
+
+.group-details {
+  text-align: center;
+}
+
+.group-detail-image {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--border-color);
+}
+
+.group-detail-placeholder {
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+  color: white;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.group-description {
+  color: #555;
+  margin: 20px 0;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.group-stats {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin: 28px 0;
+  padding: 24px;
+  background: var(--bg-light);
+  border-radius: var(--radius);
+  border: 2px solid var(--border-color);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* === ACCIONES DEL GRUPO === */
+.group-actions {
+  display: flex;
+  gap: 14px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.group-actions .modal-btn {
+  flex: 1;
+  min-width: 170px;
+}
+
+.delete-btn {
+  background: #d32f2f !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 3px 10px rgba(211, 47, 47, 0.3);
+}
+
+.delete-btn:hover {
+  background: #b71c1c !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+}
+
+/* === MIEMBROS DEL GRUPO === */
+.group-members {
+  margin-top: 35px;
+  text-align: left;
+}
+
+.group-members h3 {
+  color: var(--primary-dark);
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 18px;
+}
+
+.member-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.member-item:hover {
+  background: var(--bg-light);
+  transform: translateY(-5px);
+  border-color: var(--primary);
+}
+
+.member-item img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.member-item:hover img {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.member-item span {
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  font-weight: 500;
+  text-align: center;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* === COLUMNA DERECHA === */
@@ -1963,48 +2265,52 @@ body {
   box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
+  height: fit-content;
+  position: sticky;
+  top: 100px;
 }
 
-/* ✅ COMPONENTE BIBLIOGRAPHY DINÁMICO */
+/* === COMPONENTE BIBLIOGRAPHY MEJORADO === */
 .bibliography-card {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 22px;
+  margin-bottom: 22px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.3s ease;
 }
 
 .bibliography-card:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .bio-header {
   border-bottom: 2px solid var(--secondary);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+  padding-bottom: 12px;
+  margin-bottom: 18px;
 }
 
 .bio-header h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-light);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .bio-content {
-  margin-bottom: 15px;
-  min-height: 60px;
+  margin-bottom: 18px;
+  min-height: 70px;
 }
 
 #bio-text {
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--text-light);
   font-size: 0.95rem;
 }
@@ -2012,25 +2318,26 @@ body {
 .bio-footer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .bio-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 .bio-meta:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(3px);
 }
 
 .bio-icon {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
 #bio-website {
@@ -2049,36 +2356,46 @@ body {
 .bio-skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .bio-skill-tag {
   background: var(--accent);
   color: white;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* === BIOGRAPHY EDITOR === */
 .bio-editor {
   background: #374030;
   color: var(--text-light);
   width: 100%;
   border-radius: var(--radius);
-  border: none;
-  margin-top: 14px;
-  padding: 12px;
+  border: 1px solid #4e5748;
+  margin-top: 18px;
+  padding: 14px;
   font-size: 0.95rem;
   resize: vertical;
-  min-height: 100px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  min-height: 110px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
   font-family: inherit;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+}
+
+.bio-editor:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(160, 179, 139, 0.2);
 }
 
 .save-bio-btn {
-  margin-top: 14px;
-  padding: 10px;
+  margin-top: 16px;
+  padding: 12px;
   width: 100%;
   border: none;
   border-radius: var(--radius);
@@ -2086,26 +2403,29 @@ body {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   color: white;
   cursor: pointer;
-  transition: all 0.25s;
-}
-.save-bio-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* === MODALES === */
+.save-bio-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* === MODALES MEJORADOS === */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(6px);
 }
 
 .modal.hidden {
@@ -2115,10 +2435,10 @@ body {
 .modal-content {
   background: var(--card-bg);
   border-radius: var(--radius);
-  padding: 30px;
-  max-width: 600px;
+  padding: 35px;
+  max-width: 650px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
   position: relative;
@@ -2127,29 +2447,32 @@ body {
 
 .modal-content h2 {
   color: var(--primary-dark);
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  border-bottom: 2px solid var(--primary);
-  padding-bottom: 10px;
+  margin-bottom: 24px;
+  font-size: 1.6rem;
+  border-bottom: 3px solid var(--primary);
+  padding-bottom: 12px;
+  font-weight: 600;
 }
 
 .close-modal {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 18px;
+  right: 18px;
   background: transparent;
   border: none;
   font-size: 2rem;
   cursor: pointer;
   color: var(--text-dark);
-  transition: all 0.3s;
-  width: 40px;
-  height: 40px;
+  transition: all 0.3s ease;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  font-weight: 300;
 }
+
 .close-modal:hover {
   background: var(--primary);
   color: white;
@@ -2160,232 +2483,613 @@ body {
 .modal-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
+
 .modal-btn {
-  padding: 12px 20px;
+  padding: 13px 22px;
   border: 2px solid var(--primary);
   background: white;
   color: var(--primary);
   border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   text-align: left;
+  font-size: 0.95rem;
 }
+
 .modal-btn:hover {
   background: var(--primary);
   color: white;
-  transform: translateX(5px);
+  transform: translateX(8px);
+  box-shadow: 0 3px 10px rgba(104, 116, 80, 0.3);
 }
+
 .modal-btn.confirm {
   background: var(--primary);
   color: white;
   border: none;
   text-align: center;
-}
-.modal-btn.confirm:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(104, 116, 80, 0.3);
 }
 
-#urlForm, #bannerUrlForm {
+.modal-btn.confirm:hover {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(104, 116, 80, 0.4);
+}
+
+#urlForm,
+#bannerUrlForm {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 15px;
+  gap: 14px;
+  margin-top: 18px;
 }
-#urlForm input, #bannerUrlForm input {
-  padding: 12px;
-  border: 1px solid var(--border-color);
+
+#urlForm input,
+#bannerUrlForm input {
+  padding: 13px 15px;
+  border: 2px solid var(--border-color);
   border-radius: var(--radius);
   font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+#urlForm input:focus,
+#bannerUrlForm input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.15);
 }
 
 /* === ITEMS DE MODALES === */
-.follower-item, .like-item, .post-item {
+.follower-item,
+.like-item,
+.post-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
+  gap: 16px;
+  padding: 16px;
   border-radius: var(--radius);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   background: var(--bg-light);
   transition: all 0.3s ease;
   cursor: pointer;
+  border: 2px solid transparent;
 }
-.follower-item:hover, .like-item:hover, .post-item:hover {
-  background: var(--secondary);
-  transform: translateX(5px);
+
+.follower-item:hover,
+.like-item:hover,
+.post-item:hover {
+  background: white;
+  border-color: var(--primary);
+  transform: translateX(8px);
   box-shadow: var(--shadow-sm);
 }
 
-/* ✅ FIX: Imágenes circulares y bien proporcionadas en modales */
-.follower-item img, .like-item img, .post-item img {
-  width: 55px;
-  height: 55px;
+.follower-item img,
+.like-item img,
+.post-item img {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--primary);
+  border: 3px solid var(--primary);
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .follower-item span {
   font-weight: 600;
   color: var(--text-dark);
+  font-size: 1rem;
 }
-.like-item div, .post-item div {
+
+.like-item div,
+.post-item div {
   flex: 1;
   min-width: 0;
 }
-.like-item p, .post-item p {
-  margin: 0 0 5px 0;
+
+.like-item p,
+.post-item p {
+  margin: 0 0 8px 0;
   color: var(--text-dark);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
+
 .like-item span {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #666;
 }
+
 .post-stats {
   display: flex;
-  gap: 15px;
-  margin-top: 8px;
+  gap: 18px;
+  margin-top: 10px;
   font-size: 0.9rem;
   color: #666;
+  flex-wrap: wrap;
 }
+
 .post-stats span {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  font-weight: 500;
 }
+
 .like-item small {
   display: block;
-  margin-top: 5px;
+  margin-top: 8px;
   color: var(--primary);
   font-size: 0.85rem;
+  font-weight: 500;
 }
+
 .no-image {
-  width: 55px;
-  height: 55px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--secondary);
+  background: linear-gradient(135deg, var(--secondary), var(--accent));
   border-radius: 50%;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* === MENSAJE VACÍO === */
-.followers-list p, .likes-list p, .posts-list p {
+/* === MENSAJES VACÍOS === */
+.followers-list p,
+.likes-list p,
+.posts-list p {
   text-align: center;
-  color: #666;
-  padding: 40px 20px;
+  color: #999;
+  padding: 50px 20px;
   font-style: italic;
+  font-size: 1.05rem;
 }
 
-/* === SCROLLBAR === */
-.modal-content::-webkit-scrollbar {
-  width: 8px;
+/* === SCROLLBARS PERSONALIZADAS === */
+.modal-content::-webkit-scrollbar,
+.search-results::-webkit-scrollbar {
+  width: 10px;
 }
-.modal-content::-webkit-scrollbar-track {
+
+.modal-content::-webkit-scrollbar-track,
+.search-results::-webkit-scrollbar-track {
   background: var(--bg-light);
   border-radius: 10px;
 }
-.modal-content::-webkit-scrollbar-thumb {
+
+.modal-content::-webkit-scrollbar-thumb,
+.search-results::-webkit-scrollbar-thumb {
   background: var(--primary);
   border-radius: 10px;
+  border: 2px solid var(--bg-light);
 }
-.modal-content::-webkit-scrollbar-thumb:hover {
+
+.modal-content::-webkit-scrollbar-thumb:hover,
+.search-results::-webkit-scrollbar-thumb:hover {
   background: var(--primary-dark);
 }
 
 /* === NOTIFICACIONES === */
 .notification {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  padding: 14px 22px;
+  top: 28px;
+  right: 28px;
+  padding: 16px 26px;
   border-radius: var(--radius);
   color: white;
   font-weight: 600;
-  z-index: 9999;
-  animation: slideIn 0.3s ease;
+  z-index: 99999;
+  animation: slideIn 0.4s ease;
   box-shadow: var(--shadow-lg);
+  font-size: 0.95rem;
+  max-width: 400px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
+
 .notification.success {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
 }
+
 .notification.error {
-  background: #b83c3c;
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
 }
+
 .notification.hidden {
   display: none;
 }
 
-/* === RESPONSIVE === */
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 1200px) {
+  .profile-container {
+    grid-template-columns: 1fr 1.5fr 1fr;
+  }
+}
+
 @media (max-width: 992px) {
   .profile-container {
     grid-template-columns: 1fr;
-    margin-top: 60px;
-    gap: 16px;
-    padding: 16px;
-  }
-  .left-section, .right-section {
-    text-align: center;
-  }
-  .search-results {
-    width: calc(100% - 32px);
-  }
-  .modal-content {
-    width: 95%;
+    margin-top: 70px;
+    gap: 20px;
     padding: 20px;
   }
+
+  .left-section,
+  .right-section {
+    position: static;
+  }
+
+  .search-results {
+    width: calc(100% - 40px);
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 25px;
+    max-height: 90vh;
+  }
+
   .banner {
-    height: 180px;
+    height: 200px;
   }
+
   .change-banner-btn {
-    padding: 8px 14px;
+    padding: 10px 16px;
     font-size: 0.9rem;
+    bottom: 14px;
+    right: 14px;
   }
+
   .group-actions {
     flex-direction: column;
   }
+
   .group-actions .modal-btn {
     width: 100%;
+    min-width: auto;
+  }
+
+  .group-stats {
+    gap: 30px;
+    padding: 20px;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+    margin-top: 60px;
+  }
+
+  .profile-image {
+    width: 130px;
+    height: 130px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .follower-item img,
+  .like-item img,
+  .post-item img,
+  .no-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .banner {
+    height: 170px;
+  }
+
+  .change-banner-btn {
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 14px;
+  }
+
+  .member-item img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .group-stats {
+    flex-direction: column;
+    gap: 20px;
   }
 }
 
 @media (max-width: 576px) {
-  .profile-image {
-    width: 120px;
-    height: 120px;
+  .profile-container {
+    padding: 12px;
   }
+
+  .profile-image {
+    width: 110px;
+    height: 110px;
+  }
+
+  .left-section,
+  .right-section,
+  .main-section {
+    padding: 20px;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+
   .modal-content h2 {
     font-size: 1.2rem;
+    padding-bottom: 10px;
   }
-  .follower-item img, .like-item img, .post-item img, .no-image {
+
+  .follower-item img,
+  .like-item img,
+  .post-item img,
+  .no-image {
     width: 45px;
     height: 45px;
   }
+
   .banner {
-    height: 150px;
+    height: 140px;
   }
+
   .change-banner-btn {
     bottom: 10px;
     right: 10px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
+    padding: 7px 12px;
+    font-size: 0.8rem;
   }
+
   .members-grid {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 12px;
+  }
+
+  .member-item {
+    padding: 8px;
+  }
+
+  .member-item img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .notification {
+    top: 15px;
+    right: 15px;
+    left: 15px;
+    max-width: none;
+    padding: 14px 20px;
+  }
+
+  .search-result-item {
+    padding: 12px;
+  }
+
+  .search-result-item img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .group-small-image,
+  .group-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .user-stats {
+    padding: 14px;
+  }
+
+  .user-stats p {
+    padding: 8px 10px;
+    font-size: 0.9rem;
   }
 }
+
+@media (max-width: 400px) {
+  .profile-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .banner {
+    height: 120px;
+  }
+
+  .modal-content {
+    padding: 18px;
+  }
+
+  .group-card-small {
+    padding: 12px;
+  }
+
+  .team-card {
+    padding: 20px;
+  }
+
+  .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+  }
+}
+
+/* === ACCESIBILIDAD / REDUCIR MOVIMIENTO === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* === MODO OSCURO === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: #2a2e27;
+    --text-dark: #e6e9e3;
+    --bg-light: #1a1d18;
+    --border-color: #4e5748;
+  }
+
+  .search-results,
+  .modal-content {
+    background: var(--card-bg);
+    color: var(--text-dark);
+  }
+
+  .search-result-item:hover,
+  .follower-item:hover,
+  .like-item:hover,
+  .post-item:hover {
+    background: #353933;
+  }
+
+  .group-card-small {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+  }
+
+  .group-card-small:hover {
+    background: #353933;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    background: #353933;
+    color: var(--text-dark);
+    border-color: var(--border-color);
+  }
+
+  .image-preview-btn {
+    background: #353933;
+    border-color: var(--border-color);
+  }
+
+  .image-preview-btn:hover {
+    background: var(--card-bg);
+  }
+}
+
+/* === ESTILOS ADICIONALES DE EXPERIENCIA === */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.team-card p,
+.team-card h4 {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:disabled,
+input:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.user-stats p span,
+.team-action-btn,
+.view-group-btn,
+.modal-btn {
+  will-change: transform;
+}
+
+.profile-image,
+.banner-image,
+.group-small-image,
+.member-item img {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.member-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #72B340, #8BC34A);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.status-indicator {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  margin-left: 4px;
+}
+
+.status-online { background: #4ade80; color: white; }
+.status-away { background: #fbbf24; color: white; }
+.status-busy { background: #f87171; color: white; }
+.status-offline { background: #9ca3af; color: white; }
+
+.no-groups, .no-members {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-style: italic;
+}
+
+.more-members {
+  text-align: center;
+  color: #666;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.delete-btn {
+  background: linear-gradient(90deg, #ef4444, #dc2626) !important;
+}
+
+.delete-btn:hover {
+  background: linear-gradient(90deg, #dc2626, #b91c1c) !important;
+}
 </style>
-
-

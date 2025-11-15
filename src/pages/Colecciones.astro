@@ -1,0 +1,1974 @@
+---
+// Colecciones.astro - Sistema de colecciones con UI/UX mejorada
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/shared/Navigation.astro';
+---
+
+<Layout title="Mis Colecciones">
+  <Navigation />
+
+  <div class="collections-container">
+    <!-- 🔹 HEADER MEJORADO CON ANIMACIONES -->
+    <header class="collections-header">
+      <div class="header-background"></div>
+      <div class="header-content">
+        <div class="header-icon">📚</div>
+        <h1 class="animate-fade-in">Mis Colecciones de Recetas</h1>
+        <p class="subtitle animate-fade-in-delay">Organiza y guarda tus recetas favoritas en colecciones personalizadas</p>
+        <button id="create-collection-btn" class="create-btn animate-bounce-in">
+          <span class="btn-icon">✨</span>
+          <span>Nueva Colección</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 🔹 BÚSQUEDA Y FILTROS MEJORADOS -->
+    <div class="collections-controls">
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="collections-search" 
+          placeholder="Buscar en tus colecciones..." 
+          class="search-input"
+        />
+        <div class="search-results-count" id="results-count"></div>
+      </div>
+      
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid" title="Vista en cuadrícula">
+          <span class="btn-icon">⊞</span>
+          <span class="btn-text">Cuadrícula</span>
+        </button>
+        <button class="view-btn" data-view="list" title="Vista en lista">
+          <span class="btn-icon">☰</span>
+          <span class="btn-text">Lista</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 🔹 GRID DE COLECCIONES CON ANIMACIONES -->
+    <div id="collections-grid" class="collections-grid">
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Cargando colecciones...</p>
+      </div>
+    </div>
+
+    <!-- 🔹 ESTADO VACÍO MEJORADO -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-animation">
+        <div class="empty-icon">📚</div>
+        <div class="empty-circles">
+          <div class="circle"></div>
+          <div class="circle"></div>
+          <div class="circle"></div>
+        </div>
+      </div>
+      <h3>No hay colecciones aún</h3>
+      <p>Crea tu primera colección para comenzar a organizar tus recetas favoritas</p>
+      <button class="create-btn" onclick="document.getElementById('create-collection-btn').click()">
+        <span class="btn-icon">✨</span>
+        Crear Primera Colección
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL CREAR/EDITAR MEJORADO -->
+  <div id="collectionModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeCollectionModal()"></div>
+    <div class="modal-content collection-modal">
+      <button class="close-modal" onclick="closeCollectionModal()">×</button>
+      <div class="modal-header">
+        <div class="modal-icon">📚</div>
+        <h2 id="modal-title">Nueva Colección</h2>
+      </div>
+      
+      <form id="collection-form">
+        <div class="form-group floating-label">
+          <input 
+            type="text" 
+            id="collection-name" 
+            required 
+            placeholder=" "
+            maxlength="100"
+          />
+          <label for="collection-name">Nombre de la colección *</label>
+          <div class="input-border"></div>
+        </div>
+
+        <div class="form-group floating-label">
+          <textarea 
+            id="collection-description" 
+            rows="3" 
+            placeholder=" "
+            maxlength="300"
+          ></textarea>
+          <label for="collection-description">Descripción</label>
+          <div class="input-border"></div>
+          <div class="char-count">
+            <span id="desc-count">0</span>/300
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Imagen de portada</label>
+          <div class="image-input-group">
+            <input 
+              type="url" 
+              id="collection-cover" 
+              placeholder="https://ejemplo.com/imagen.jpg"
+              class="image-url-input"
+            />
+            <button type="button" id="preview-collection-btn" class="preview-btn">
+              <span>👁️</span> Vista previa
+            </button>
+          </div>
+          <div id="collection-cover-preview" class="cover-preview hidden">
+            <div class="preview-overlay">
+              <span class="preview-label">Vista previa</span>
+              <button type="button" class="remove-preview-btn" onclick="removePreview()">×</button>
+            </div>
+            <img id="collection-cover-img" src="" alt="Preview" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="collection-public" checked />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">
+              <strong>Colección pública</strong>
+              <small>Visible para todos los usuarios</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="closeCollectionModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary">
+            <span class="btn-icon">💾</span>
+            <span id="submit-text">Crear Colección</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL VER COLECCIÓN MEJORADO -->
+  <div id="viewCollectionModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeViewCollectionModal()"></div>
+    <div class="modal-content view-collection-modal">
+      <button class="close-modal" onclick="closeViewCollectionModal()">×</button>
+      
+      <div id="collection-details" class="collection-details-content">
+        <!-- Se llenará dinámicamente -->
+      </div>
+
+      <div class="collection-actions-bar">
+        <button id="add-recipe-btn" class="action-bar-btn">
+          <span class="btn-icon">➕</span>
+          <span>Agregar Receta</span>
+        </button>
+        <button id="edit-collection-btn" class="action-bar-btn">
+          <span class="btn-icon">✏️</span>
+          <span>Editar</span>
+        </button>
+        <button id="delete-collection-btn" class="action-bar-btn delete-btn">
+          <span class="btn-icon">🗑️</span>
+          <span>Eliminar</span>
+        </button>
+      </div>
+
+      <div class="recipes-section">
+        <h3 class="section-title">
+          <span class="title-icon">🍽️</span>
+          Recetas en esta colección
+        </h3>
+        <div id="collection-recipes" class="recipes-grid">
+          <!-- Se llenará dinámicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 MODAL AGREGAR RECETA MEJORADO -->
+  <div id="addRecipeModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeAddRecipeModal()"></div>
+    <div class="modal-content add-recipe-modal">
+      <button class="close-modal" onclick="closeAddRecipeModal()">×</button>
+      <div class="modal-header">
+        <div class="modal-icon">➕</div>
+        <h2>Agregar Receta</h2>
+      </div>
+      
+      <div class="search-recipes">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="recipe-search" 
+          placeholder="Buscar recetas para agregar..." 
+          class="search-input"
+        />
+      </div>
+
+      <div id="available-recipes" class="available-recipes-list">
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Cargando recetas...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification hidden"></div>
+</Layout>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .collections-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* ================================
+     HEADER MEJORADO
+     ================================ */
+  .collections-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 4rem 2rem;
+    border-radius: 24px;
+    color: white;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  }
+
+  .header-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #687450 0%, #425638 100%);
+    background-size: 200% 200%;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .header-content h1 {
+    font-size: 2.8rem;
+    margin-bottom: 0.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 1.15rem;
+    opacity: 0.95;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease;
+  }
+
+  .animate-fade-in-delay {
+    animation: fadeIn 0.8s ease 0.2s both;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.8s ease 0.4s both;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    70% {
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .create-btn {
+    background: white;
+    color: #667eea;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .create-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+  }
+
+  .create-btn:active {
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .btn-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .create-btn:hover .btn-icon {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  /* ================================
+     CONTROLES MEJORADOS
+     ================================ */
+  .collections-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .search-container {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .search-results-count {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: #999;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.25rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .view-btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .view-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  .view-btn:hover:not(.active) {
+    background: #f3f4f6;
+  }
+
+  /* ================================
+     GRID DE COLECCIONES MEJORADO
+     ================================ */
+  .collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .collections-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    position: relative;
+    animation: cardFadeIn 0.5s ease;
+  }
+
+  @keyframes cardFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .collection-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+
+  .collection-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+  }
+
+  .collection-card:hover::before {
+    opacity: 1;
+  }
+
+  .collection-cover {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: transform 0.5s ease;
+  }
+
+  .collection-card:hover .collection-cover {
+    transform: scale(1.1);
+  }
+
+  .collection-card-content {
+    padding: 1.75rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .collection-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-weight: 700;
+    transition: color 0.3s ease;
+  }
+
+  .collection-card:hover h3 {
+    color: #667eea;
+  }
+
+  .collection-description {
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .collection-stats {
+    display: flex;
+    gap: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 2px solid #f3f4f6;
+    font-size: 0.9rem;
+    color: #9ca3af;
+    font-weight: 600;
+  }
+
+  .collection-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(255,255,255,0.95);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 3;
+    transition: all 0.3s ease;
+  }
+
+  .collection-card:hover .collection-badge {
+    transform: scale(1.1);
+  }
+
+  .badge-public { 
+    color: #22c55e;
+    border: 2px solid #22c55e;
+  }
+  
+  .badge-private { 
+    color: #f59e0b;
+    border: 2px solid #f59e0b;
+  }
+
+  /* ================================
+     ESTADO VACÍO MEJORADO
+     ================================ */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+
+  .empty-animation {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .empty-circles {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .circle {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .circle:nth-child(2) {
+    animation-delay: 0.5s;
+  }
+
+  .circle:nth-child(3) {
+    animation-delay: 1s;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  .empty-state h3 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+  }
+
+  .empty-state p {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+
+  /* ================================
+     MODALES MEJORADOS
+     ================================ */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content {
+    position: relative;
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8) translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .modal-content.view-collection-modal {
+    max-width: 900px;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10;
+  }
+
+  .close-modal:hover {
+    background: #667eea;
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .modal-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .modal-header h2 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  /* ================================
+     FORMULARIOS MEJORADOS
+     ================================ */
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-group.floating-label {
+    position: relative;
+  }
+
+  .floating-label input,
+  .floating-label textarea {
+    width: 100%;
+    padding: 1.25rem 1rem 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .floating-label label {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+
+  .floating-label input:focus,
+  .floating-label input:not(:placeholder-shown),
+  .floating-label textarea:focus,
+  .floating-label textarea:not(:placeholder-shown) {
+    border-color: #667eea;
+  }
+
+  .floating-label input:focus ~ label,
+  .floating-label input:not(:placeholder-shown) ~ label,
+  .floating-label textarea:focus ~ label,
+  .floating-label textarea:not(:placeholder-shown) ~ label {
+    top: 0.5rem;
+    font-size: 0.75rem;
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  .input-border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.4s ease;
+  }
+
+  .floating-label input:focus ~ .input-border,
+  .floating-label textarea:focus ~ .input-border {
+    width: 100%;
+  }
+
+  .char-count {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+
+  .image-input-group {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .image-url-input {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .image-url-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .preview-btn {
+    padding: 0.875rem 1.5rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .preview-btn:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .cover-preview {
+    margin-top: 1.25rem;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .preview-label {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .remove-preview-btn {
+    background: rgba(255,255,255,0.9);
+    color: #ef4444;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .remove-preview-btn:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .cover-preview img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Toggle Switch Mejorado */
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .toggle-label:hover {
+    background: #f3f4f6;
+  }
+
+  .toggle-label input[type="checkbox"] {
+    display: none;
+  }
+
+  .toggle-slider {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #d1d5db;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle-label input[type="checkbox"]:checked ~ .toggle-slider {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .toggle-label input[type="checkbox"]:checked ~ .toggle-slider::before {
+    transform: translateX(24px);
+  }
+
+  .toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .toggle-text strong {
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+
+  .toggle-text small {
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+
+  /* Botones de formulario */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f3f4f6;
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .btn-secondary:hover {
+    background: #e5e7eb;
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: translateY(-1px);
+  }
+
+  /* ================================
+     BARRA DE ACCIONES DE COLECCIÓN
+     ================================ */
+  .collection-actions-bar {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 16px;
+  }
+
+  .action-bar-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .action-bar-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .action-bar-btn.delete-btn {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .action-bar-btn.delete-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+  }
+
+  /* ================================
+     DETALLES DE COLECCIÓN
+     ================================ */
+  .collection-details-content h1 {
+    font-size: 2.2rem;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    font-weight: 800;
+  }
+
+  .recipes-section {
+    margin-top: 2rem;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+  }
+
+  .title-icon {
+    font-size: 1.8rem;
+  }
+
+  /* ================================
+     GRID DE RECETAS MEJORADO
+     ================================ */
+  .recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .recipe-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    animation: cardFadeIn 0.4s ease;
+  }
+
+  .recipe-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .recipe-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+    transition: transform 0.5s ease;
+  }
+
+  .recipe-card:hover .recipe-image {
+    transform: scale(1.1);
+  }
+
+  .recipe-content {
+    padding: 1.25rem;
+  }
+
+  .recipe-card h4 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+    font-weight: 700;
+  }
+
+  .recipe-card p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .remove-recipe-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.4rem;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    opacity: 0;
+    transform: scale(0.8);
+    z-index: 2;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+
+  .recipe-card:hover .remove-recipe-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .remove-recipe-btn:hover {
+    background: #dc2626;
+    transform: scale(1.15) rotate(90deg);
+  }
+
+  /* ================================
+     RECETAS DISPONIBLES
+     ================================ */
+  .available-recipes-list {
+    max-height: 500px;
+    overflow-y: auto;
+    margin-top: 1.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .available-recipes-list::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .available-recipes-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 10px;
+  }
+
+  .available-recipes-list::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+  }
+
+  .available-recipe-item {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .available-recipe-item:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+  }
+
+  .available-recipe-item img {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .available-recipe-info {
+    flex: 1;
+  }
+
+  .available-recipe-info h4 {
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+    color: #1f2937;
+    font-weight: 700;
+  }
+
+  .available-recipe-info p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ================================
+     LOADING MEJORADO
+     ================================ */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1.5rem;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-container p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* ================================
+     NOTIFICACIONES MEJORADAS
+     ================================ */
+  .notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1.25rem 1.75rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+    z-index: 10000;
+    animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 250px;
+  }
+
+  .notification.success {
+    border-left: 5px solid #22c55e;
+  }
+
+  .notification.success::before {
+    content: '✓';
+    background: #22c55e;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  .notification.error {
+    border-left: 5px solid #ef4444;
+  }
+
+  .notification.error::before {
+    content: '✕';
+    background: #ef4444;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(450px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* ================================
+     UTILIDADES
+     ================================ */
+  .hidden {
+    display: none !important;
+  }
+
+  /* ================================
+     RESPONSIVE
+     ================================ */
+  @media (max-width: 768px) {
+    .collections-header {
+      padding: 3rem 1.5rem;
+    }
+
+    .header-content h1 {
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+    }
+
+    .collections-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .collections-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .view-toggle {
+      justify-content: center;
+    }
+
+    .recipes-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+    }
+
+    .action-bar-btn {
+      flex: 1 1 100%;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .notification {
+      bottom: 1rem;
+      right: 1rem;
+      left: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .header-icon {
+      font-size: 3rem;
+    }
+
+    .header-content h1 {
+      font-size: 1.75rem;
+    }
+
+    .create-btn {
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .available-recipe-item img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+</style>
+
+<script>
+  let currentEditId = null;
+  let allCollections = [];
+  let currentCollectionId = null;
+  let currentView = 'grid';
+  let availableRecipes = [];
+
+  // ============================================================
+  // 🔔 Notificaciones Mejoradas
+  // ============================================================
+  function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.remove('hidden');
+    setTimeout(() => notification.classList.add('hidden'), 3500);
+  }
+
+  // ============================================================
+  // 📊 Cargar colecciones con animación
+  // ============================================================
+  async function loadCollections() {
+    try {
+      const res = await fetch('http://localhost:3000/api/collections', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al cargar colecciones');
+
+      allCollections = await res.json();
+      renderCollections();
+      updateResultsCount(allCollections.length);
+    } catch (err) {
+      console.error('❌ Error:', err);
+      document.getElementById('collections-grid').innerHTML = 
+        '<div class="loading-container"><p style="color: #ef4444;">Error al cargar las colecciones</p></div>';
+    }
+  }
+
+  // ============================================================
+  // 📈 Actualizar contador de resultados
+  // ============================================================
+  function updateResultsCount(count) {
+    const counter = document.getElementById('results-count');
+    if (count > 0) {
+      counter.textContent = `${count} ${count === 1 ? 'colección' : 'colecciones'}`;
+      counter.style.display = 'block';
+    } else {
+      counter.style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // 🎨 Renderizar colecciones con animaciones escalonadas
+  // ============================================================
+  function renderCollections(collections = allCollections) {
+    const container = document.getElementById('collections-grid');
+    const emptyState = document.getElementById('empty-state');
+
+    if (collections.length === 0) {
+      container.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      updateResultsCount(0);
+      return;
+    }
+
+    container.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    updateResultsCount(collections.length);
+
+    container.className = `collections-grid ${currentView === 'list' ? 'list-view' : ''}`;
+
+    container.innerHTML = collections.map((collection, index) => `
+      <div class="collection-card" onclick="viewCollection('${collection._id}')" style="animation-delay: ${index * 0.1}s;">
+        ${collection.coverImage ? 
+          `<img src="${collection.coverImage}" alt="${collection.name}" class="collection-cover" />` :
+          `<div class="collection-cover"></div>`
+        }
+        <span class="collection-badge ${collection.isPublic ? 'badge-public' : 'badge-private'}">
+          ${collection.isPublic ? '🌐 Pública' : '🔒 Privada'}
+        </span>
+        <div class="collection-card-content">
+          <h3>${collection.name}</h3>
+          <p class="collection-description">${collection.description || 'Sin descripción'}</p>
+          
+          <div class="collection-stats">
+            <span>📖 ${collection.recipeCount || 0} recetas</span>
+            <span>📅 ${new Date(collection.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ============================================================
+  // ✍️ Crear colección
+  // ============================================================
+  document.getElementById('create-collection-btn')?.addEventListener('click', () => {
+    currentEditId = null;
+    document.getElementById('modal-title').textContent = 'Nueva Colección';
+    document.getElementById('collection-form').reset();
+    document.getElementById('collection-cover-preview').classList.add('hidden');
+    document.getElementById('submit-text').textContent = 'Crear Colección';
+    document.getElementById('desc-count').textContent = '0';
+    document.getElementById('collectionModal').classList.remove('hidden');
+  });
+
+  // ============================================================
+  // 📝 Contador de caracteres
+  // ============================================================
+  document.getElementById('collection-description')?.addEventListener('input', (e) => {
+    const count = e.target.value.length;
+    document.getElementById('desc-count').textContent = count;
+  });
+
+  // ============================================================
+  // 💾 Guardar colección
+  // ============================================================
+  document.getElementById('collection-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = {
+        name: document.getElementById('collection-name').value.trim(),
+        description: document.getElementById('collection-description').value.trim(),
+        coverImage: document.getElementById('collection-cover').value.trim(),
+        isPublic: document.getElementById('collection-public').checked,
+      };
+
+      const url = currentEditId 
+        ? `http://localhost:3000/api/collections/${currentEditId}`
+        : 'http://localhost:3000/api/collections';
+
+      const res = await fetch(url, {
+        method: currentEditId ? 'PUT' : 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error('Error al guardar');
+
+      showNotification(currentEditId ? '✨ Colección actualizada exitosamente' : '🎉 Colección creada exitosamente');
+      closeCollectionModal();
+      await loadCollections();
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al guardar colección', 'error');
+    }
+  });
+
+  // ============================================================
+  // 👁️ Ver colección con recetas
+  // ============================================================
+  window.viewCollection = async function(id) {
+    try {
+      currentCollectionId = id;
+      
+      const res = await fetch(`http://localhost:3000/api/collections/${id}`, {
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al cargar');
+
+      const collection = await res.json();
+      
+      document.getElementById('collection-details').innerHTML = `
+        ${collection.coverImage ? `<img src="${collection.coverImage}" alt="${collection.name}" style="width: 100%; max-height: 320px; object-fit: cover; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.15);" />` : ''}
+        <h1>${collection.name}</h1>
+        <p style="color: #6b7280; font-size: 1.15rem; margin: 1rem 0; line-height: 1.6;">${collection.description || 'Sin descripción'}</p>
+        <div style="display: flex; gap: 2rem; margin: 1.5rem 0; color: #9ca3af; font-weight: 600;">
+          <span>📖 ${collection.recipes?.length || 0} recetas</span>
+          <span>${collection.isPublic ? '🌐 Pública' : '🔒 Privada'}</span>
+          <span>📅 ${new Date(collection.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        </div>
+      `;
+
+      // Renderizar recetas
+      const recipesContainer = document.getElementById('collection-recipes');
+      if (collection.recipes && collection.recipes.length > 0) {
+        recipesContainer.innerHTML = collection.recipes.map((recipe, index) => `
+          <div class="recipe-card" style="animation-delay: ${index * 0.08}s;">
+            <button class="remove-recipe-btn" onclick="removeRecipeFromCollection('${collection._id}', '${recipe._id}')" title="Quitar de la colección">
+              ×
+            </button>
+            ${recipe.image ? 
+              `<img src="${recipe.image}" alt="${recipe.name}" class="recipe-image" />` :
+              `<div class="recipe-image"></div>`
+            }
+            <div class="recipe-content">
+              <h4>${recipe.name}</h4>
+              <p>${recipe.description || 'Sin descripción'}</p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        recipesContainer.innerHTML = `
+          <div style="text-align: center; padding: 3rem; grid-column: 1 / -1;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
+            <p style="color: #9ca3af; font-size: 1.1rem;">No hay recetas en esta colección aún</p>
+            <p style="color: #d1d5db; font-size: 0.95rem; margin-top: 0.5rem;">Agrega recetas para comenzar</p>
+          </div>
+        `;
+      }
+
+      // Event listeners para botones
+      document.getElementById('add-recipe-btn').onclick = () => openAddRecipeModal(id);
+      document.getElementById('edit-collection-btn').onclick = () => editCollection(id);
+      document.getElementById('delete-collection-btn').onclick = () => deleteCollection(id);
+
+      document.getElementById('viewCollectionModal').classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al cargar colección', 'error');
+    }
+  };
+
+  // ============================================================
+  // ✏️ Editar colección
+  // ============================================================
+  window.editCollection = async function(id) {
+    try {
+      const collection = allCollections.find(c => c._id === id);
+      if (!collection) return;
+
+      currentEditId = id;
+      document.getElementById('modal-title').textContent = 'Editar Colección';
+      document.getElementById('collection-name').value = collection.name;
+      document.getElementById('collection-description').value = collection.description || '';
+      document.getElementById('collection-cover').value = collection.coverImage || '';
+      document.getElementById('collection-public').checked = collection.isPublic;
+      document.getElementById('submit-text').textContent = 'Actualizar Colección';
+      document.getElementById('desc-count').textContent = (collection.description || '').length;
+
+      if (collection.coverImage) {
+        document.getElementById('collection-cover-img').src = collection.coverImage;
+        document.getElementById('collection-cover-preview').classList.remove('hidden');
+      }
+
+      closeViewCollectionModal();
+      document.getElementById('collectionModal').classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error:', err);
+    }
+  };
+
+  // ============================================================
+  // 🗑️ Eliminar colección
+  // ============================================================
+  window.deleteCollection = async function(id) {
+    if (!confirm('¿Estás seguro de eliminar esta colección? Esta acción no se puede deshacer.')) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/collections/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al eliminar');
+
+      showNotification('🗑️ Colección eliminada exitosamente');
+      closeViewCollectionModal();
+      await loadCollections();
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al eliminar colección', 'error');
+    }
+  };
+
+  // ============================================================
+  // ➕ Abrir modal agregar receta
+  // ============================================================
+  window.openAddRecipeModal = async function (collectionId) {
+    currentCollectionId = collectionId;
+
+    try {
+      const res = await fetch('http://localhost:3000/api/recipes', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) throw new Error('Error al cargar recetas');
+
+      availableRecipes = await res.json();
+      renderAvailableRecipes(availableRecipes);
+
+      document.getElementById('addRecipeModal').classList.remove('hidden');
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('No se pudieron cargar las recetas', 'error');
+    }
+  };
+
+  // ============================================================
+  // 🔍 Buscar recetas en modal
+  // ============================================================
+  document.getElementById('recipe-search')?.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const filtered = availableRecipes.filter(r =>
+      r.name.toLowerCase().includes(term) ||
+      (r.description && r.description.toLowerCase().includes(term))
+    );
+    renderAvailableRecipes(filtered);
+  });
+
+  // ============================================================
+  // 🎨 Renderizar recetas disponibles
+  // ============================================================
+  function renderAvailableRecipes(recipes) {
+    const container = document.getElementById('available-recipes');
+
+    if (!recipes.length) {
+      container.innerHTML = `
+        <div style="text-align:center; padding: 3rem;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+          <p style="color:#9ca3af; font-size: 1.1rem;">No hay recetas que coincidan</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = recipes
+      .map((r, index) => `
+        <div class="available-recipe-item" onclick="addRecipeToCollection('${r._id}')" style="animation-delay: ${index * 0.05}s;">
+          ${r.image ? 
+            `<img src="${r.image}" alt="${r.name}" />` : 
+            `<div style="width: 70px; height: 70px; background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%); border-radius: 12px; flex-shrink: 0;"></div>`
+          }
+          <div class="available-recipe-info">
+            <h4>${r.name}</h4>
+            <p>${r.description || 'Sin descripción'}</p>
+          </div>
+        </div>
+      `
+      )
+      .join('');
+  }
+
+  // ============================================================
+  // ➕ Agregar receta a colección
+  // ============================================================
+  window.addRecipeToCollection = async function (recipeId) {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/collections/${currentCollectionId}/recipes`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipeId }),
+        }
+      );
+
+      if (!res.ok) throw new Error('Error al agregar receta');
+
+      showNotification('✨ Receta agregada a la colección');
+      closeAddRecipeModal();
+      await viewCollection(currentCollectionId);
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al agregar receta', 'error');
+    }
+  };
+
+  // ============================================================
+  // ❌ Quitar receta de colección
+  // ============================================================
+  window.removeRecipeFromCollection = async function (collectionId, recipeId) {
+    if (!confirm('¿Quitar esta receta de la colección?')) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/collections/${collectionId}/recipes/${recipeId}`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
+
+      if (!res.ok) throw new Error('Error al quitar receta');
+
+      showNotification('Receta eliminada de la colección');
+      await viewCollection(collectionId);
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al quitar receta', 'error');
+    }
+  };
+
+  // ============================================================
+  // 🔍 Buscar colecciones
+  // ============================================================
+  document.getElementById('collections-search')?.addEventListener('input', (e) => {
+    const value = e.target.value.toLowerCase();
+    const filtered = allCollections.filter(c =>
+      c.name.toLowerCase().includes(value) ||
+      (c.description && c.description.toLowerCase().includes(value))
+    );
+    renderCollections(filtered);
+  });
+
+  // ============================================================
+  // 🔁 Cambiar vista grid/list
+  // ============================================================
+  document.querySelectorAll('.view-btn')?.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      currentView = btn.dataset.view;
+      renderCollections();
+    });
+  });
+
+  // ============================================================
+  // 👁️ Vista previa de imagen de colección
+  // ============================================================
+  document.getElementById('preview-collection-btn')?.addEventListener('click', () => {
+    const url = document.getElementById('collection-cover').value.trim();
+    const preview = document.getElementById('collection-cover-preview');
+
+    if (!url) {
+      preview.classList.add('hidden');
+      return;
+    }
+
+    document.getElementById('collection-cover-img').src = url;
+    document.getElementById('collection-cover-img').onerror = () => {
+      showNotification('No se pudo cargar la imagen', 'error');
+      preview.classList.add('hidden');
+    };
+    document.getElementById('collection-cover-img').onload = () => {
+      preview.classList.remove('hidden');
+    };
+  });
+
+  // ============================================================
+  // 🗑️ Remover vista previa
+  // ============================================================
+  window.removePreview = function() {
+    document.getElementById('collection-cover').value = '';
+    document.getElementById('collection-cover-preview').classList.add('hidden');
+  };
+
+  // ============================================================
+  // ❌ Cerrar modales
+  // ============================================================
+  function closeCollectionModal() {
+    document.getElementById('collectionModal').classList.add('hidden');
+  }
+
+  function closeViewCollectionModal() {
+    document.getElementById('viewCollectionModal').classList.add('hidden');
+  }
+
+  function closeAddRecipeModal() {
+    document.getElementById('addRecipeModal').classList.add('hidden');
+  }
+
+  // ============================================================
+  // ⌨️ Cerrar modales con tecla ESC
+  // ============================================================
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modals = document.querySelectorAll('.modal:not(.hidden)');
+      modals.forEach(modal => modal.classList.add('hidden'));
+    }
+  });
+
+  // ============================================================
+  // 🚀 Iniciar carga de colecciones al abrir la página
+  // ============================================================
+  loadCollections();
+</script>
