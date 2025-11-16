@@ -1,101 +1,151 @@
 ---
 import Layout from "../layouts/Layout.astro"
 ---
+
 <Layout title="Learn More">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learn more about your chatbot</title>
-  <style>
-    #learn-more {
-      background-color: #f0f4ee; 
-      color: #3c3f36; 
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
+<section id="learn-more" class="w-full max-w-[1400px] mx-auto px-6 lg:px-20 mt-28 py-16 rounded-2xl shadow-xl relative overflow-hidden">
 
-    h1 {
-      color: #4b6f4e; 
-      text-align: center;
-      margin-bottom: 20px;
-    }
+  <div class="absolute inset-0 bg-gradient-to-br from-[#e8eee6] via-[#f3f6f1] to-[#e8eee6] opacity-70"></div>
 
-    h2 {
-      color: #4b6f4e; 
-      margin-top: 30px;
-    }
+  <div class="floating-emojis pointer-events-none select-none opacity-30">
+    <span class="float-emoji">🥗</span>
+    <span class="float-emoji">🎧</span>
+    <span class="float-emoji">📚</span>
+    <span class="float-emoji">😊</span>
+  </div>
 
-    p {
-      line-height: 1.6;
-      margin-top: 10px;
-    }
-
-    ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
-
-    li {
-      background: #d0e6d4; 
-      border-radius: 5px;
-      margin: 10px 0;
-      padding: 10px;
-      transition: background 0.3s;
-    }
-
-    li:hover {
-      background: #c2e2c2; 
-    }
-  </style>
-</head>
-<body>
-  <section class="w-full max-w-[1400px] mx-auto px-20 mt-36" id="learn-more">
-    <h1 class="text-3xl text-pretty">Meet Roy, our interactive chatbot</h1>
-    <p class="mt-4 text-lg">
-      Let yourself be helped to have a healthier life, thanks to this interactive chatbot that takes into account your mood.
+  <!-- 🟢 HEADER -->
+  <div class="relative text-center">
+    <h1 class="text-4xl font-extrabold text-[#2b3a2a] drop-shadow-lg animate-fade-in">
+      Conoce FoodEmotions
+    </h1>
+    <p class="mt-5 text-lg text-[#2f332c] font-medium max-w-3xl mx-auto animate-fade-in-delay">
+      La plataforma que combina <strong class="text-[#425638]">emociones</strong>, 
+      <strong class="text-[#425638]">comida</strong>, 
+      <strong class="text-[#425638]">música</strong> y 
+      <strong class="text-[#425638]">libros</strong> a través de Roy, tu asistente emocional.
     </p>
+  </div>
 
-    <h2 class="text-2xl font-bold">Key features</h2>
-      <ul>
-        <li>
-          <h2>Interactive chat</h2>
-          <p>Interact with Roy and let him know how you feel, so he can be more accurate with the recommendation he will make.</p>
-        </li>
-        <li>
-          <h2>Areas of recommendations</h2>
-          <p>Access three different areas according to your interests: recipes, music, and books. Each one promoting healthy living and good mental health.</p>
-        </li>
-        <li>
-          <h2>Personalized profile</h2>
-          <p>Create your own profile where you can save your favorite content, including music playlists, recipes you love, and books that inspire you.</p>
-        </li>
-        <li>
-          <h2>Customizable experience</h2>
-          <p>Tailor the appearance of your profile and the application to suit your preferences. Adjust colors and layouts to create a user experience that feels uniquely yours.</p>
-        </li>
-        <li>
-          <h2>Blog and social interaction</h2>
-          <p>Stay connected with the community! Follow other users, view their shared content in the blog section, and interact with them to exchange ideas and recommendations.</p>
-        </li>
-        <li>
-          <h2>User-friendly interface</h2>
-          <p>The page has a simple interface, and users can easily access each of the available items.</p>
-        </li>
-      </ul>
+  <!-- ✔️ CARDS PRINCIPALES (más claras y con mayor contraste) -->
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-16 relative z-10">
 
-      Join us in this innovative journey and let Roy enrich your everyday experiences with meaningful interactions and personalized recommendations!
-    </p>
-    <div class="mt-8">
-      <h2 class="text-2xl font-bold">How It Works</h2>
+    <!-- Card genérica -->
+    <div class="feature-card">
+      <h2>🤖 Roy: Tu compañero emocional</h2>
       <p>
-        Interact with your bot anytime you need assistance. Whether you're looking for a new recipe, a song to match your mood, or inspiration in the literary world, your bot is here to help.
+        Roy analiza tu estado de ánimo y te recomienda contenido adaptado a tus emociones. Una experiencia realmente personalizada.
       </p>
     </div>
-  </section>
-</body>
-</html>
+
+    <div class="feature-card">
+      <h2>🍲 Recetas según tu mood</h2>
+      <p>
+        Encuentra platos saludables que conecten con cómo te sientes. Por países, por sabores o según tu emoción.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h2>🎧 Música emocional</h2>
+      <p>
+        Playlists para relajarte, motivarte, concentrarte o levantarte el ánimo. Roy elige lo mejor para ti.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h2>📚 Libros que inspiran</h2>
+      <p>
+        Exploración literaria según tu estado emocional o tus intereses personales.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h2>🧑‍💻 Perfil personalizable</h2>
+      <p>
+        Cambia tu foto, tu bio, tu fondo, guarda tus favoritos y crea colecciones únicas.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h2>🫂 Comunidad & Blog</h2>
+      <p>
+        Sigue usuarios, comparte contenido, sube recetas o reflexiones en tu blog personal.
+      </p>
+    </div>
+  </div>
+
+  <!-- 🟩 HOW IT WORKS -->
+  <div class="relative mt-20 text-center">
+    <h2 class="text-3xl font-bold text-[#2b3a2a]">¿Cómo funciona?</h2>
+    <p class="mt-4 max-w-3xl mx-auto text-[#2f332c] font-medium">
+      Habla con Roy, explora las secciones y deja que la aplicación se adapte  
+      a tus emociones. Cada función está diseñada para brindarte bienestar  
+      y una experiencia única.
+    </p>
+
+    <button 
+      onclick="window.location.href='/Chatbot'" 
+      class="mt-8 px-8 py-4 bg-[#425638] text-white rounded-xl text-lg shadow-md hover:bg-[#354a2e] transition-all duration-300 hover:scale-105 font-semibold">
+      Hablar con Roy
+    </button>
+  </div>
+
+</section>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-in { animation: fadeIn 0.8s ease forwards; }
+  .animate-fade-in-delay { animation: fadeIn 1.2s ease forwards; }
+
+  .feature-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.10);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .feature-card h2 {
+    color: #2b3a2a;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .feature-card p {
+    color: #2f332c;
+    font-weight: 500;
+    line-height: 1.65;
+  }
+
+  .floating-emojis {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    gap: 20px;
+    justify-content: space-evenly;
+  }
+
+  .float-emoji {
+    font-size: 2.2rem;
+    animation: float 6s infinite ease-in-out;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); opacity: 0.25; }
+    50% { transform: translateY(-20px); opacity: 0.45; }
+    100% { transform: translateY(0px); opacity: 0.25; }
+  }
+</style>
 
 </Layout>

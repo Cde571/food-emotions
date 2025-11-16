@@ -2244,7 +2244,7 @@ body {
   image-rendering: crisp-edges;
 }
 
-.author-details {
+:global(.author-details) {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -2263,7 +2263,7 @@ body {
   max-width: 200px;
 }
 
-.author-name:hover {
+:global.author-name:hover) {
   color: var(--primary);
 }
 
@@ -3645,20 +3645,20 @@ textarea {
     margin-bottom: 16px;
   }
 
-  .filter-tabs {
+  :global(.filter-tabs) {
     border-radius: 0;
     margin-bottom: 16px;
   }
 
-  .posts-grid {
+  :global(.posts-grid) {
     gap: 16px;
   }
 
-  .post-card {
+  :global(.post-card) {
     border-radius: 0;
   }
 
-  .author-avatar {
+  :global(.author-avatar) {
     width: 36px !important;
     height: 36px !important;
   }

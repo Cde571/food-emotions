@@ -6,87 +6,149 @@ import Layout from "../layouts/Layout.astro";
 <Layout title="Testimonials">
   <Header />
 
-  <section class="testimonials-container mt-32">
-    <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <img src="src/img/User1.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">Since I met Roy, my way of life has changed a lot.</p>
-        <p class="testimonial-author">John Doe</p>
+  <!-- ============================
+       ⭐ SECCIÓN DE TESTIMONIOS
+  =============================== -->
+  <section class="relative w-full max-w-[1400px] mx-auto px-6 lg:px-20 mt-32" id="testimonials">
+
+    <!-- Fondo de partículas -->
+    <canvas id="particles-bg" class="absolute inset-0 w-full h-full pointer-events-none opacity-30"></canvas>
+
+    <h1 class="text-4xl text-center font-bold text-white tracking-tight relative z-20 mb-4">
+      What users are saying
+    </h1>
+
+    <p class="text-center text-gray-300 max-w-2xl mx-auto relative z-20 text-lg mb-16">
+      Real stories from people whose emotional well-being has improved thanks to Roy 💚
+    </p>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 relative z-20">
+
+      <!-- CARD TEMPLATE -->
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn">
+        <img src="/src/img/User1.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “Since I met Roy, my entire lifestyle has improved.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">John Doe</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
 
-      <div class="testimonial-card">
-        <img src="src/img/User2.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">I love this site, the content is very varied.</p>
-        <p class="testimonial-author">Jane Smith</p>
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn delay-100">
+        <img src="/src/img/User2.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “I love this site, the content is so varied and useful.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">Jane Smith</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
 
-      <div class="testimonial-card">
-        <img src="src/img/User3.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">Before I was a person with a disorderly lifestyle, thanks to this site I have started to lead a much healthier life.</p>
-        <p class="testimonial-author">Michael Johnson</p>
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn delay-200">
+        <img src="/src/img/User3.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “Thanks to Roy, I started living a much healthier life.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">Michael Johnson</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
 
-      <div class="testimonial-card">
-        <img src="src/img/User4.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">I love Roy, he always helps me find things to do when I have free time.</p>
-        <p class="testimonial-author">Emily Davis</p>
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn delay-300">
+        <img src="/src/img/User4.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “Roy always gives me the perfect recommendation.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">Emily Davis</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
 
-      <div class="testimonial-card">
-        <img src="src/img/User5.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">I love the design of the website and the easy access it handles.</p>
-        <p class="testimonial-author">David Lee</p>
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn delay-500">
+        <img src="/src/img/User5.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “The design is beautiful and incredibly easy to use.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">David Lee</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
 
-      <div class="testimonial-card">
-        <img src="src/img/User6.jpg" alt="Testimonial Avatar" class="testimonial-avatar">
-        <p class="testimonial-text">My knowledge and eating habits are now better. And the best thing is that I can have them at hand.</p>
-        <p class="testimonial-author">Sarah Kim</p>
+      <div class="testimonial-card bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition duration-300 opacity-0 animate-fadeIn delay-700">
+        <img src="/src/img/User6.jpg" class="testimonial-avatar mx-auto shadow-md" />
+        <p class="testimonial-text mt-6 text-gray-100 italic text-center">
+          “My eating habits improved thanks to Roy’s recommendations.”
+        </p>
+        <p class="testimonial-author text-[#a0c49d] text-center mt-4 font-semibold">Sarah Kim</p>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
       </div>
+
     </div>
   </section>
 </Layout>
 
+
+<!-- ============================
+     ⭐ ESTILOS
+=============================== -->
 <style>
-.testimonials-container {
-  
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 2rem;
-}
+  .testimonial-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
+  /* Animación FadeIn */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-.testimonial-card {
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  text-align: center;
-  margin-top: 60px;
-}
+  .animate-fadeIn { animation: fadeIn .8s ease forwards; }
 
-.testimonial-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 15px;
-}
-
-.testimonial-text {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.5;
-}
-
-.testimonial-author {
-  font-weight: bold;
-  margin-top: 10px;
-}
+  .delay-100 { animation-delay: .1s; }
+  .delay-200 { animation-delay: .2s; }
+  .delay-300 { animation-delay: .3s; }
+  .delay-500 { animation-delay: .5s; }
+  .delay-700 { animation-delay: .7s; }
 </style>
+
+<!-- ============================
+     ⭐ PARTÍCULAS DE FONDO
+=============================== -->
+<script is:inline>
+  const canvas = document.getElementById("particles-bg");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = Array.from({ length: 40 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 1,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.2,
+  }));
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff55";
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+</script>

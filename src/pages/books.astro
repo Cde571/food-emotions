@@ -1,86 +1,681 @@
 ---
-import { useState } from 'react'
+const books = [
+  {
+    id: 1,
+    title: "El poder del ahora",
+    author: "Eckhart Tolle",
+    category: "Espiritualidad",
+    image: "/img/poder_del_ahora.jpg",
+    description: "Una guía para alcanzar la iluminación a través del poder del presente.",
+    pages: 236,
+    year: 1997
+  },
+  {
+    id: 2,
+    title: "El hombre en busca de sentido",
+    author: "Viktor Frankl",
+    category: "Psicología",
+    image: "/img/hombre_sentido.jpg",
+    description: "Aprende a explorar tus habilidades no descubiertas para este mundo incierto.",
+    pages: 180,
+    year: 1946
+  },
+  {
+    id: 3,
+    title: "Inteligencia emocional",
+    author: "Daniel Goleman",
+    category: "Psicología",
+    image: "/img/inteligencia_emocional.jpg",
+    description: "Explora cómo la inteligencia emocional impacta tu vida personal y profesional.",
+    pages: 384,
+    year: 1995
+  },
+  {
+    id: 4,
+    title: "Hábitos atómicos",
+    author: "James Clear",
+    category: "Desarrollo personal",
+    image: "/img/habitos_atomicos.jpg",
+    description: "Pequeños cambios diarios que transforman tu vida y te ayudan a lograr grandes resultados.",
+    pages: 320,
+    year: 2018
+  },
+  {
+    id: 5,
+    title: "El alquimista",
+    author: "Paulo Coelho",
+    category: "Ficción",
+    image: "/img/el_alquimista.png",
+    description: "Una fábula inspiradora sobre seguir tus sueños y escuchar al corazón.",
+    pages: 208,
+    year: 1988
+  },
+  {
+    id: 6,
+    title: "Padre rico padre pobre",
+    author: "Robert Kiyosaki",
+    category: "Finanzas",
+    image: "/img/padre_rico_padre_pobre.png",
+    description: "Una perspectiva diferente sobre el dinero, la inversión y la educación financiera.",
+    pages: 336,
+    year: 1997
+  },
+  {
+    id: 7,
+    title: "Siddhartha",
+    author: "Hermann Hesse",
+    category: "Espiritualidad",
+    image: "/img/siddhartha.jpg",
+    description: "Un viaje espiritual en busca de la iluminación y el autoconocimiento.",
+    pages: 152,
+    year: 1922
+  },
+  {
+    id: 8,
+    title: "El monje que vendió su Ferrari",
+    author: "Robin Sharma",
+    category: "Desarrollo personal",
+    image: "/img/el_monje_ferrari.jpg",
+    description: "Una fábula sobre cumplir tus sueños y alcanzar tu destino.",
+    pages: 198,
+    year: 1997
+  },
+  {
+    id: 9,
+    title: "Piense y hágase rico",
+    author: "Napoleon Hill",
+    category: "Finanzas",
+    image: "/img/piense_hagase_rico.jpg",
+    description: "Los 13 principios del éxito financiero basados en el estudio de millonarios.",
+    pages: 320,
+    year: 1937
+  },
+  {
+    id: 10,
+    title: "El arte de la guerra",
+    author: "Sun Tzu",
+    category: "Estrategia",
+    image: "/img/arte_guerra.jpg",
+    description: "Estrategias milenarias aplicables a los negocios y la vida cotidiana.",
+    pages: 273,
+    year: -500
+  },
+  {
+    id: 11,
+    title: "Meditaciones",
+    author: "Marco Aurelio",
+    category: "Filosofía",
+    image: "/img/meditaciones.jpg",
+    description: "Reflexiones filosóficas del emperador romano sobre la vida y el estoicismo.",
+    pages: 304,
+    year: 180
+  },
+  {
+    id: 12,
+    title: "La magia del orden",
+    author: "Marie Kondo",
+    category: "Desarrollo personal",
+    image: "/img/magia_orden.jpg",
+    description: "El método japonés para ordenar tu casa y transformar tu vida.",
+    pages: 256,
+    year: 2011
+  },
+  {
+    id: 13,
+    title: "Cien años de soledad",
+    author: "Gabriel García Márquez",
+    category: "Ficción",
+    image: "/img/cien_anos.jpg",
+    description: "La obra maestra del realismo mágico que narra la historia de la familia Buendía.",
+    pages: 471,
+    year: 1967
+  },
+  {
+    id: 14,
+    title: "Sapiens",
+    author: "Yuval Noah Harari",
+    category: "Historia",
+    image: "/img/sapiens.jpg",
+    description: "Una breve historia de la humanidad desde los cazadores-recolectores hasta la actualidad.",
+    pages: 498,
+    year: 2011
+  },
+  {
+    id: 15,
+    title: "El arte de amar",
+    author: "Erich Fromm",
+    category: "Psicología",
+    image: "/img/arte_amar.jpg",
+    description: "Una exploración profunda sobre la naturaleza del amor y las relaciones humanas.",
+    pages: 128,
+    year: 1956
+  },
+  {
+    id: 16,
+    title: "Cómo ganar amigos",
+    author: "Dale Carnegie",
+    category: "Desarrollo personal",
+    image: "/img/ganar_amigos.jpg",
+    description: "Principios fundamentales para mejorar tus habilidades sociales y de liderazgo.",
+    pages: 288,
+    year: 1936
+  },
+  {
+    id: 17,
+    title: "El inversor inteligente",
+    author: "Benjamin Graham",
+    category: "Finanzas",
+    image: "/img/inversor_inteligente.jpg",
+    description: "La guía definitiva sobre inversión en valor y análisis financiero.",
+    pages: 640,
+    year: 1949
+  },
+  {
+    id: 18,
+    title: "La semana laboral de 4 horas",
+    author: "Tim Ferriss",
+    category: "Negocios",
+    image: "/img/4_horas.jpg",
+    description: "Cómo escapar de la rutina y vivir donde quieras con un nuevo estilo de vida.",
+    pages: 416,
+    year: 2007
+  },
+  {
+    id: 19,
+    title: "1984",
+    author: "George Orwell",
+    category: "Ficción",
+    image: "/img/1984.jpg",
+    description: "Una distopía sobre el totalitarismo y la vigilancia masiva.",
+    pages: 328,
+    year: 1949
+  },
+  {
+    id: 20,
+    title: "El camino del artista",
+    author: "Julia Cameron",
+    category: "Creatividad",
+    image: "/img/camino_artista.jpg",
+    description: "Un curso de descubrimiento y rescate de tu propia creatividad.",
+    pages: 256,
+    year: 1992
+  },
+  {
+    id: 21,
+    title: "Mindfulness en la vida cotidiana",
+    author: "Jon Kabat-Zinn",
+    category: "Meditación",
+    image: "/img/mindfulness.jpg",
+    description: "Aprende a vivir el momento presente con plenitud y consciencia.",
+    pages: 208,
+    year: 1994
+  },
+  {
+    id: 22,
+    title: "El código de la manifestación",
+    author: "Raimon Samsó",
+    category: "Espiritualidad",
+    image: "/img/codigo_manifestacion.jpg",
+    description: "Descubre cómo materializar tus deseos y crear tu realidad.",
+    pages: 192,
+    year: 2015
+  },
+  {
+    id: 23,
+    title: "Ikigai",
+    author: "Héctor García",
+    category: "Desarrollo personal",
+    image: "/img/ikigai.jpg",
+    description: "El secreto japonés para una vida larga y feliz.",
+    pages: 192,
+    year: 2016
+  },
+  {
+    id: 24,
+    title: "El principito",
+    author: "Antoine de Saint-Exupéry",
+    category: "Ficción",
+    image: "/img/principito.jpg",
+    description: "Una hermosa historia sobre la amistad, el amor y la pérdida.",
+    pages: 96,
+    year: 1943
+  }
+];
+
+const categories = [...new Set(books.map(book => book.category))].sort();
 ---
 
-<html lang="en">
+<html lang="es">
   <head>
-    <title>Books Section</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books Recommendations</title>
     <style>
-      .verde {
-        background-color: #eafaf1;
-        color: #2f6135;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e8ede4 0%, #d4dbc8 100%);
+        color: #425638;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        padding: 40px 20px;
+        animation: fadeInDown 0.8s ease;
+      }
+
+      .header h1 {
+        font-size: 3.5rem;
+        color: #425638;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: #687450;
+        font-weight: 300;
+      }
+
+      .search-container {
+        max-width: 700px;
+        margin: 30px auto;
+        position: relative;
+        animation: fadeIn 1s ease;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 18px 50px 18px 20px;
+        border: 2px solid #687450;
+        border-radius: 50px;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.3s ease;
+        background: white;
+        color: #425638;
+      }
+
+      .search-input:focus {
+        border-color: #425638;
+        box-shadow: 0 4px 15px rgba(66, 86, 56, 0.2);
+      }
+
+      .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #687450;
+        font-size: 1.3rem;
+      }
+
+      .filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin: 30px 0;
+        animation: fadeIn 1s ease;
+      }
+
+      .filter-btn {
+        padding: 12px 28px;
+        background: white;
+        border: 2px solid #687450;
+        border-radius: 25px;
+        color: #425638;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      .filter-btn:hover {
+        background: #687450;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(66, 86, 56, 0.3);
+      }
+
+      .filter-btn.active {
+        background: #425638;
+        color: white;
+        border-color: #425638;
+      }
+
+      .books-grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        padding: 20px;
+      }
+
       .book-card {
-        @apply bg-white shadow-md rounded-xl p-4 flex flex-col gap-2;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.6s ease;
+        cursor: pointer;
+      }
+
+      .book-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(66, 86, 56, 0.3);
+      }
+
+      .book-image-container {
+        position: relative;
+        height: 350px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f8f2 0%, #e8ede4 100%);
+      }
+
+      .book-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .book-card:hover .book-image {
+        transform: scale(1.1);
+      }
+
+      .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(66, 86, 56, 0.95);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 2;
+      }
+
+      .book-content {
+        padding: 20px;
+      }
+
+      .book-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #425638;
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+
+      .book-author {
+        color: #687450;
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        font-style: italic;
+      }
+
+      .book-description {
+        color: #687450;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .book-meta {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: 2px solid #e8ede4;
+        font-size: 0.85rem;
+        color: #687450;
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #687450;
+        font-size: 1.2rem;
+        grid-column: 1 / -1;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2.5rem;
+        }
+
+        .books-grid {
+          grid-template-columns: 1fr;
+          padding: 10px;
+        }
+
+        .filter-tabs {
+          gap: 10px;
+        }
+
+        .filter-btn {
+          padding: 10px 20px;
+          font-size: 0.9rem;
+        }
+      }
+
+      .scroll-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: #425638;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 15px rgba(66, 86, 56, 0.4);
+        transition: all 0.3s ease;
+        z-index: 999;
+      }
+
+      .scroll-top:hover {
+        background: #687450;
+        transform: translateY(-5px);
+      }
+
+      .scroll-top.visible {
+        display: flex;
       }
     </style>
   </head>
-  <body class="verde min-h-screen p-10 font-sans">
-    <h1 class="text-4xl font-bold mb-8 text-center">📚 Book Recommendations</h1>
+  <body>
+    <div class="header">
+      <h1>📚 Book Recommendations</h1>
+      <p>Discover books that will transform your life and expand your mind</p>
+    </div>
 
-    <!-- Buscador -->
-    <div class="flex justify-center mb-8">
+    <div class="search-container">
       <input
         type="text"
-        placeholder="Search by title, author or category..."
         id="searchInput"
-        class="w-full max-w-xl p-3 rounded-lg border border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
-        oninput="filterBooks()"
+        class="search-input"
+        placeholder="Search by title, author or category..."
       />
+      <span class="search-icon">🔍</span>
     </div>
 
-    <!-- Categorías -->
-    <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="book-card" data-title="El poder del ahora" data-author="Eckhart Tolle" data-category="Espiritualidad">
-        <img src="/img/el_poder_del_ahora.jpg" alt="El poder del ahora" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">El poder del ahora</h2>
-        <p class="text-sm text-gray-600">Autor: Eckhart Tolle</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Espiritualidad</span>
-        <p class="text-sm mt-2">Una guía para alcanzar la iluminación a través del poder del presente.</p>
-      </div>
-
-      <div class="book-card" data-title="Los secretos de la mente millonaria" data-author="T. Harv Eker" data-category="Autoayuda">
-        <img src="/img/el_hombre_en_busca_del_sentido.jpg" alt="El hombre en busca de sentido" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">El hombre en busca de sentido</h2>
-        <p class="text-sm text-gray-600">Autor: Viktor Frankl</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Autoayuda</span>
-        <p class="text-sm mt-2">Aprende a explorar tus habilidades no descubiertas para este mundo incierto.</p>
-      </div>
-
-      <div class="book-card" data-title="Inteligencia emocional" data-author="Daniel Goleman" data-category="Psicología">
-        <img src="/img/la_inteligencia_emocional.jpg" alt="Inteligencia emocional" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">Inteligencia emocional</h2>
-        <p class="text-sm text-gray-600">Autor: Daniel Goleman</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Psicología</span>
-        <p class="text-sm mt-2">Explora cómo la inteligencia emocional impacta tu vida personal y profesional.</p>
-      </div>
-
-      <div class="book-card" data-title="Hábitos atómicos" data-author="James Clear" data-category="Desarrollo personal">
-        <img src="/img/habitos_atomicos.png" alt="Hábitos atómicos" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">Hábitos atómicos</h2>
-        <p class="text-sm text-gray-600">Autor: James Clear</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Desarrollo personal</span>
-        <p class="text-sm mt-2">Pequeños cambios diarios que transforman tu vida y te ayudan a lograr grandes resultados.</p>
-      </div>
-
-      <div class="book-card" data-title="El alquimista" data-author="Paulo Coelho" data-category="Ficción">
-        <img src="/img/el_alquimista.png" alt="El alquimista" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">El alquimista</h2>
-        <p class="text-sm text-gray-600">Autor: Paulo Coelho</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Ficción</span>
-        <p class="text-sm mt-2">Una fábula inspiradora sobre seguir tus sueños y escuchar al corazón.</p>
-      </div>
-
-      <div class="book-card" data-title="Padre Rico Padre Pobre" data-author="Robert Kiyosaki" data-category="Finanzas">
-        <img src="/img/padre_rico_padre_pobre.png" alt="Padre Rico Padre Pobre" class="w-full h-60 object-cover rounded-md" />
-        <h2 class="text-xl font-semibold">Padre rico padre pobre</h2>
-        <p class="text-sm text-gray-600">Autor: Robert Kiyosaki</p>
-        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs inline-block">Finanzas</span>
-        <p class="text-sm mt-2">Una perspectiva diferente sobre el dinero, la inversión y la educación financiera.</p>
-      </div>
+    <div class="filter-tabs">
+      <button class="filter-btn active" data-category="all">All Books</button>
+      {categories.map(category => (
+        <button class="filter-btn" data-category={category}>{category}</button>
+      ))}
     </div>
-    <script src="/search.js" defer></script>
+
+    <div class="books-grid" id="booksGrid">
+      {books.map((book, index) => (
+        <div 
+          class="book-card" 
+          data-title={book.title.toLowerCase()}
+          data-author={book.author.toLowerCase()}
+          data-category={book.category}
+          style={`animation-delay: ${index * 0.05}s`}
+        >
+          <div class="book-image-container">
+            <img src={book.image} alt={book.title} class="book-image" />
+            <div class="category-badge">{book.category}</div>
+          </div>
+          <div class="book-content">
+            <h2 class="book-title">{book.title}</h2>
+            <p class="book-author">por {book.author}</p>
+            <p class="book-description">{book.description}</p>
+            <div class="book-meta">
+              <span>📖 {book.pages} páginas</span>
+              <span>📅 {book.year > 0 ? book.year : `${Math.abs(book.year)} A.C.`}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <button class="scroll-top" id="scrollTop">↑</button>
+
+    <script is:inline>
+      const searchInput = document.getElementById('searchInput');
+      const booksGrid = document.getElementById('booksGrid');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const bookCards = document.querySelectorAll('.book-card');
+
+      let currentCategory = 'all';
+
+      // Search functionality
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        bookCards.forEach(card => {
+          const title = card.dataset.title;
+          const author = card.dataset.author;
+          const category = card.dataset.category;
+          
+          const matchesSearch = title.includes(searchTerm) || 
+                               author.includes(searchTerm) || 
+                               category.toLowerCase().includes(searchTerm);
+          const matchesCategory = currentCategory === 'all' || category === currentCategory;
+
+          if (matchesSearch && matchesCategory) {
+            card.style.display = 'block';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Show no results message
+        const existingMessage = document.getElementById('noResults');
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+
+        if (visibleCount === 0) {
+          const noResults = document.createElement('div');
+          noResults.id = 'noResults';
+          noResults.className = 'no-results';
+          noResults.innerHTML = `
+            <p style="font-size: 3rem; margin-bottom: 20px;">📚</p>
+            <p>No se encontraron libros que coincidan con tu búsqueda</p>
+            <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Intenta con otros términos</p>
+          `;
+          booksGrid.appendChild(noResults);
+        }
+      });
+
+      // Filter functionality
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.dataset.category;
+          currentCategory = category;
+          
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          searchInput.value = '';
+          
+          const existingMessage = document.getElementById('noResults');
+          if (existingMessage) {
+            existingMessage.remove();
+          }
+
+          bookCards.forEach((card, index) => {
+            if (category === 'all' || card.dataset.category === category) {
+              card.style.display = 'block';
+              card.style.animation = `fadeInUp 0.6s ease ${index * 0.03}s`;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Scroll to top button
+      const scrollTopBtn = document.getElementById('scrollTop');
+      
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    </script>
   </body>
 </html>

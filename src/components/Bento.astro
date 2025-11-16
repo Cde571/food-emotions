@@ -2,85 +2,353 @@
 import BentoItem from "./BentoItem.astro";
 ---
 
+<!-- ============================
+     🟩 BENTO PRINCIPAL
+=============================== -->
 <section class="w-full max-w-[1400px] grid grid-cols-10 auto-rows-[25rem] gap-4 mx-auto px-20 mt-44">
+
   <!-- Music Section -->
   <BentoItem
     href="/music"
     class="col-span-5 bg-[#a0c49d]"
-    title="Music section"
-    subtitle="Songs to meditate, do yoga, or just relax."
+    title="Sección de Música"
+    subtitle="Canciones para meditar, hacer yoga o relajarte."
   >
     <div
       slot="image"
-      class="absolute top-0 left-0 w-full h-full bg-center bg-cover bg-no-repeat group-hover:scale-110 transition-transform duration-1000 ease-in-out"
-      style="background-image: url('/img/yoga.jpg');"
-    ></div>
+      class="absolute inset-0 bg-center bg-cover group-hover:scale-110 transition-transform duration-700"
+      style="background-image: url('/img/yoga.jpg');">
+    </div>
   </BentoItem>
 
   <!-- Food Section -->
   <BentoItem
     href="/food"
     class="col-span-5 bg-[#b2d3c2]"
-    title="Food section"
-    subtitle="Healthy recipes to nourish your body."
+    title="Sección de Comida"
+    subtitle="Recetas saludables para nutrir tu cuerpo."
   >
     <div
       slot="image"
-      class="absolute top-0 left-0 w-full h-full bg-center bg-cover bg-no-repeat group-hover:scale-110 transition-transform duration-1000 ease-in-out"
-      style="background-image: url('/img/comer_sano.jpg');"
-    ></div>
+      class="absolute inset-0 bg-center bg-cover group-hover:scale-110 transition-transform duration-700"
+      style="background-image: url('/img/comer_sano.jpg');">
+    </div>
   </BentoItem>
 
   <!-- Book Section -->
   <BentoItem
     href="/books"
     class="col-span-10 bg-[#d2e6d4]"
-    title="Book section"
-    subtitle="Recommendations to improve your mental health."
+    title="Sección de Libros"
+    subtitle="Lecturas que ayudan a tu bienestar mental."
   >
     <div
       slot="image"
-      class="absolute top-0 left-0 w-full h-full bg-center bg-cover bg-no-repeat group-hover:scale-110 transition-transform duration-1000 ease-in-out"
-      style="background-image: url('/img/libros.png');"
-    ></div>
-  </BentoItem>
-</section>
-
-<section>
-    <h1 class="text-[#ffffff] text-5xl text-pretty text-center mt-44">ChatBot Chapters</h1>
-    <div class="flex justify-center space-x-4 px-4 mt-44">
-      
-        <!-- Card 1 -->
-        <div class="bg-[#4a5d23] shadow-md rounded-lg overflow-hidden w-1/4">
-            <img src="src/img/chatbot.png" alt="logo" />
-            <div class="p-4">
-                <h2 class="text-xl font-semibold mb-2 text-white">Chapter 1: Introduction to ChatBot</h2>
-                <p class="text-gray-300">A chatbot is a computer program designed to simulate conversation 
-                    with humans. It can answer questions, provide help, or chat casually using text or 
-                    voice. Chatbots are often used in websites, apps, and messaging platforms 
-                    to offer quick support or information.</p>
-            </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-[#5b6b3e] shadow-md rounded-lg overflow-hidden w-1/4">
-            <img src="src/img/Brain Icon.png" alt="Imagen 2" class="w-auto h-auto mx-auto rounded-md mb-4">
-            <div class="p-4">
-                <h2 class="text-xl font-semibold mb-2 text-white">Chapter 2: Meet Roy and what he can do</h2>
-                <p class="text-gray-300">Roy is a chatbot that helps you with your mood, 
-                    just tell him how you feel and he will make different recommendations 
-                    (music, books or food).</p>
-            </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-[#6b7b43] shadow-md rounded-lg overflow-hidden w-1/4">
-            <img src="src/img/Cpu Icon.png" alt="Imagen 3" class="w-auto h-auto mx-auto rounded-md mb-4">
-            <div class="p-4">
-                <h2 class="text-xl font-semibold mb-2 text-white">Chapter 3: What else does the site offer?</h2>
-                <p class="text-gray-300">You can save the content you like in an organized way, 
-                    share and comment with other users, as well as customize the page to your liking..</p>
-            </div>
-        </div>
+      class="absolute inset-0 bg-center bg-cover group-hover:scale-110 transition-transform duration-700"
+      style="background-image: url('/img/libros.png');">
     </div>
+  </BentoItem>
+
 </section>
+
+<!-- ============================
+     🌿 CONSEJOS EMOCIONALES
+=============================== -->
+<section class="mt-44 px-6 overflow-visible">
+  <h1 class="text-white text-5xl text-center font-bold mb-6">
+    Consejos según tu emoción
+  </h1>
+
+  <!-- Descripción -->
+  <p class="text-center text-gray-300 max-w-3xl mx-auto mb-12 text-lg leading-relaxed">
+    Estas tarjetas representan diferentes emociones que puedes experimentar en tu día a día.
+    Toca la emoción que más se acerque a cómo te sientes en este momento y recibirás 
+    recomendaciones prácticas, simples y útiles para ayudarte a gestionar esa emoción 
+    de forma saludable y consciente. Además, ¡puedes escuchar mediante voz el consejo!
+  </p>
+
+  <div class="relative max-w-6xl mx-auto overflow-visible">
+
+    <!-- Flecha izquierda -->
+    <button 
+      onclick="scrollEmotions(-350)" 
+      class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-[#425638] text-white p-3 rounded-full shadow-lg hover:bg-[#354a2e] transition z-40">
+      ‹
+    </button>
+
+    <!-- Flecha derecha -->
+    <button 
+      onclick="scrollEmotions(350)" 
+      class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-[#425638] text-white p-3 rounded-full shadow-lg hover:bg-[#354a2e] transition z-40">
+      ›
+    </button>
+
+    <!-- CARRUSEL -->
+    <div
+      id="emotionsCarousel"
+      class="flex flex-nowrap gap-8 overflow-x-auto scroll-smooth no-scrollbar px-4 py-4 relative z-30"
+      style="scroll-snap-type: x mandatory;"
+    >
+      <!-- TARJETAS -->
+      <!-- Estrés -->
+      <div onclick="openTip('estres')"
+        class="emotion-card flex-none w-[320px] h-[260px] rounded-3xl p-8 bg-[#4a5d23] cursor-pointer shadow-xl hover:scale-[1.03] transition scroll-snap-align-start relative z-50">
+        <div class="flex justify-center mb-4">
+          <span class="text-6xl">😰</span>
+        </div>
+        <h2 class="text-white text-2xl font-extrabold text-center leading-tight">
+          Cuando te sientes <br /> estresado
+        </h2>
+        <p class="text-gray-200 text-center mt-3 text-sm">
+          Toca para ver cómo recuperar la calma.
+        </p>
+      </div>
+
+      <!-- Tristeza -->
+      <div onclick="openTip('tristeza')"
+        class="emotion-card flex-none w-[320px] h-[260px] rounded-3xl p-8 bg-[#5b6b3e] cursor-pointer shadow-xl hover:scale-[1.03] transition scroll-snap-align-start relative z-50">
+        <div class="flex justify-center mb-4">
+          <span class="text-6xl">😞</span>
+        </div>
+        <h2 class="text-white text-2xl font-extrabold text-center leading-tight">
+          Cuando te sientes <br /> triste
+        </h2>
+        <p class="text-gray-200 text-center mt-3 text-sm">
+          Toca para recibir apoyo emocional.
+        </p>
+      </div>
+
+      <!-- Cansancio -->
+      <div onclick="openTip('cansancio')"
+        class="emotion-card flex-none w-[320px] h-[260px] rounded-3xl p-8 bg-[#6b7b43] cursor-pointer shadow-xl hover:scale-[1.03] transition scroll-snap-align-start relative z-50">
+        <div class="flex justify-center mb-4">
+          <span class="text-6xl">😴</span>
+        </div>
+        <h2 class="text-white text-2xl font-extrabold text-center leading-tight">
+          Cansancio mental
+        </h2>
+        <p class="text-gray-200 text-center mt-3 text-sm">
+          Toca para renovar tu energía.
+        </p>
+      </div>
+
+      <!-- Ansiedad -->
+      <div onclick="openTip('ansiedad')"
+        class="emotion-card flex-none w-[320px] h-[260px] rounded-3xl p-8 bg-[#425638] cursor-pointer shadow-xl hover:scale-[1.03] transition scroll-snap-align-start relative z-50">
+        <div class="flex justify-center mb-4">
+          <span class="text-6xl">😶‍🌫️</span>
+        </div>
+        <h2 class="text-white text-2xl font-extrabold text-center leading-tight">
+          Ansiedad
+        </h2>
+        <p class="text-gray-200 text-center mt-3 text-sm">
+          Toca para centrarte y respirar.
+        </p>
+      </div>
+
+      <!-- Frustración -->
+      <div onclick="openTip('frustracion')"
+        class="emotion-card flex-none w-[320px] h-[260px] rounded-3xl p-8 bg-[#687450] cursor-pointer shadow-xl hover:scale-[1.03] transition scroll-snap-align-start relative z-50">
+        <div class="flex justify-center mb-4">
+          <span class="text-6xl">😡</span>
+        </div>
+        <h2 class="text-white text-2xl font-extrabold text-center leading-tight">
+          Frustración
+        </h2>
+        <p class="text-gray-200 text-center mt-3 text-sm">
+          Toca para liberar tensión.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     🌿 MODAL
+=============================== -->
+<div
+  id="tipModal"
+  class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999]"
+>
+  <div class="bg-white w-[90%] max-w-lg p-8 rounded-2xl shadow-2xl text-center relative animate-fadeIn">
+
+    <!-- Botón cerrar -->
+    <button
+      onclick="closeTip()"
+      class="absolute right-4 top-4 text-gray-600 hover:text-black text-2xl"
+    >
+      ✕
+    </button>
+
+    <!-- Fondo animado (respiración) -->
+    <div class="breathing-bg absolute inset-0 opacity-20"></div>
+
+    <h2 id="tipTitle" class="text-3xl font-bold text-[#425638] mb-4 relative z-20"></h2>
+
+    <p id="tipText" class="text-gray-700 text-lg leading-relaxed whitespace-pre-line relative z-20"></p>
+
+    <!-- Botón escuchar -->
+    <button
+      onclick="speakTip()"
+      class="mt-6 px-6 py-3 bg-[#425638] text-white rounded-xl font-semibold shadow hover:bg-[#354a2e] transition relative z-20"
+    >
+      Leer en voz alta
+    </button>
+  </div>
+</div>
+
+
+<!-- ============================
+     🌿 AUDIOS 
+=============================== -->
+<audio id="audio-estres" src="/sounds/estres.wav"></audio>
+<audio id="audio-tristeza" src="/sounds/tristeza.wav"></audio>
+<audio id="audio-cansancio" src="/sounds/cansancio.wav"></audio>
+<audio id="audio-ansiedad" src="/sounds/ansiedad.wav"></audio>
+<audio id="audio-frustracion" src="/sounds/frustracion.wav"></audio>
+
+
+<!-- ============================
+     🌿 SCRIPTS GLOBALES
+=============================== -->
+<script is:inline>
+  const tips = {
+    estres: {
+      title: "Consejos para el Estrés",
+      text: `
+• Respira profundo 5 veces.
+• Baja los hombros y relaja la mandíbula.
+• Camina durante 2 minutos.
+• Toma agua lentamente.
+• Enfócate en una sola tarea a la vez.
+`,
+      audio: "audio-estres"
+    },
+
+    tristeza: {
+      title: "Cuando te sientes triste",
+      text: `
+• Exprésate sin juzgarte.
+• Habla con alguien de confianza.
+• Escucha música tranquila.
+• Abraza algo cálido.
+• Escribe cómo te sientes.
+`,
+      audio: "audio-tristeza"
+    },
+
+    cansancio: {
+      title: "Cansancio Mental",
+      text: `
+• Cierra los ojos 20 segundos.
+• Estira cuello y espalda.
+• Haz una pausa de pantallas.
+• Respira profundo varias veces.
+• Baja la intensidad de luces/ruidos.
+`,
+      audio: "audio-cansancio"
+    },
+
+    ansiedad: {
+      title: "Ansiedad",
+      text: `
+• Respira 4 2 6 varias veces.
+• Mira a tu alrededor: nombra 3 cosas.
+• Coloca tus manos en el pecho.
+• Bebe agua lentamente.
+• Enfócate en lo que puedes controlar ahora.
+`,
+      audio: "audio-ansiedad"
+    },
+
+    frustracion: {
+      title: "Frustración",
+      text: `
+• Exhala profundamente.
+• Acepta que algo no salió como querías.
+• Mueve tu cuerpo para soltar tensión.
+• Identifica qué PUEDES cambiar.
+• Date permiso de volver a intentarlo luego.
+`,
+      audio: "audio-frustracion"
+    }
+  };
+
+  // Scroll con botones
+  window.scrollEmotions = (amount) => {
+    document.getElementById("emotionsCarousel")
+      .scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  // Abrir modal
+  window.openTip = (type) => {
+    const data = tips[type];
+    if (!data) return;
+
+    document.getElementById("tipTitle").textContent = data.title;
+    document.getElementById("tipText").textContent = data.text;
+
+    // Reproducir audio
+    stopAllAudio();
+    document.getElementById(data.audio)?.play();
+
+    document.getElementById("tipModal").classList.remove("hidden");
+  };
+
+  // Cerrar modal
+  window.closeTip = () => {
+    document.getElementById("tipModal").classList.add("hidden");
+    stopAllAudio();
+  };
+
+  // Detener todos los audios
+  function stopAllAudio() {
+    ["estres","tristeza","cansancio","ansiedad","frustracion"].forEach((a)=>{
+      const audio = document.getElementById(`audio-${a}`);
+      if (audio) { audio.pause(); audio.currentTime = 0; }
+    });
+  }
+
+  // Voz 
+  window.speakTip = () => {
+    const text = document.getElementById("tipText").textContent;
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "es-ES";
+    msg.pitch = 1;
+    msg.rate = 1;
+    speechSynthesis.speak(msg);
+  };
+</script>
+
+
+<!-- ============================
+     🌿 ESTILOS
+=============================== -->
+<style>
+  :global(.no-scrollbar::-webkit-scrollbar) { display: none; }
+  :global(.no-scrollbar) { scrollbar-width: none; }
+
+  /* Fondo de respiración dentro del modal */
+  .breathing-bg {
+    background: radial-gradient(circle, #7a8f6b 0%, transparent 70%);
+    animation: breathing 4s infinite ease-in-out;
+    border-radius: 50%;
+  }
+
+  @keyframes breathing {
+    0%   { transform: scale(0.7); opacity: 0.25; }
+    50%  { transform: scale(1); opacity: 0.45; }
+    100% { transform: scale(0.7); opacity: 0.25; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn .3s ease-out;
+  }
+</style>

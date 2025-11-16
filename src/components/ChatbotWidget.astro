@@ -81,31 +81,35 @@ import { onMount } from "astro/jsx-runtime";
   }
 
   async function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+  const text = input.value.trim();
+  if (!text) return;
 
-    addMessage(text, "user");
-    input.value = "";
+  addMessage(text, "user");
+  input.value = "";
 
-    addMessage("Roy está escribiendo...", "bot");
+  // Mensaje temporal de "escribiendo..."
+  addMessage("Roy está escribiendo...", "bot");
 
-    try {
-      const res = await fetch("http://localhost:3000/api/chat/voice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, mode: "general" }),
-      });
+  try {
+    const res = await fetch("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, mode: "general" }),
+    });
 
-      const data = await res.json();
-      chatBox.lastChild.remove(); // elimina "escribiendo..."
+    const data = await res.json();
 
-      const reply = data.reply || "No pude procesar tu mensaje.";
-      addMessage(reply, "bot");
-    } catch (err) {
-      chatBox.lastChild.remove();
-      addMessage("❌ Error al conectar con el servidor.", "bot");
-    }
+    // Eliminar el mensaje temporal
+    if (chatBox.lastChild) chatBox.lastChild.remove();
+
+    const reply = data.reply || "No pude procesar tu mensaje.";
+    addMessage(reply, "bot");
+
+  } catch (err) {
+    if (chatBox.lastChild) chatBox.lastChild.remove();
+    addMessage("❌ Error al conectar con el servidor.", "bot");
   }
+}
 
   sendBtn.addEventListener("click", sendMessage);
   input.addEventListener("keydown", (e) => {

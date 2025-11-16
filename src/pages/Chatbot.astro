@@ -17,7 +17,7 @@ import Layout from "../layouts/Layout.astro";
       <!-- 🔹 MODO DE CHAT -->
       <div class="mode-selector">
         <button class="mode-btn active" data-mode="general">💬 General</button>
-        <button class="mode-btn" data-mode="emocional">❤️ Emocional</button>
+        <button class="mode-btn" data-mode="emocional">❤️ Literario</button>
         <button class="mode-btn" data-mode="chef">🍳 Chef</button>
         <button class="mode-btn" data-mode="musical">🎵 Musical</button>
       </div>
@@ -113,46 +113,48 @@ import Layout from "../layouts/Layout.astro";
     function showTyping(){typingIndicator.style.display="flex";}
     function hideTyping(){typingIndicator.style.display="none";}
 
-    async function sendMessage(){
-      const text=input.value.trim();
-      if(!text)return;
-      addUserMessage(text);
-      input.value="";
-      input.style.height="auto";
-      btn.disabled=true;
-      showTyping();
+    async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
 
-      try{
-        const res=await fetch("http://localhost:3000/api/chat/voice",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({message:text,mode:currentMode})
-        });
-        const data=await res.json();
-        hideTyping();
-        if(res.ok){
-          addBotMessage(data.reply||"No pude procesar tu mensaje.",data.emotion);
-          if(data.audioUrl){
-            const a=new Audio(`http://localhost:3000${data.audioUrl}`);
-            a.play();
-          }
-        }else{
-          addBotMessage("⚠️ Error al procesar el mensaje.","neutral");
-        }
-      }catch(e){
-        hideTyping();
-        addBotMessage("❌ Error de conexión.","neutral");
-      }
-      btn.disabled=false;
+  addUserMessage(text);
+  input.value = "";
+  input.style.height = "auto";
+  btn.disabled = true;
+  showTyping();
+
+  try {
+    const res = await fetch("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, mode: currentMode })
+    });
+
+    const data = await res.json();
+    hideTyping();
+
+    if (res.ok) {
+      addBotMessage(data.reply || "No pude procesar tu mensaje.", data.emotion);
+    } else {
+      addBotMessage("⚠️ Error al procesar el mensaje.", "neutral");
     }
 
-    btn.addEventListener("click",sendMessage);
-    input.addEventListener("keydown",e=>{
-      if(e.key==="Enter"&&!e.shiftKey){
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+  } catch (e) {
+    hideTyping();
+    addBotMessage("❌ Error de conexión.", "neutral");
+  }
+
+  btn.disabled = false;
+}
+
+btn.addEventListener("click", sendMessage);
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
   </script>
 
   <style>
@@ -253,9 +255,22 @@ import Layout from "../layouts/Layout.astro";
       max-width:75%;
     }
 
-    .message.bot{align-items:flex-start;}
-    .bot-avatar-small{width:32px;height:32px;flex-shrink:0;}
-    .bot-avatar-small img{width:100%;height:100%;border-radius:50%;border:2px solid #cdd9b8;}
+    :global(.message.bot) {
+  align-items: flex-start;
+}
+
+:global(.bot-avatar-small) {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+:global(.bot-avatar-small img) {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #cdd9b8;
+}
     .message-bubble{
       background:rgba(255,255,255,0.3);
       padding:.8rem 1rem;

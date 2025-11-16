@@ -4,148 +4,731 @@ const musicList = [
     title: "Meditation",
     description: "Peaceful sounds to help you meditate and relax.",
     image: "/img/meditation.jpg",
-    link: "https://www.youtube.com/watch?v=22i6SofLVRY"
+    category: "Meditation",
+    duration: "1 hour",
+    youtubeId: "22i6SofLVRY"
   },
   {
     title: "Yoga flow",
     description: "Background music for yoga sessions and stretching.",
     image: "/img/yoga.jpg",
-    link: "https://www.youtube.com/watch?v=2q_HJzd2aKc"
+    category: "Yoga",
+    duration: "45 mins",
+    youtubeId: "2q_HJzd2aKc"
   },
   {
     title: "Deep relax",
     description: "Ambient sounds for deep relaxation and stress relief.",
     image: "/img/relax.jpg",
-    link: "https://www.youtube.com/watch?v=1ZYbU82GVz4"
+    category: "Relaxation",
+    duration: "2 hours",
+    youtubeId: "1ZYbU82GVz4"
   },
   {
     title: "Morning vibes",
     description: "Start your day with gentle, uplifting melodies.",
     image: "/img/morning.jpg",
-    link: "https://www.youtube.com/watch?v=SSuCyZlksrI&t=846s"
+    category: "Energy",
+    duration: "30 mins",
+    youtubeId: "SSuCyZlksrI"
   },
   {
     title: "Healing frequencies",
     description: "Frequencies like 432Hz to promote inner healing.",
     image: "/img/frequency.jpg",
-    link: "https://www.youtube.com/watch?v=eWLVBP3VrO4"
+    category: "Healing",
+    duration: "3 hours",
+    youtubeId: "eWLVBP3VrO4"
   },
   {
     title: "Nature sounds",
     description: "Enjoy the sound of rain, birds, forests and ocean waves.",
     image: "/img/nature.jpg",
-    link: "https://www.youtube.com/watch?v=lE6RYpe9IT0"
+    category: "Nature",
+    duration: "8 hours",
+    youtubeId: "lE6RYpe9IT0"
   },
   {
     title: "Sleep aid",
     description: "Calming tracks to help you fall asleep faster.",
     image: "/img/sleep.png",
-    link: "https://www.youtube.com/watch?v=rA7m3iKpuko"
+    category: "Sleep",
+    duration: "10 hours",
+    youtubeId: "rA7m3iKpuko"
   },
   {
     title: "Instrumental peace",
     description: "Instrumental piano, flutes, and acoustic guitars.",
     image: "/img/instrumental.jpg",
-    link: "https://www.youtube.com/watch?v=yhFccHgf_FQ"
+    category: "Instrumental",
+    duration: "1.5 hours",
+    youtubeId: "yhFccHgf_FQ"
   },
   {
     title: "Focus & study",
     description: "Stay focused with distraction-free melodies.",
     image: "/img/focus.jpg",
-    link: "https://www.youtube.com/watch?v=_4kHxtiuML0"
+    category: "Focus",
+    duration: "4 hours",
+    youtubeId: "_4kHxtiuML0"
   },
   {
     title: "Mantras and chants",
     description: "Spiritual chants and sacred mantras to calm the mind.",
     image: "/img/mantras.jpeg",
-    link: "https://www.youtube.com/watch?v=8timuM4xkuU"
+    category: "Spiritual",
+    duration: "50 mins",
+    youtubeId: "8timuM4xkuU"
   },
+  {
+    title: "Chakra balancing",
+    description: "Music to balance and align your seven chakras.",
+    image: "/img/chakra.jpg",
+    category: "Healing",
+    duration: "2 hour",
+    youtubeId: "NuXa4GxT3jc"
+  },
+  {
+    title: "Tibetan bowls",
+    description: "Soothing sounds of Tibetan singing bowls.",
+    image: "/img/tibetan.jpg",
+    category: "Meditation",
+    duration: "2 hours",
+    youtubeId: "FjHGZj2IjBk"
+  },
+  {
+    title: "Forest bathing",
+    description: "Immerse yourself in the sounds of a peaceful forest.",
+    image: "/img/forest.jpg",
+    category: "Nature",
+    duration: "1 hour",
+    youtubeId: "0R4sVTzDxPQ"
+  },
+  {
+    title: "Ocean waves",
+    description: "Gentle waves for relaxation and better sleep.",
+    image: "/img/ocean.jpg",
+    category: "Nature",
+    duration: "10 hours",
+    youtubeId: "WHPEKLQID4U"
+  },
+  {
+    title: "Zen garden",
+    description: "Traditional Japanese music for inner peace.",
+    image: "/img/zen.jpg",
+    category: "Meditation",
+    duration: "1 hour",
+    youtubeId: "CH6WkQcRBZA"
+  },
+  {
+    title: "Binaural beats",
+    description: "Brain wave entrainment for deep meditation.",
+    image: "/img/binaural.jpg",
+    category: "Focus",
+    duration: "3 hours",
+    youtubeId: "SKRmk_xDyRc"
+  },
+  {
+    title: "Reiki healing",
+    description: "Energy healing music for mind and body.",
+    image: "/img/reiki.jpg",
+    category: "Healing",
+    duration: "6 hours",
+    youtubeId: "OmxTqWUQiLk"
+  },
+  {
+    title: "Celtic harp",
+    description: "Beautiful melodies from the Celtic tradition.",
+    image: "/img/celtic.jpg",
+    category: "Instrumental",
+    duration: "2 hour",
+    youtubeId: "9c51_Oao2nk"
+  },
+  {
+    title: "White noise",
+    description: "Pure white noise for blocking distractions.",
+    image: "/img/whitenoise.jpg",
+    category: "Sleep",
+    duration: "12 hours",
+    youtubeId: "nMfPqeZjc2c"
+  },
+  {
+    title: "Thunder & rain",
+    description: "Powerful thunderstorm sounds for deep relaxation.",
+    image: "/img/thunder.jpg",
+    category: "Nature",
+    duration: "8 hours",
+    youtubeId: "mPZkdNFkNps"
+  },
+  {
+    title: "Positive energy",
+    description: "Uplifting music to boost your mood and motivation.",
+    image: "/img/positive.jpg",
+    category: "Energy",
+    duration: "1 hour",
+    youtubeId: "ZbZSe6N_BXs"
+  },
+  {
+    title: "Native flute",
+    description: "Native American flute music for spiritual connection.",
+    image: "/img/flute.jpg",
+    category: "Spiritual",
+    duration: "9 hours",
+    youtubeId: "dr2VyUvzrwI"
+  },
+  {
+    title: "Spa relaxation",
+    description: "Luxurious spa music for ultimate relaxation.",
+    image: "/img/spa.jpg",
+    category: "Relaxation",
+    duration: "2 hours",
+    youtubeId: "A9PhV0B2nmg"
+  },
+  {
+    title: "Piano dreams",
+    description: "Soft piano compositions for peaceful moments.",
+    image: "/img/piano.jpg",
+    category: "Instrumental",
+    duration: "1 hour",
+    youtubeId: "E7EOjkGVmyo"
+  }
 ];
 ---
 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Music section</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music for your mind</title>
     <style>
-      body {
-        font-family: sans-serif;
-        background-color: #edf6ec;
-        color: #2f4f2f;
+      * {
         margin: 0;
-        padding: 2rem;
+        padding: 0;
+        box-sizing: border-box;
       }
 
-      h1 {
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e8ede4 0%, #d4dbc8 100%);
+        color: #425638;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .header {
         text-align: center;
-        color: #3d6b3d;
-        margin-bottom: 3rem;
+        padding: 40px 20px;
+        animation: fadeInDown 0.8s ease;
+      }
+
+      .header h1 {
+        font-size: 3.5rem;
+        color: #425638;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: #687450;
+        font-weight: 300;
+      }
+
+      .filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin: 30px 0;
+        animation: fadeIn 1s ease;
+      }
+
+      .filter-btn {
+        padding: 12px 28px;
+        background: white;
+        border: 2px solid #687450;
+        border-radius: 25px;
+        color: #425638;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      .filter-btn:hover {
+        background: #687450;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(66, 86, 56, 0.3);
+      }
+
+      .filter-btn.active {
+        background: #425638;
+        color: white;
+        border-color: #425638;
       }
 
       .music-grid {
+        max-width: 1400px;
+        margin: 0 auto;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 20px;
       }
 
       .card {
-        background: #ffffff;
-        border-radius: 1rem;
+        background: white;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.6s ease;
+        position: relative;
       }
 
       .card:hover {
-        transform: scale(1.03);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(66, 86, 56, 0.3);
+      }
+
+      .image-container {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+        cursor: pointer;
       }
 
       .card img {
         width: 100%;
-        height: 200px;
+        height: 100%;
         object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .card:hover img {
+        transform: scale(1.15);
+      }
+
+      .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(66, 86, 56, 0.95);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 2;
+      }
+
+      .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70px;
+        height: 70px;
+        background: rgba(66, 86, 56, 0.95);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      .image-container:hover .play-icon {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+
+      .play-icon::after {
+        content: '▶';
+        color: white;
+        font-size: 2rem;
+        margin-left: 4px;
       }
 
       .card-content {
-        padding: 1rem;
-        text-align: center;
+        padding: 25px;
       }
 
       .card-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #425638;
+        margin-bottom: 10px;
       }
 
-      .play-button {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background-color: #88c057;
+      .card-description {
+        color: #687450;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+      }
+
+      .card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 2px solid #e8ede4;
+        font-size: 0.9rem;
+        color: #687450;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 25px;
+        max-width: 900px;
+        width: 100%;
+        position: relative;
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        overflow: hidden;
+      }
+
+      .modal-header {
+        padding: 30px;
+        background: linear-gradient(135deg, #425638 0%, #687450 100%);
+        color: white;
+      }
+
+      .modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .modal-description {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        transition: all 0.3s ease;
+        z-index: 10;
+      }
+
+      .close-btn:hover {
+        background: white;
+        color: #425638;
+        transform: rotate(90deg);
+      }
+
+      .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+      }
+
+      .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .modal-footer {
+        padding: 25px 30px;
+        background: #f5f8f2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #687450;
+        font-weight: 600;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2.5rem;
+        }
+
+        .music-grid {
+          grid-template-columns: 1fr;
+          padding: 10px;
+        }
+
+        .filter-tabs {
+          gap: 10px;
+        }
+
+        .filter-btn {
+          padding: 10px 20px;
+          font-size: 0.9rem;
+        }
+
+        .modal-content {
+          margin: 10px;
+        }
+
+        .modal-title {
+          font-size: 1.5rem;
+        }
+      }
+
+      .scroll-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: #425638;
         color: white;
         border: none;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: background-color 0.3s ease;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 15px rgba(66, 86, 56, 0.4);
+        transition: all 0.3s ease;
+        z-index: 999;
       }
 
-      .play-button:hover {
-        background-color: #6da341;
+      .scroll-top:hover {
+        background: #687450;
+        transform: translateY(-5px);
+      }
+
+      .scroll-top.visible {
+        display: flex;
       }
     </style>
   </head>
   <body>
-    <h1 class="text-4xl font-bold text-center mb-8">🎵 Music for your mind</h1>
-    <div class="music-grid">
-      {musicList.map((music) => (
-        <div class="card">
-          <img src={music.image} alt={music.title} />
+    <div class="header">
+      <h1>🎵 Music for your mind</h1>
+      <p>Relax, focus, and heal with our curated collection</p>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-btn active" data-category="all">All Music</button>
+      <button class="filter-btn" data-category="Meditation">Meditation</button>
+      <button class="filter-btn" data-category="Nature">Nature</button>
+      <button class="filter-btn" data-category="Sleep">Sleep</button>
+      <button class="filter-btn" data-category="Focus">Focus</button>
+      <button class="filter-btn" data-category="Healing">Healing</button>
+      <button class="filter-btn" data-category="Spiritual">Spiritual</button>
+    </div>
+
+    <div class="music-grid" id="musicGrid">
+      {musicList.map((music, index) => (
+        <div class="card" data-category={music.category} style={`animation-delay: ${index * 0.1}s`}>
+          <div class="image-container" onclick={`openPlayer('${music.youtubeId}', '${music.title}', '${music.description}', '${music.duration}', '${music.category}')`}>
+            <img src={music.image} alt={music.title} />
+            <div class="category-badge">{music.category}</div>
+            <div class="play-icon"></div>
+          </div>
           <div class="card-content">
-            <div class="card-title">{music.title}</div>
-            <a href={music.link} class="play-button" target="_blank" rel="noopener noreferrer">Listen</a>
+            <h2 class="card-title">{music.title}</h2>
+            <p class="card-description">{music.description}</p>
+            <div class="card-meta">
+              <span>⏱️ {music.duration}</span>
+              <span style="color: #425638; font-weight: 600;">Click to play ▶</span>
+            </div>
           </div>
         </div>
       ))}
     </div>
+
+    <!-- Modal Player -->
+    <div class="modal" id="playerModal">
+      <div class="modal-content">
+        <button class="close-btn" onclick="closePlayer()">✕</button>
+        <div class="modal-header">
+          <h2 class="modal-title" id="playerTitle"></h2>
+          <p class="modal-description" id="playerDescription"></p>
+        </div>
+        <div class="video-container">
+          <iframe 
+            id="youtubePlayer"
+            src=""
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+        <div class="modal-footer">
+          <div class="modal-meta-item">
+            <span id="playerCategory"></span>
+          </div>
+          <div class="modal-meta-item">
+            ⏱️ <span id="playerDuration"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="scroll-top" id="scrollTop">↑</button>
+
+    <script is:inline>
+      // Filter functionality
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.card');
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const category = btn.dataset.category;
+          
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          cards.forEach((card, index) => {
+            if (category === 'all' || card.dataset.category === category) {
+              card.style.display = 'block';
+              card.style.animation = `fadeInUp 0.6s ease ${index * 0.05}s`;
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Player functions
+      function openPlayer(youtubeId, title, description, duration, category) {
+        const modal = document.getElementById('playerModal');
+        const iframe = document.getElementById('youtubePlayer');
+        
+        document.getElementById('playerTitle').textContent = title;
+        document.getElementById('playerDescription').textContent = description;
+        document.getElementById('playerDuration').textContent = duration;
+        document.getElementById('playerCategory').textContent = category;
+        
+        iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1`;
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closePlayer() {
+        const modal = document.getElementById('playerModal');
+        const iframe = document.getElementById('youtubePlayer');
+        
+        iframe.src = '';
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+
+      // Close modal on background click
+      document.getElementById('playerModal').addEventListener('click', (e) => {
+        if (e.target.id === 'playerModal') {
+          closePlayer();
+        }
+      });
+
+      // Close with ESC key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closePlayer();
+        }
+      });
+
+      // Scroll to top button
+      const scrollTopBtn = document.getElementById('scrollTop');
+      
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('visible');
+        } else {
+          scrollTopBtn.classList.remove('visible');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    </script>
   </body>
 </html>

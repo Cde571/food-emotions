@@ -8,6 +8,7 @@ const recipes = [
     origin: 'United States',
     time: '5 mins',
     servings: 1,
+    description: 'Refreshing and energizing drink packed with nutrients.',
     steps: [
       'Blend 1 ripe banana, 1 cup of spinach, 1 apple, and 1 cup of water.',
       'Add 1 tablespoon of chia seeds and a handful of ice cubes.',
@@ -131,6 +132,291 @@ const recipes = [
       'Lemon slices (for garnish)',
       'Ice cubes'
     ]
+  },
+  {
+    id: 'modal-7',
+    title: 'Quinoa salad',
+    image: '/img/quinoa-salad.jpg',
+    description: 'Protein-packed and colorful lunch option.',
+    category: 'Lunch',
+    origin: 'Peru',
+    time: '20 mins',
+    servings: 2,
+    steps: [
+      'Cook 1 cup of quinoa according to package instructions and let cool.',
+      'Dice 1 cucumber, 2 tomatoes, and 1 red bell pepper.',
+      'Mix quinoa with vegetables, add chopped parsley and mint.',
+      'Dress with olive oil, lemon juice, salt and pepper to taste.'
+    ],
+    ingredients: [
+      '1 cup quinoa',
+      '1 cucumber',
+      '2 tomatoes',
+      '1 red bell pepper',
+      'Fresh parsley and mint',
+      '3 tablespoons olive oil',
+      'Juice of 1 lemon',
+      'Salt and pepper to taste'
+    ]
+  },
+  {
+    id: 'modal-8',
+    title: 'Lentil soup',
+    image: '/img/lentil-soup.jpg',
+    description: 'Warm and comforting, rich in fiber.',
+    category: 'Lunch',
+    origin: 'India',
+    time: '35 mins',
+    servings: 4,
+    steps: [
+      'Sauté 1 diced onion, 2 carrots, and 2 celery stalks in olive oil.',
+      'Add 1 cup red lentils, 4 cups vegetable broth, and spices (cumin, turmeric, paprika).',
+      'Simmer for 25 minutes until lentils are soft.',
+      'Blend half the soup for a creamy texture, season with salt and serve.'
+    ],
+    ingredients: [
+      '1 onion',
+      '2 carrots',
+      '2 celery stalks',
+      '1 cup red lentils',
+      '4 cups vegetable broth',
+      '1 tsp cumin',
+      '1 tsp turmeric',
+      '1 tsp paprika',
+      'Olive oil',
+      'Salt to taste'
+    ]
+  },
+  {
+    id: 'modal-9',
+    title: 'Grilled salmon',
+    image: '/img/grilled-salmon.jpg',
+    description: 'Rich in omega-3 fatty acids.',
+    category: 'Dinner',
+    origin: 'Norway',
+    time: '15 mins',
+    servings: 2,
+    steps: [
+      'Season 2 salmon fillets with salt, pepper, and lemon zest.',
+      'Grill for 6-7 minutes on each side until cooked through.',
+      'Serve with steamed asparagus and a squeeze of fresh lemon.'
+    ],
+    ingredients: [
+      '2 salmon fillets',
+      'Salt and pepper',
+      'Lemon zest and juice',
+      '1 bunch asparagus',
+      'Olive oil'
+    ]
+  },
+  {
+    id: 'modal-10',
+    title: 'Vegetable stir-fry',
+    image: '/img/stir-fry.jpg',
+    description: 'Quick, colorful, and nutrient-dense.',
+    category: 'Dinner',
+    origin: 'China',
+    time: '15 mins',
+    servings: 2,
+    steps: [
+      'Heat 2 tablespoons sesame oil in a wok over high heat.',
+      'Add sliced bell peppers, broccoli florets, snap peas, and carrots.',
+      'Stir-fry for 5-7 minutes, then add soy sauce and ginger.',
+      'Serve over brown rice or noodles.'
+    ],
+    ingredients: [
+      '1 red bell pepper',
+      '1 yellow bell pepper',
+      '1 cup broccoli florets',
+      '1 cup snap peas',
+      '1 carrot (sliced)',
+      '2 tablespoons sesame oil',
+      '3 tablespoons soy sauce',
+      '1 teaspoon fresh ginger (grated)',
+      'Brown rice or noodles'
+    ]
+  },
+  {
+    id: 'modal-11',
+    title: 'Hummus',
+    image: '/img/hummus.jpg',
+    description: 'Creamy and protein-rich dip.',
+    category: 'Snacks',
+    origin: 'Lebanon',
+    time: '10 mins',
+    servings: 4,
+    steps: [
+      'Blend 1 can of chickpeas (drained) with 3 tablespoons tahini, 2 garlic cloves, and juice of 1 lemon.',
+      'Add 2 tablespoons olive oil and blend until smooth.',
+      'Season with salt and cumin, serve with vegetable sticks or pita bread.'
+    ],
+    ingredients: [
+      '1 can chickpeas',
+      '3 tablespoons tahini',
+      '2 garlic cloves',
+      'Juice of 1 lemon',
+      '2 tablespoons olive oil',
+      'Salt and cumin to taste',
+      'Vegetable sticks or pita bread'
+    ]
+  },
+  {
+    id: 'modal-12',
+    title: 'Energy balls',
+    image: '/img/energy-balls.jpg',
+    description: 'Perfect pre-workout snack.',
+    category: 'Snacks',
+    origin: 'United States',
+    time: '10 mins',
+    servings: 12,
+    steps: [
+      'Mix 1 cup dates, 1/2 cup almonds, 2 tablespoons cocoa powder in a food processor.',
+      'Roll mixture into small balls.',
+      'Refrigerate for 30 minutes before serving.'
+    ],
+    ingredients: [
+      '1 cup pitted dates',
+      '1/2 cup almonds',
+      '2 tablespoons cocoa powder',
+      '1 tablespoon chia seeds',
+      'Pinch of sea salt'
+    ]
+  },
+  {
+    id: 'modal-13',
+    title: 'Berry smoothie bowl',
+    image: '/img/smoothie-bowl.jpg',
+    description: 'Thick and topped with superfoods.',
+    category: 'Breakfast',
+    origin: 'Brazil',
+    time: '10 mins',
+    servings: 1,
+    steps: [
+      'Blend 1 frozen banana, 1 cup mixed berries, 1/2 cup yogurt until thick.',
+      'Pour into a bowl and top with granola, coconut flakes, and fresh fruit.',
+      'Drizzle with honey and enjoy with a spoon.'
+    ],
+    ingredients: [
+      '1 frozen banana',
+      '1 cup mixed berries',
+      '1/2 cup Greek yogurt',
+      'Granola',
+      'Coconut flakes',
+      'Fresh fruit',
+      'Honey'
+    ]
+  },
+  {
+    id: 'modal-14',
+    title: 'Sweet potato fries',
+    image: '/img/sweet-potato-fries.jpg',
+    description: 'Baked and lightly seasoned.',
+    category: 'Snacks',
+    origin: 'United States',
+    time: '30 mins',
+    servings: 2,
+    steps: [
+      'Preheat oven to 425°F (220°C).',
+      'Cut 2 sweet potatoes into fries, toss with olive oil, paprika, and salt.',
+      'Bake for 25-30 minutes, flipping halfway, until crispy.'
+    ],
+    ingredients: [
+      '2 large sweet potatoes',
+      '2 tablespoons olive oil',
+      '1 teaspoon paprika',
+      'Salt to taste'
+    ]
+  },
+  {
+    id: 'modal-15',
+    title: 'Green juice',
+    image: '/img/green-juice.jpg',
+    description: 'Detoxifying and energizing.',
+    category: 'Drinks',
+    origin: 'United States',
+    time: '10 mins',
+    servings: 1,
+    steps: [
+      'Juice 2 cups spinach, 1 cucumber, 2 celery stalks, 1 green apple, and 1/2 lemon.',
+      'Add a small piece of ginger for extra zing.',
+      'Serve immediately over ice.'
+    ],
+    ingredients: [
+      '2 cups spinach',
+      '1 cucumber',
+      '2 celery stalks',
+      '1 green apple',
+      '1/2 lemon',
+      'Small piece of ginger'
+    ]
+  },
+  {
+    id: 'modal-16',
+    title: 'Banana nice cream',
+    image: '/img/nice-cream.jpg',
+    description: 'Healthy ice cream alternative.',
+    category: 'Desserts',
+    origin: 'United States',
+    time: '5 mins',
+    servings: 2,
+    steps: [
+      'Freeze 3 ripe bananas overnight.',
+      'Blend frozen bananas until smooth and creamy.',
+      'Add toppings like dark chocolate chips, peanut butter, or berries.'
+    ],
+    ingredients: [
+      '3 ripe bananas (frozen)',
+      'Optional toppings: dark chocolate chips, peanut butter, berries'
+    ]
+  },
+  {
+    id: 'modal-17',
+    title: 'Chickpea curry',
+    image: '/img/chickpea-curry.jpg',
+    description: 'Aromatic and satisfying plant-based meal.',
+    category: 'Dinner',
+    origin: 'India',
+    time: '25 mins',
+    servings: 4,
+    steps: [
+      'Sauté 1 onion and 3 garlic cloves in coconut oil.',
+      'Add 2 cans chickpeas, 1 can coconut milk, and curry spices.',
+      'Simmer for 15 minutes, serve over basmati rice.'
+    ],
+    ingredients: [
+      '1 onion',
+      '3 garlic cloves',
+      '2 cans chickpeas',
+      '1 can coconut milk',
+      '2 tablespoons curry powder',
+      '1 teaspoon turmeric',
+      'Coconut oil',
+      'Basmati rice',
+      'Fresh cilantro'
+    ]
+  },
+  {
+    id: 'modal-18',
+    title: 'Zucchini noodles',
+    image: '/img/zoodles.jpg',
+    description: 'Low-carb pasta alternative.',
+    category: 'Lunch',
+    origin: 'Italy',
+    time: '15 mins',
+    servings: 2,
+    steps: [
+      'Spiralize 3 zucchinis into noodles.',
+      'Sauté in olive oil for 3-4 minutes.',
+      'Top with homemade tomato sauce and fresh basil.'
+    ],
+    ingredients: [
+      '3 zucchinis',
+      '2 tablespoons olive oil',
+      '1 cup tomato sauce',
+      'Fresh basil',
+      'Garlic',
+      'Salt and pepper'
+    ]
   }
 ];
 ---
@@ -138,93 +424,447 @@ const recipes = [
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Healthy recipes</title>
-    <link rel="stylesheet" href="/styles.css" />
-    <script type="module">
-      export function openModal(id) {
-        const modal = document.getElementById(id);
-        const content = modal.querySelector('[data-modal-content]');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          content.classList.remove('scale-90', 'opacity-0');
-          content.classList.add('scale-100', 'opacity-100');
-        }, 10);
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
 
-      export function closeModal(id) {
-        const modal = document.getElementById(id);
-        const content = modal.querySelector('[data-modal-content]');
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-90', 'opacity-0');
-        setTimeout(() => {
-          modal.classList.add('hidden');
-        }, 300);
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #e8ede4 0%, #d4dbc8 100%);
+        color: #425638;
+        min-height: 100vh;
+        padding: 20px;
       }
 
-      window.openModal = openModal;
-      window.closeModal = closeModal;
-    </script>
+      .header {
+        text-align: center;
+        padding: 40px 20px;
+        animation: fadeInDown 0.8s ease;
+      }
+
+      .header h1 {
+        font-size: 3.5rem;
+        color: #425638;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        color: #687450;
+        font-weight: 300;
+      }
+
+      .recipes-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+        padding: 20px;
+      }
+
+      .recipe-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.6s ease;
+      }
+
+      .recipe-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(66, 86, 56, 0.3);
+      }
+
+      .recipe-image-container {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+      }
+
+      .recipe-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .recipe-card:hover .recipe-image {
+        transform: scale(1.15);
+      }
+
+      .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(66, 86, 56, 0.95);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        z-index: 2;
+      }
+
+      .recipe-info {
+        padding: 25px;
+      }
+
+      .recipe-title {
+        font-size: 1.5rem;
+        color: #425638;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .recipe-description {
+        color: #687450;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+      }
+
+      .recipe-meta {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: 2px solid #e8ede4;
+        font-size: 0.9rem;
+        color: #687450;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 25px;
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      }
+
+      .modal-header {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+      }
+
+      .modal-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #425638;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10;
+      }
+
+      .close-btn:hover {
+        background: #425638;
+        color: white;
+        transform: rotate(90deg);
+      }
+
+      .modal-body {
+        padding: 35px;
+      }
+
+      .modal-title {
+        font-size: 2rem;
+        color: #425638;
+        margin-bottom: 20px;
+        font-weight: 700;
+      }
+
+      .modal-meta {
+        display: flex;
+        gap: 25px;
+        padding: 20px;
+        background: #f5f8f2;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .modal-meta-item {
+        color: #687450;
+        font-weight: 600;
+      }
+
+      .section-title {
+        font-size: 1.4rem;
+        color: #425638;
+        margin: 25px 0 15px 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: '';
+        width: 4px;
+        height: 25px;
+        background: #687450;
+        border-radius: 2px;
+      }
+
+      .ingredients-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .ingredients-list li {
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        background: #f9faf8;
+        border-left: 3px solid #687450;
+        border-radius: 8px;
+        color: #425638;
+        transition: all 0.2s ease;
+      }
+
+      .ingredients-list li:hover {
+        background: #f0f4ec;
+        transform: translateX(5px);
+      }
+
+      .steps-list {
+        list-style: none;
+        counter-reset: step-counter;
+        padding: 0;
+      }
+
+      .steps-list li {
+        padding: 15px 20px 15px 45px;
+        margin-bottom: 12px;
+        background: #f9faf8;
+        border-radius: 12px;
+        color: #425638;
+        position: relative;
+        line-height: 1.6;
+        transition: all 0.2s ease;
+        counter-increment: step-counter;
+      }
+
+      .steps-list li:hover {
+        background: #f0f4ec;
+        transform: translateX(5px);
+      }
+
+      .steps-list li::before {
+        content: counter(step-counter);
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 25px;
+        background: #687450;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2.5rem;
+        }
+
+        .recipes-container {
+          grid-template-columns: 1fr;
+          padding: 10px;
+        }
+
+        .modal-content {
+          margin: 10px;
+        }
+
+        .modal-body {
+          padding: 25px;
+        }
+      }
+    </style>
   </head>
-  <body class="bg-green-50 text-green-900 font-sans p-8">
-    <h1 class="text-4xl font-bold text-center mb-8">🌱 Healthy recipes</h1>
+  <body>
+    <div class="header">
+      <h1>🌱 Healthy Recipes</h1>
+      <p>Delicious and nutritious meals for a healthier lifestyle</p>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="recipes-container">
       {recipes.map(recipe => (
-        <div
-          class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer"
-          onclick={`openModal('${recipe.id}')`}
-        >
-          <img src={recipe.image} alt={recipe.title} class="w-full h-40 object-cover rounded-md mb-3" />
-          <h2 class="text-xl font-semibold mb-1">{recipe.title}</h2>
-          <p class="text-sm mb-2 text-gray-700">
-            {recipe.description}
-            <strong class="block mt-1 text-green-600">Category: {recipe.category}</strong>
-            <span class="block text-gray-500 text-xs">Origin: {recipe.origin}</span>
-          </p>
+        <div class="recipe-card" onclick={`openModal('${recipe.id}')`}>
+          <div class="recipe-image-container">
+            <img class="recipe-image" src={recipe.image} alt={recipe.title} />
+            <div class="category-badge">{recipe.category}</div>
+          </div>
+          <div class="recipe-info">
+            <h2 class="recipe-title">{recipe.title}</h2>
+            <p class="recipe-description">{recipe.description}</p>
+            <div class="recipe-meta">
+              <span>🕒 {recipe.time}</span>
+              <span>🍽️ {recipe.servings}</span>
+              <span>🌍 {recipe.origin}</span>
+            </div>
+          </div>
         </div>
       ))}
     </div>
 
     {recipes.map(recipe => (
-      <div
-        id={recipe.id}
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
-      >
-        <div
-          data-modal-content
-          class="bg-white rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-90 opacity-0"
-        >
-          <h2 class="text-2xl font-bold mb-3">{recipe.title}</h2>
-          <img src={recipe.image} alt={recipe.title} class="w-full h-48 object-cover rounded-md mb-4" />
-    
-          <div class="flex justify-between text-sm text-gray-600 mb-4">
-            <span>🕒 {recipe.time}</span>
-            <span>🍽️ {recipe.servings} serving{recipe.servings > 1 ? 's' : ''}</span>
-            <span>🌍 {recipe.origin}</span>
+      <div id={recipe.id} class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <img class="modal-image" src={recipe.image} alt={recipe.title} />
+            <button class="close-btn" onclick={`closeModal('${recipe.id}')`}>✕</button>
           </div>
-    
-          <h3 class="text-lg font-semibold mb-2">Ingredients</h3>
-          <ul class="list-disc list-inside space-y-1 text-gray-800 text-sm mb-4">
-            {recipe.ingredients.map(ingredient => (
-              <li>{ingredient}</li>
-            ))}
-          </ul>
-    
-          <h3 class="text-lg font-semibold mb-2">Steps</h3>
-          <ul class="list-decimal list-inside space-y-1 text-gray-800 text-sm mb-4">
-            {recipe.steps.map(step => (
-              <li>{step}</li>
-            ))}
-          </ul>
-    
-          <button
-            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-            onclick={`closeModal('${recipe.id}')`}
-          >
-            Cerrar
-          </button>
+          <div class="modal-body">
+            <h2 class="modal-title">{recipe.title}</h2>
+            <div class="modal-meta">
+              <div class="modal-meta-item">🕒 {recipe.time}</div>
+              <div class="modal-meta-item">🍽️ {recipe.servings} serving{recipe.servings > 1 ? 's' : ''}</div>
+              <div class="modal-meta-item">🌍 {recipe.origin}</div>
+              <div class="modal-meta-item">📂 {recipe.category}</div>
+            </div>
+            
+            <h3 class="section-title">Ingredients</h3>
+            <ul class="ingredients-list">
+              {recipe.ingredients.map(ingredient => (
+                <li>{ingredient}</li>
+              ))}
+            </ul>
+            
+            <h3 class="section-title">Preparation Steps</h3>
+            <ul class="steps-list">
+              {recipe.steps.map(step => (
+                <li>{step}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     ))}
+
+    <script is:inline>
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+
+      // Cerrar modal al hacer clic fuera
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+
+      // Cerrar con tecla ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal.active').forEach(modal => {
+            closeModal(modal.id);
+          });
+        }
+      });
+    </script>
   </body>
 </html>

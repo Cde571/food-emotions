@@ -2,74 +2,113 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 
-// Definición de la interfaz y datos de las preguntas frecuentes
+// Definición de la interfaz de preguntas
 interface FAQItem {
   question: string;
   answer: string;
 }
 
+// Nuevas FAQ reelaboradas profesionalmente
 const faqs: FAQItem[] = [
   {
-    question: "¿Quién es Roy y qué hace?",
+    question: "¿Quién es Roy y cuál es su propósito?",
     answer:
-      "Roy es un chatbot interactivo con el cual puedes conversar. Está diseñado para ofrecer recomendaciones en áreas clave como recetas, música y libros. Todo en pro de la vida sana y el mejoramiento de la salud",
+      "Roy es un chatbot emocionalmente inteligente diseñado para acompañarte en tu bienestar diario. Detecta tu estado emocional, conversa contigo y te ofrece recomendaciones personalizadas en áreas como recetas saludables, música para regular tus emociones y libros que fortalecen tu salud mental.",
   },
   {
-    question: "¿Qué capacidades tiene el bot en cuanto a conocimiento y diversidad?",
+    question: "¿Qué tipo de conocimiento maneja Roy?",
     answer:
-      "Roy maneja especificamente 3 áreas de interés: recetas, música y libros. Cada área tiene cierto número de información, que no es demasiado extensa, pero tampoco demasiado corta.",
+      "Roy está entrenado con un conjunto curado de información que abarca tres áreas principales: recetas, música y libros. Aunque su base de conocimientos es precisa y optimizada, se expande continuamente según avances del proyecto y las necesidades de los usuarios.",
   },
   {
-    question: "¿Cuál es el enfoque inicial del bot?",
+    question: "¿Cuál es el enfoque principal del proyecto?",
     answer:
-      "El enfoque inicial del bot está en el área de recetas, música y libros. Pero puede añadirse más temas de interés para los clientes en el futuro.",
+      "El enfoque inicial está en generar bienestar emocional a través del contenido: recetas nutritivas, música alineada a tu ánimo y libros que aportan calma, crecimiento y estabilidad mental. Más adelante se integrarán nuevas áreas como ejercicios mentales, rutinas de respiración, mindfulness y más.",
   },
   {
-    question: "¿A quién está dirigido este bot?",
+    question: "¿Quién puede usar este bot?",
     answer:
-      "El bot está dirigido a cualquier persona interesada en mejorar la calidad de su vida.",
+      "Cualquier persona que desee mejorar su salud emocional, su estilo de vida o que simplemente quiera un espacio seguro para expresarse y recibir recomendaciones personalizadas.",
   },
   {
-    question: "¿El chat tiene un límite de tiempo?",
+    question: "¿Existen límites de uso o tiempo?",
     answer:
-      "Roy es completamente de uso libre, puedesw conversar con él el tiempo que sea necesario y puedes pedirle la cantidad de recomendaciones que desees.",
+      "No. Roy está disponible 24/7 para acompañarte. Puedes hablar con él el tiempo que quieras, pedirle todas las recomendaciones que necesites o simplemente desahogarte.",
   },
   {
-    question: "¿Cómo puedo empezar a usar el bot?",
+    question: "¿Cómo puedo empezar?",
     answer:
-      "Para empezar a usar el bot, simplemente inicia la interacción a través de la interfaz de usuario principal, dando clic en el botón 'Try now' o 'Pruébalo ahora' y podrá acceder al chat interactivo. Dile a Roy cómo te sientes y que temas te interesan. Después, él te dará algunas recomendaciones.",
+      "Ingresa en la opción “Try now” o “Pruébalo ahora” en la página principal. Allí obtendrás una guia más detallada sobre cómo interactuar con Roy. Inicia sesión y accede a todas sus funciones.",
   },
 ];
 ---
-
-<!-- Contenido HTML con la lógica para mapear las preguntas frecuentes -->
-<Layout>
+<Layout title="FAQ">
   <Header />
-  <section class="faq-section max-w-4xl mx-auto p-6 mt-44">
-    <h2 class="text-3xl font-bold mb-4">Preguntas Frecuentes</h2>
+
+  <section class="relative faq-section max-w-4xl mx-auto p-10 mt-44 rounded-3xl shadow-xl">
+    <h2 class="text-4xl font-bold mb-6 text-white text-center tracking-tight">Preguntas Frecuentes</h2>
+
+    <p class="text-gray-200 text-center max-w-2xl mx-auto mb-10 text-lg">
+      Aquí encontrarás respuestas claras sobre Roy, sus funciones y cómo puede acompañarte a mejorar
+      tu bienestar emocional a través de recomendaciones personalizadas.
+    </p>
+
     <div class="faq-container space-y-4">
-      {faqs.map((faq) => (
-        <div class="faq-item bg-white shadow-md p-4 rounded-lg">
-          <h3 class="text-xl font-semibold">{faq.question}</h3>
-          <p class="text-gray-700 mt-2">{faq.answer}</p>
+      {faqs.map((faq, index) => (
+        <div
+          class="faq-item bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-6 cursor-pointer transition duration-300"
+          onclick={`toggleFAQ(${index})`}
+        >
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-semibold text-white">{faq.question}</h3>
+            <span id={`icon-${index}`} class="text-white text-2xl transition">+</span>
+          </div>
+          <p
+            id={`answer-${index}`}
+            class="faq-answer text-gray-200 mt-3 hidden leading-relaxed"
+          >
+            {faq.answer}
+          </p>
         </div>
       ))}
     </div>
   </section>
 </Layout>
 
+<!-- ============================
+     ⭐ ESTILOS GLOBALES
+=============================== -->
 <style is:global>
   .faq-section {
-    background-color: #687450;
-    padding: 2rem;
+    background: linear-gradient(135deg, #425638 0%, #687450 100%);
   }
-  .faq-item {
-    border: 1px solid #e5e7eb;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+
   .faq-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 </style>
+
+<!-- ============================
+     ⭐ SCRIPT: EXPANDIR / COLAPSAR FAQ
+=============================== -->
+<script is:inline>
+  function toggleFAQ(index) {
+    const answer = document.getElementById(`answer-${index}`);
+    const icon = document.getElementById(`icon-${index}`);
+
+    if (answer.classList.contains("hidden")) {
+      answer.classList.remove("hidden");
+      answer.style.animation = "fadeIn 0.3s ease";
+      icon.textContent = "−";
+    } else {
+      answer.classList.add("hidden");
+      icon.textContent = "+";
+    }
+  }
+</script>

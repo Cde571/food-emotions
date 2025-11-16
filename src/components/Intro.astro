@@ -29,34 +29,163 @@
     </div>
 </section>
 
-<!-- Sección de testimonios -->
-<section class="w-full max-w-[1400px] mx-auto px-20 mt-44" id="testimonials">
-    <h2 class="text-2xl font-bold text-center mb-8 text-yellow-50">User testimonials</h2>
-    <div class="flex justify-between gap-4">
-        <!-- Card 1 -->
-        <div class="bg-white p-6 rounded-lg shadow-md flex-1">
-            <img src="/src/img/User2.jpg" alt="User Image" class="w-auto h-auto mx-auto rounded-md mb-4">
-            <p style="font-style: italic" class="text-gray-700">
-                "I love this site, the content is very varied."
-            </p>
-            <span class="block mt-4 text-sm font-bold text-gray-600">- Jane Smith</span>
-        </div>
-        <!-- Card 2 -->
-        <div class="bg-white p-6 rounded-lg shadow-md flex-1">
-            <p style="font-style: italic" class="text-gray-700">
-                <img src="/src/img/User5.jpg" alt="User Image" class="w-auto h-auto mx-auto rounded-md mb-4">
-                "I love the design of the website and the easy access it handles."
-            </p>
-            <span style="font-style: italic" class="block mt-4 text-sm font-bold text-gray-600">- David Lee</span>
-        </div>
-        <!-- Card 3 -->
-        <div class="bg-white p-6 rounded-lg shadow-md flex-1">
-            <!-- Imagen dentro de la tarjeta -->
-            <img src="/src/img/User4.jpg" alt="User Image" class="w-auto h-auto mx-auto rounded-md mb-4">
-            <p style="font-style: italic" class="text-gray-700">
-                "I love Roy, he always helps me find things to do when I have free time."
-            </p>
-            <span class="block mt-4 text-sm font-bold text-gray-600">- Emily Davis</span>
-        </div>
+<!-- ============================
+     ⭐ TESTIMONIOS (INTERACTIVO, ANIMADO, PREMIUM)
+=============================== -->
+<section class="relative w-full max-w-[1400px] mx-auto px-6 lg:px-20 mt-44" id="testimonials">
+
+  <!-- Fondo de partículas -->
+  <canvas id="particles-bg" class="absolute inset-0 w-full h-full pointer-events-none opacity-25"></canvas>
+
+  <h2 class="text-4xl font-bold text-center mb-6 text-white tracking-tight relative z-20">
+    Lo que dicen nuestros usuarios
+  </h2>
+
+  <p class="text-center text-gray-300 max-w-2xl mx-auto mb-12 text-lg relative z-20">
+    Personas reales que han mejorado su bienestar emocional gracias a Roy.  
+    Desliza o deja que el carrusel avance automáticamente 💬
+  </p>
+
+  <div class="relative z-20">
+
+    <!-- Flecha izquierda -->
+    <button 
+      onclick="scrollTestimonials(-350)"
+      class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 bg-[#425638] text-white p-3 rounded-full shadow-lg hover:bg-[#354a2e] transition z-50">
+      ‹
+    </button>
+
+    <!-- CARRUSEL -->
+    <div 
+      id="testimonialCarousel"
+      class="flex flex-nowrap gap-8 overflow-x-auto scroll-smooth no-scrollbar px-2 lg:px-4 py-6 group"
+      style="scroll-snap-type: x mandatory"
+    >
+
+      <!-- CARD -->
+      <div class="testimonial-card bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-3xl min-w-[320px] shadow-xl scroll-snap-align-center hover:-translate-y-2 hover:shadow-2xl transition transform duration-300 opacity-0 animate-fadeIn">
+        <img src="/src/img/User2.jpg" class="w-24 h-24 rounded-full mx-auto object-cover shadow-md">
+        <p class="mt-6 text-gray-100 italic text-center">“FoodEmotions ha sido clave para gestionar mis emociones.”</p>
+        <span class="block mt-4 text-sm font-bold text-[#a0c49d] text-center">– Jane Smith</span>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
+      </div>
+
+      <div class="testimonial-card bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-3xl min-w-[320px] shadow-xl scroll-snap-align-center hover:-translate-y-2 hover:shadow-2xl transition transform duration-300 opacity-0 animate-fadeIn delay-100">
+        <img src="/src/img/User5.jpg" class="w-24 h-24 rounded-full mx-auto object-cover shadow-md">
+        <p class="mt-6 text-gray-100 italic text-center">“El diseño es hermoso, amo lo fácil que es usar la app.”</p>
+        <span class="block mt-4 text-sm font-bold text-[#a0c49d] text-center">– David Lee</span>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
+      </div>
+
+      <div class="testimonial-card bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-3xl min-w-[320px] shadow-xl scroll-snap-align-center hover:-translate-y-2 hover:shadow-2xl transition transform duration-300 opacity-0 animate-fadeIn delay-200">
+        <img src="/src/img/User4.jpg" class="w-24 h-24 rounded-full mx-auto object-cover shadow-md">
+        <p class="mt-6 text-gray-100 italic text-center">“Roy siempre sabe qué recomendarme según mi estado.”</p>
+        <span class="block mt-4 text-sm font-bold text-[#a0c49d] text-center">– Emily Davis</span>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
+      </div>
+
+      <div class="testimonial-card bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-3xl min-w-[320px] shadow-xl scroll-snap-align-center hover:-translate-y-2 hover:shadow-2xl transition transform duration-300 opacity-0 animate-fadeIn delay-300">
+        <img src="/src/img/User3.jpg" class="w-24 h-24 rounded-full mx-auto object-cover shadow-md">
+        <p class="mt-6 text-gray-100 italic text-center">“Nunca pensé que un chatbot pudiera ayudarme tanto.”</p>
+        <span class="block mt-4 text-sm font-bold text-[#a0c49d] text-center">– Carlos Mendoza</span>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
+      </div>
+
+      <div class="testimonial-card bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-3xl min-w-[320px] shadow-xl scroll-snap-align-center hover:-translate-y-2 hover:shadow-2xl transition transform duration-300 opacity-0 animate-fadeIn delay-500">
+        <img src="/src/img/User6.jpg" class="w-24 h-24 rounded-full mx-auto object-cover shadow-md">
+        <p class="mt-6 text-gray-100 italic text-center">“La sección de emociones es mi favorita, Roy es increíble.”</p>
+        <span class="block mt-4 text-sm font-bold text-[#a0c49d] text-center">– Laura Gómez</span>
+        <div class="text-center text-yellow-300 mt-2">★★★★★</div>
+      </div>
+
     </div>
+
+    <!-- Flecha derecha -->
+    <button 
+      onclick="scrollTestimonials(350)"
+      class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 bg-[#425638] text-white p-3 rounded-full shadow-lg hover:bg-[#354a2e] transition z-50">
+      ›
+    </button>
+
+  </div>
 </section>
+
+<!-- ============================
+     ⭐ SCRIPTS
+=============================== -->
+<script is:inline>
+  // Botones
+  window.scrollTestimonials = (amount) => {
+    const c = document.getElementById("testimonialCarousel");
+    c.scrollBy({ left: amount, behavior: "smooth" });
+  };
+
+  // Auto-scroll con pausa cuando el usuario pasa el mouse
+  const carousel = document.getElementById("testimonialCarousel");
+  let autoScroll = setInterval(() => {
+    carousel.scrollBy({ left: 350, behavior: "smooth" });
+  }, 4000);
+
+  carousel.addEventListener("mouseenter", () => clearInterval(autoScroll));
+  carousel.addEventListener("mouseleave", () => {
+    autoScroll = setInterval(() => {
+      carousel.scrollBy({ left: 350, behavior: "smooth" });
+    }, 4000);
+  });
+
+  // Fondo de partículas muy suave
+  const canvas = document.getElementById("particles-bg");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = Array.from({ length: 35 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 1,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+  }));
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff55";
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+</script>
+
+<style>
+  :global(.no-scrollbar::-webkit-scrollbar) { display: none; }
+  :global(.no-scrollbar) { scrollbar-width: none; }
+
+  @keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fadeIn { animation: fadeIn .8s ease forwards; }
+  .delay-100 { animation-delay: .1s; }
+  .delay-200 { animation-delay: .2s; }
+  .delay-300 { animation-delay: .3s; }
+  .delay-500 { animation-delay: .5s; }
+</style>
+
+
