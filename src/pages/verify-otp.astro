@@ -1,0 +1,207 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+// Obtener email o teléfono de la URL
+const email = Astro.url.searchParams.get("email");
+const telefono = Astro.url.searchParams.get("telefono");
+const identifier = email || telefono || "tu cuenta";
+---
+
+<Layout title="Verificar código OTP">
+  <section class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#425638] via-[#556844] to-[#687450] px-6 py-10">
+
+    <div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl shadow-black/20 border border-white/20">
+
+      <h1 class="text-3xl font-bold text-white mb-4">Verificar código</h1>
+      <p class="text-white/80 mb-6">Ingresa el código OTP que enviamos a tu {email ? 'correo' : 'teléfono'}.</p>
+
+      <form id="otpForm" class="flex flex-col gap-4">
+        <input
+          type="text"
+          name="otp"
+          id="otpInput"
+          placeholder="Código de 6 dígitos"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          required
+          class="px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/50 focus:bg-white/30 outline-none text-center text-2xl tracking-widest font-bold"
+        />
+
+        <button
+          type="submit"
+          id="verifyBtn"
+          class="w-full py-3 rounded-xl bg-[#687450] hover:bg-[#79885C] text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Verificar código
+        </button>
+      </form>
+
+      <p class="text-white/60 text-sm mt-4 text-center">
+        Enviamos el código a: <span class="font-semibold text-white">{identifier}</span>
+      </p>
+
+      <button
+        id="resendBtn"
+        class="w-full mt-3 text-white/70 hover:text-white text-sm transition"
+      >
+        ¿No recibiste el código? Reenviar
+      </button>
+    </div>
+
+  </section>
+
+  <script>
+    const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000';
+    
+    const email = new URLSearchParams(window.location.search).get("email");
+    const telefono = new URLSearchParams(window.location.search).get("telefono");
+    
+    const otpForm = document.getElementById("otpForm") as HTMLFormElement;
+    const otpInput = document.getElementById("otpInput") as HTMLInputElement;
+    const verifyBtn = document.getElementById("verifyBtn") as HTMLButtonElement;
+    const resendBtn = document.getElementById("resendBtn") as HTMLButtonElement;
+
+    // Validar que haya email o teléfono
+    if (!email && !telefono) {
+      alert('Sesión inválida. Por favor, vuelve a solicitar el código.');
+      window.location.href = '/forgot-password';
+    }
+
+    // Permitir solo números en el input
+    otpInput?.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      target.value = target.value.replace(/[^0-9]/g, '');
+    });
+
+    // Envío del formulario
+    otpForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const otp = otpInput.value.trim();
+
+      if (otp.length !== 6) {
+        alert('El código debe tener 6 dígitos');
+        return;
+      }
+
+      console.log('🔍 Verificando OTP...');
+      console.log('📧 Email:', email);
+      console.log('📱 Teléfono:', telefono);
+      console.log('🔑 OTP:', otp);
+
+      // Deshabilitar botón mientras se procesa
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verificando...';
+
+      try {
+        const payload: { email?: string; telefono?: string; otp: string } = { otp };
+        
+        if (email) {
+          payload.email = email;
+        } else if (telefono) {
+          payload.telefono = telefono;
+        }
+
+        const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        console.log('📡 Status:', res.status);
+        const data = await res.json();
+        console.log('📄 Response:', data);
+
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          
+          // Redirigir con el parámetro correcto
+          const queryParam = email 
+            ? `email=${encodeURIComponent(email)}`
+            : `telefono=${encodeURIComponent(telefono!)}`;
+          
+          window.location.href = `/reset-password?${queryParam}`;
+        } else {
+          alert('❌ ' + (data.message || 'Código incorrecto'));
+          otpInput.value = '';
+          otpInput.focus();
+        }
+      } catch (error) {
+        console.error('❌ Error:', error);
+        alert('Error de conexión. Por favor, intenta de nuevo.');
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verificar código';
+      }
+    });
+
+    // Botón para reenviar código
+    resendBtn?.addEventListener('click', async () => {
+      if (!confirm('¿Deseas reenviar el código?')) return;
+
+      console.log('🔄 Reenviando código...');
+
+      try {
+        const payload: { email?: string; telefono?: string } = {};
+        
+        if (email) {
+          payload.email = email;
+        } else if (telefono) {
+          payload.telefono = telefono;
+        }
+
+        const res = await fetch(`${API_URL}/api/auth/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert('✅ ' + data.message);
+          
+          // Mostrar OTP en desarrollo
+          if (data.dev_otp) {
+            console.log('🔑 Nuevo OTP (desarrollo):', data.dev_otp);
+            alert(`🔑 Nuevo OTP para desarrollo: ${data.dev_otp}`);
+          }
+          
+          otpInput.value = '';
+          otpInput.focus();
+        } else {
+          alert('❌ ' + (data.message || 'Error al reenviar el código'));
+        }
+      } catch (error) {
+        console.error('❌ Error:', error);
+        alert('Error de conexión. Por favor, intenta de nuevo.');
+      }
+    });
+
+    // Auto-focus en el input
+    otpInput?.focus();
+  </script>
+
+  <style>
+    /* Animación al cargar */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    section > div {
+      animation: fadeInUp 0.4s ease;
+    }
+
+    /* Estilo mejorado para el input OTP */
+    #otpInput:focus {
+      box-shadow: 0 0 0 3px rgba(160, 179, 139, 0.3);
+    }
+  </style>
+</Layout>

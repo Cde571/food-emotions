@@ -1,0 +1,1937 @@
+---
+// ============================================================
+// 📄 GROUP.ASTRO - PÁGINA INDIVIDUAL DE GRUPO
+// Ruta: src/pages/Group.astro
+// URL: /Group?slug=nombre-del-grupo
+// ============================================================
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/shared/Navigation.astro';
+---
+
+<Layout title="Grupo">
+  <Navigation />
+
+  <div class="group-page-container">
+    <!-- 🔹 ENCABEZADO DEL GRUPO -->
+    <header class="group-header">
+      <div class="group-banner" id="group-banner">
+        <img id="group-banner-img" src="" alt="Banner" />
+      </div>
+      
+      <div class="group-info-header">
+        <div class="group-avatar-container">
+          <img id="group-avatar" src="" alt="Grupo" class="group-avatar" />
+        </div>
+        
+        <div class="group-details-header">
+          <h1 id="group-name">Cargando...</h1>
+          <p id="group-description">Descripción del grupo</p>
+          
+          <div class="group-stats-header">
+            <span id="member-count">0 miembros</span>
+            <span>•</span>
+            <span id="post-count">0 publicaciones</span>
+          </div>
+        </div>
+        
+        <div class="group-actions-header">
+          <!-- Botón de unirse/salir -->
+          <button id="join-leave-btn" class="btn-join" style="display: none;">
+            👥 Unirse al grupo
+          </button>
+          
+          <!-- Botón de configuración (solo admins) -->
+          <button id="settings-btn" class="btn-settings" style="display: none;">
+            ⚙️ Configuración
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 🔹 NAVEGACIÓN DEL GRUPO -->
+    <nav class="group-nav">
+      <button class="nav-tab active" data-tab="posts">📸 Publicaciones</button>
+      <button class="nav-tab" data-tab="members">👥 Miembros</button>
+      <button class="nav-tab" data-tab="about">ℹ️ Información</button>
+      <button class="nav-tab admin-only" data-tab="manage" style="display: none;">⚡ Administrar</button>
+    </nav>
+
+    <!-- 🔹 CONTENIDO PRINCIPAL -->
+    <main class="group-content">
+      <!-- TAB: PUBLICACIONES -->
+      <section id="tab-posts" class="tab-content active">
+        <!-- Crear publicación (solo miembros) -->
+        <div id="create-post-section" class="create-post-card" style="display: none;">
+          <h3>✍️ Crear publicación</h3>
+          <form id="create-post-form">
+            <textarea 
+              id="post-caption" 
+              placeholder="¿Qué quieres compartir con el grupo?" 
+              rows="3"
+            ></textarea>
+            
+            <div class="post-images-preview" id="images-preview"></div>
+            
+            <div class="post-form-actions">
+              <input type="file" id="post-images" accept="image/*" multiple hidden />
+              <button type="button" id="add-images-btn" class="btn-secondary">
+                📷 Agregar imágenes
+              </button>
+              <button type="submit" class="btn-primary">
+                📤 Publicar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Feed de publicaciones -->
+        <div id="posts-feed" class="posts-feed">
+          <div class="loading">Cargando publicaciones...</div>
+        </div>
+      </section>
+
+      <!-- TAB: MIEMBROS -->
+      <section id="tab-members" class="tab-content">
+        <div class="members-section">
+          <div class="members-search">
+            <input type="text" id="search-members" placeholder="Buscar miembros..." />
+          </div>
+          
+          <div class="members-filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="admins">Administradores</button>
+          </div>
+          
+          <div id="members-list" class="members-grid">
+            <div class="loading">Cargando miembros...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: INFORMACIÓN -->
+      <section id="tab-about" class="tab-content">
+        <div class="about-section">
+          <div class="info-card">
+            <h3>📖 Descripción</h3>
+            <p id="about-description">Descripción del grupo</p>
+          </div>
+          
+          <div class="info-card">
+            <h3>📊 Estadísticas</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-number" id="stat-members">0</span>
+                <span class="stat-label">Miembros</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="stat-posts">0</span>
+                <span class="stat-label">Publicaciones</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="stat-admins">0</span>
+                <span class="stat-label">Administradores</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="info-card">
+            <h3>👑 Creador</h3>
+            <div id="creator-info" class="creator-info"></div>
+          </div>
+          
+          <div class="info-card">
+            <h3>📅 Fecha de creación</h3>
+            <p id="created-date">-</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ADMINISTRAR (solo admins) -->
+      <section id="tab-manage" class="tab-content admin-only">
+        <div class="manage-section">
+          <h2>⚡ Panel de Administración</h2>
+          
+          <!-- Editar información del grupo -->
+          <div class="admin-card">
+            <h3>✏️ Editar Información</h3>
+            <button id="edit-group-info-btn" class="btn-secondary">
+              Editar nombre, descripción e imagen
+            </button>
+          </div>
+          
+          <!-- Gestionar miembros -->
+          <div class="admin-card">
+            <h3>👥 Gestionar Miembros</h3>
+            <div class="members-management">
+              <input type="text" id="search-members-admin" placeholder="Buscar miembro..." />
+              <div id="admin-members-list" class="admin-members-list">
+                <div class="loading">Cargando miembros...</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Gestionar administradores (solo creador) -->
+          <div id="admin-management-section" class="admin-card creator-only" style="display: none;">
+            <h3>👑 Gestionar Administradores</h3>
+            <p class="help-text">Solo el creador puede designar o remover administradores</p>
+            <div id="admin-designation-list" class="admin-members-list">
+              <div class="loading">Cargando...</div>
+            </div>
+          </div>
+          
+          <!-- Zona de peligro (solo creador) -->
+          <div id="danger-zone" class="admin-card danger-zone creator-only" style="display: none;">
+            <h3>⚠️ Zona de Peligro</h3>
+            <button id="delete-group-btn" class="btn-danger">
+              🗑️ Eliminar Grupo Permanentemente
+            </button>
+            <p class="warning-text">Esta acción no se puede deshacer</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Configuración rápida -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-modal">×</button>
+      <h2>⚙️ Configuración</h2>
+      <div class="settings-options">
+        <button class="settings-option" data-action="edit">
+          ✏️ Editar información del grupo
+        </button>
+        <button class="settings-option admin-only" data-action="members">
+          👥 Gestionar miembros
+        </button>
+        <button class="settings-option creator-only" data-action="admins">
+          👑 Gestionar administradores
+        </button>
+        <button class="settings-option" data-action="leave">
+          🚪 Salir del grupo
+        </button>
+        <button class="settings-option danger creator-only" data-action="delete">
+          🗑️ Eliminar grupo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Ver miembro -->
+  <div id="member-modal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-modal">×</button>
+      <div id="member-details"></div>
+    </div>
+  </div>
+
+  <div id="notification" class="notification hidden"></div>
+</Layout>
+
+<script>
+// ============================================================
+// 🎯 LÓGICA DE LA PÁGINA DE GRUPO
+// ============================================================
+
+let currentUser = null;
+let currentGroup = null;
+let groupSlug = '';
+let isMember = false;
+let isAdmin = false;
+let isCreator = false;
+
+// ============================================================
+// 🔔 Notificaciones
+// ============================================================
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${type}`;
+  notification.classList.remove('hidden');
+  setTimeout(() => notification.classList.add('hidden'), 3000);
+}
+
+// ============================================================
+// 🔄 Cargar usuario actual
+// ============================================================
+async function loadCurrentUser() {
+  try {
+    const res = await fetch('http://localhost:3000/api/user/me', {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      window.location.href = '/login';
+      return;
+    }
+    
+    const data = await res.json();
+    if (!data.loggedIn) {
+      window.location.href = '/login';
+      return;
+    }
+    
+    currentUser = data;
+    console.log('✅ Usuario cargado:', currentUser.username);
+  } catch (err) {
+    console.error('❌ Error cargando usuario:', err);
+    window.location.href = '/login';
+  }
+}
+
+// ============================================================
+// 📊 Cargar datos del grupo
+// ============================================================
+async function loadGroupData() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    groupSlug = params.get('slug');
+    
+    if (!groupSlug) {
+      showNotification('No se especificó un grupo', 'error');
+      setTimeout(() => window.location.href = '/Profile', 2000);
+      return;
+    }
+    
+    console.log('🔄 Cargando grupo:', groupSlug);
+    
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      showNotification('Grupo no encontrado', 'error');
+      setTimeout(() => window.location.href = '/Profile', 2000);
+      return;
+    }
+    
+    currentGroup = await res.json();
+    
+    // Determinar permisos
+    isMember = currentGroup.isMember || false;
+    isAdmin = currentGroup.isAdmin || false;
+    isCreator = currentUser && currentGroup.createdBy && 
+      (currentUser._id === currentGroup.createdBy._id || currentUser._id === currentGroup.createdBy);
+    
+    console.log('✅ Grupo cargado:', currentGroup.name);
+    console.log('🔐 Permisos:', { isMember, isAdmin, isCreator });
+    
+    updateGroupUI();
+    updatePermissions();
+    await loadGroupPosts();
+    
+  } catch (err) {
+    console.error('❌ Error cargando grupo:', err);
+    showNotification('Error al cargar el grupo', 'error');
+  }
+}
+
+// ============================================================
+// 🎨 Actualizar UI con datos del grupo
+// ============================================================
+function updateGroupUI() {
+  // Banner
+  const bannerImg = document.getElementById('group-banner-img');
+  if (bannerImg) {
+    bannerImg.src = currentGroup.image || 'https://via.placeholder.com/1200x300/687450/ffffff?text=Grupo';
+  }
+  
+  // Avatar
+  const avatar = document.getElementById('group-avatar');
+  if (avatar) {
+    avatar.src = currentGroup.image || 'https://via.placeholder.com/150/687450/ffffff?text=👥';
+  }
+  
+  // Información
+  document.getElementById('group-name').textContent = currentGroup.name || 'Grupo';
+  document.getElementById('group-description').textContent = currentGroup.description || 'Sin descripción';
+  document.getElementById('member-count').textContent = `${currentGroup.memberCount || 0} miembros`;
+  document.getElementById('post-count').textContent = `${currentGroup.postCount || 0} publicaciones`;
+  
+  // Tab de información
+  document.getElementById('about-description').textContent = currentGroup.description || 'Sin descripción';
+  document.getElementById('stat-members').textContent = currentGroup.memberCount || 0;
+  document.getElementById('stat-posts').textContent = currentGroup.postCount || 0;
+  document.getElementById('stat-admins').textContent = currentGroup.admins?.length || 0;
+  document.getElementById('created-date').textContent = new Date(currentGroup.createdAt).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  
+  // Creador
+  const creatorInfo = document.getElementById('creator-info');
+  if (creatorInfo && currentGroup.createdBy) {
+    const creator = currentGroup.createdBy;
+    creatorInfo.innerHTML = `
+      <div class="creator-card" onclick="window.location.href='/Profile?user=${creator._id || creator}'">
+        <img src="${creator.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(creator.username || 'User')}`}" alt="${creator.username}" />
+        <div>
+          <strong>${creator.username || 'Usuario'}</strong>
+          <span>Fundador del grupo</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ============================================================
+// 🔐 Actualizar permisos y visibilidad
+// ============================================================
+function updatePermissions() {
+  const joinLeaveBtn = document.getElementById('join-leave-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const createPostSection = document.getElementById('create-post-section');
+  const manageTab = document.querySelector('[data-tab="manage"]');
+  
+  // Botón de unirse/salir
+  if (joinLeaveBtn) {
+    joinLeaveBtn.style.display = 'block';
+    if (isMember) {
+      joinLeaveBtn.textContent = '✓ Miembro';
+      joinLeaveBtn.className = 'btn-member';
+    } else {
+      joinLeaveBtn.textContent = '👥 Unirse al grupo';
+      joinLeaveBtn.className = 'btn-join';
+    }
+  }
+  
+  // Botón de configuración (solo miembros)
+  if (settingsBtn && isMember) {
+    settingsBtn.style.display = 'block';
+  }
+  
+  // Crear publicación (solo miembros)
+  if (createPostSection && isMember) {
+    createPostSection.style.display = 'block';
+  }
+  
+  // Tab de administración (solo admins)
+  if (manageTab && isAdmin) {
+    manageTab.style.display = 'block';
+  }
+  
+  // Secciones solo para creador
+  document.querySelectorAll('.creator-only').forEach(el => {
+    el.style.display = isCreator ? 'block' : 'none';
+  });
+  
+  // Secciones solo para admins
+  document.querySelectorAll('.admin-only').forEach(el => {
+    if (el.classList.contains('creator-only')) return; // Skip if also creator-only
+    el.style.display = isAdmin ? 'block' : 'none';
+  });
+}
+
+// ============================================================
+// 📸 Cargar publicaciones del grupo
+// ============================================================
+async function loadGroupPosts() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/posts`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error cargando posts');
+    
+    const posts = await res.json();
+    const feed = document.getElementById('posts-feed');
+    
+    if (posts.length === 0) {
+      feed.innerHTML = '<div class="empty-state">📭 No hay publicaciones aún. ¡Sé el primero en publicar!</div>';
+      return;
+    }
+    
+    feed.innerHTML = posts.map(post => `
+      <article class="post-card" onclick="window.location.href='/Social?post=${post._id}'">
+        <div class="post-header">
+          <img src="${post.author?.profilePic || 'https://via.placeholder.com/40'}" alt="${post.author?.username}" class="post-author-pic" />
+          <div class="post-author-info">
+            <strong>${post.author?.username || 'Usuario'}</strong>
+            <span>${formatDate(post.createdAt)}</span>
+          </div>
+        </div>
+        
+        ${post.caption ? `<p class="post-caption">${post.caption}</p>` : ''}
+        
+        ${post.images && post.images.length > 0 ? `
+          <div class="post-images">
+            ${post.images.map(img => `<img src="${img}" alt="Post image" />`).join('')}
+          </div>
+        ` : ''}
+        
+        <div class="post-footer">
+          <span>❤️ ${post.likes?.length || 0}</span>
+          <span>💬 ${post.comments?.length || 0}</span>
+        </div>
+      </article>
+    `).join('');
+    
+  } catch (err) {
+    console.error('❌ Error cargando posts:', err);
+    document.getElementById('posts-feed').innerHTML = '<div class="error-state">Error al cargar publicaciones</div>';
+  }
+}
+
+// ============================================================
+// 👥 Cargar miembros del grupo
+// ============================================================
+async function loadGroupMembers() {
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/members`, {
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error cargando miembros');
+    
+    const members = await res.json();
+    const membersList = document.getElementById('members-list');
+    
+    if (members.length === 0) {
+      membersList.innerHTML = '<div class="empty-state">No hay miembros aún</div>';
+      return;
+    }
+    
+    membersList.innerHTML = members.map(member => `
+      <div class="member-card" onclick="window.location.href='/Profile?user=${member._id}'">
+        <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
+        <div class="member-info">
+          <strong>${member.username}</strong>
+          ${member.isAdmin ? '<span class="admin-badge">👑 Admin</span>' : ''}
+          ${member.bio ? `<p>${member.bio.substring(0, 60)}...</p>` : ''}
+        </div>
+      </div>
+    `).join('');
+    
+    // Cargar también en el panel de administración si es admin
+    if (isAdmin) {
+      loadAdminMembersList(members);
+    }
+    
+  } catch (err) {
+    console.error('❌ Error cargando miembros:', err);
+  }
+}
+
+// ============================================================
+// 👑 Cargar lista de miembros para administración
+// ============================================================
+function loadAdminMembersList(members) {
+  const adminList = document.getElementById('admin-members-list');
+  const designationList = document.getElementById('admin-designation-list');
+  
+  if (adminList) {
+    adminList.innerHTML = members.map(member => {
+      const isCreatorMember = currentGroup.createdBy && 
+        (member._id === currentGroup.createdBy._id || member._id === currentGroup.createdBy);
+      
+      return `
+        <div class="admin-member-item">
+          <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
+          <div class="admin-member-info">
+            <strong>${member.username}</strong>
+            ${member.isAdmin ? '<span class="admin-badge">👑 Admin</span>' : ''}
+          </div>
+          ${!isCreatorMember && isAdmin ? `
+            <button class="btn-kick" data-user-id="${member._id}">
+              🚪 Expulsar
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+    
+    // Event listeners para expulsar
+    adminList.querySelectorAll('.btn-kick').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        kickMember(btn.dataset.userId);
+      });
+    });
+  }
+  
+  // Lista para designar administradores (solo creador)
+  if (designationList && isCreator) {
+    designationList.innerHTML = members.map(member => {
+      const isCreatorMember = member._id === currentGroup.createdBy._id || 
+        member._id === currentGroup.createdBy;
+      
+      if (isCreatorMember) return ''; // No mostrar al creador
+      
+      return `
+        <div class="admin-member-item">
+          <img src="${member.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.username)}`}" alt="${member.username}" />
+          <div class="admin-member-info">
+            <strong>${member.username}</strong>
+            ${member.isAdmin ? '<span class="admin-badge">👑 Admin</span>' : ''}
+          </div>
+          <button 
+            class="btn-toggle-admin ${member.isAdmin ? 'remove' : 'add'}" 
+            data-user-id="${member._id}"
+            data-is-admin="${member.isAdmin}"
+          >
+            ${member.isAdmin ? '❌ Remover admin' : '👑 Hacer admin'}
+          </button>
+        </div>
+      `;
+    }).join('');
+    
+    // Event listeners para designar/remover admins
+    designationList.querySelectorAll('.btn-toggle-admin').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAdmin(btn.dataset.userId, btn.dataset.isAdmin === 'true');
+      });
+    });
+  }
+}
+
+// ============================================================
+// 🚪 Expulsar miembro
+// ============================================================
+async function kickMember(userId) {
+  if (!confirm('¿Estás seguro de que quieres expulsar a este miembro?')) return;
+  
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/members/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    
+    showNotification('Miembro expulsado correctamente');
+    await loadGroupMembers();
+    await loadGroupData();
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification(err.message || 'Error al expulsar miembro', 'error');
+  }
+}
+
+// ============================================================
+// 👑 Designar/Remover administrador
+// ============================================================
+async function toggleAdmin(userId, isCurrentlyAdmin) {
+  const action = isCurrentlyAdmin ? 'remover como administrador' : 'hacer administrador';
+  if (!confirm(`¿Estás seguro de que quieres ${action} a este usuario?`)) return;
+  
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/admins/${userId}`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message);
+    }
+    
+    const data = await res.json();
+    showNotification(data.message);
+    
+    await loadGroupMembers();
+    await loadGroupData();
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification(err.message || 'Error al gestionar administrador', 'error');
+  }
+}
+
+// ============================================================
+// 📝 Crear publicación en el grupo
+// ============================================================
+document.getElementById('create-post-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const caption = document.getElementById('post-caption').value.trim();
+  const images = document.getElementById('post-images').files;
+  
+  if (!caption && images.length === 0) {
+    showNotification('Debes escribir algo o agregar imágenes', 'error');
+    return;
+  }
+  
+  try {
+    showNotification('Publicando...', 'success');
+    
+    const formData = new FormData();
+    formData.append('caption', caption);
+    
+    for (let i = 0; i < images.length; i++) {
+      formData.append('images', images[i]);
+    }
+    
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/posts`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    
+    if (!res.ok) throw new Error('Error al publicar');
+    
+    showNotification('Publicación creada exitosamente');
+    
+    // Limpiar formulario
+    document.getElementById('create-post-form').reset();
+    document.getElementById('images-preview').innerHTML = '';
+    
+    // Recargar publicaciones
+    await loadGroupPosts();
+    await loadGroupData();
+    
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification('Error al crear publicación', 'error');
+  }
+});
+
+// ============================================================
+// 📷 Preview de imágenes
+// ============================================================
+document.getElementById('add-images-btn')?.addEventListener('click', () => {
+  document.getElementById('post-images').click();
+});
+
+document.getElementById('post-images')?.addEventListener('change', (e) => {
+  const files = e.target.files;
+  const preview = document.getElementById('images-preview');
+  preview.innerHTML = '';
+  
+  Array.from(files).forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement('img');
+      img.src = event.target.result;
+      img.className = 'preview-image';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// ============================================================
+// 👥 Unirse/Salir del grupo
+// ============================================================
+document.getElementById('join-leave-btn')?.addEventListener('click', async () => {
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/join`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al procesar solicitud');
+    
+    const data = await res.json();
+    showNotification(data.message);
+    
+    // Recargar página para actualizar permisos
+    await loadGroupData();
+    
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification('Error al procesar solicitud', 'error');
+  }
+});
+
+// ============================================================
+// 📑 Sistema de Tabs
+// ============================================================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const targetTab = tab.dataset.tab;
+    
+    // Actualizar tabs activos
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    
+    // Mostrar contenido correspondiente
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    document.getElementById(`tab-${targetTab}`).classList.add('active');
+    
+    // Cargar datos si es necesario
+    if (targetTab === 'members' && document.getElementById('members-list').innerHTML.includes('loading')) {
+      loadGroupMembers();
+    }
+  });
+});
+
+// ============================================================
+// ⚙️ Modal de configuración
+// ============================================================
+document.getElementById('settings-btn')?.addEventListener('click', () => {
+  document.getElementById('settings-modal').classList.remove('hidden');
+});
+
+document.querySelectorAll('.settings-option').forEach(option => {
+  option.addEventListener('click', () => {
+    const action = option.dataset.action;
+    document.getElementById('settings-modal').classList.add('hidden');
+    
+    switch(action) {
+      case 'edit':
+        // Abrir modal de edición (reutilizar el que ya tienes)
+        openEditModal();
+        break;
+      case 'members':
+        // Ir a tab de administración
+        document.querySelector('[data-tab="manage"]').click();
+        break;
+      case 'admins':
+        // Ir a tab de administración
+        document.querySelector('[data-tab="manage"]').click();
+        break;
+      case 'leave':
+        leaveGroup();
+        break;
+      case 'delete':
+        deleteGroup();
+        break;
+    }
+  });
+});
+
+// ============================================================
+// ✏️ Abrir modal de edición
+// ============================================================
+function openEditModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.id = 'edit-modal-instance';
+  
+  modal.innerHTML = `
+    <div class="modal-content">
+      <button class="close-modal">×</button>
+      <h2>✏️ Editar Grupo</h2>
+      
+      <form id="edit-form">
+        <div class="form-group">
+          <label>Nombre del grupo *</label>
+          <input type="text" id="edit-name" value="${currentGroup.name}" required />
+        </div>
+        
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="edit-description" rows="4">${currentGroup.description || ''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Imagen</label>
+          <input type="file" id="edit-image" accept="image/*" />
+          ${currentGroup.image ? `<img src="${currentGroup.image}" class="current-image" />` : ''}
+        </div>
+        
+        <button type="submit" class="btn-primary">💾 Guardar Cambios</button>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  modal.querySelector('.close-modal').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+  
+  modal.querySelector('#edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('edit-name').value.trim();
+    const description = document.getElementById('edit-description').value.trim();
+    const imageFile = document.getElementById('edit-image').files[0];
+    
+    try {
+      let imageUrl = currentGroup.image || '';
+      
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('bannerImage', imageFile);
+        
+        const uploadRes = await fetch('http://localhost:3000/api/users/me/banner', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.bannerImage;
+        }
+      }
+      
+      const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description, image: imageUrl }),
+      });
+      
+      if (!res.ok) throw new Error('Error al actualizar');
+      
+      showNotification('Grupo actualizado exitosamente');
+      modal.remove();
+      
+      // Si cambió el nombre, redirigir al nuevo slug
+      const data = await res.json();
+      if (data.group.slug !== groupSlug) {
+        window.location.href = `/Group?slug=${data.group.slug}`;
+      } else {
+        await loadGroupData();
+      }
+      
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al actualizar grupo', 'error');
+    }
+  });
+}
+
+// ============================================================
+// 🚪 Salir del grupo
+// ============================================================
+async function leaveGroup() {
+  if (!confirm('¿Estás seguro de que quieres salir de este grupo?')) return;
+  
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}/join`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al salir del grupo');
+    
+    showNotification('Has salido del grupo');
+    setTimeout(() => window.location.href = '/Profile', 1500);
+    
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification('Error al salir del grupo', 'error');
+  }
+}
+
+// ============================================================
+// 🗑️ Eliminar grupo
+// ============================================================
+document.getElementById('delete-group-btn')?.addEventListener('click', deleteGroup);
+
+async function deleteGroup() {
+  const confirmation = prompt(`Para eliminar el grupo, escribe: ${currentGroup.name}`);
+  
+  if (confirmation !== currentGroup.name) {
+    showNotification('Nombre incorrecto, cancelando', 'error');
+    return;
+  }
+  
+  try {
+    const res = await fetch(`http://localhost:3000/api/groups/${groupSlug}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    
+    if (!res.ok) throw new Error('Error al eliminar grupo');
+    
+    showNotification('Grupo eliminado exitosamente');
+    setTimeout(() => window.location.href = '/Profile', 1500);
+    
+  } catch (err) {
+    console.error('❌ Error:', err);
+    showNotification('Error al eliminar grupo', 'error');
+  }
+}
+
+// ============================================================
+// 🔍 Filtros de miembros
+// ============================================================
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    const filter = btn.dataset.filter;
+    const memberCards = document.querySelectorAll('.member-card');
+    
+    memberCards.forEach(card => {
+      if (filter === 'all') {
+        card.style.display = 'flex';
+      } else if (filter === 'admins') {
+        card.style.display = card.querySelector('.admin-badge') ? 'flex' : 'none';
+      }
+    });
+  });
+});
+
+// ============================================================
+// 🔍 Búsqueda de miembros
+// ============================================================
+document.getElementById('search-members')?.addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  document.querySelectorAll('.member-card').forEach(card => {
+    const username = card.querySelector('strong').textContent.toLowerCase();
+    card.style.display = username.includes(query) ? 'flex' : 'none';
+  });
+});
+
+document.getElementById('search-members-admin')?.addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  document.querySelectorAll('.admin-member-item').forEach(item => {
+    const username = item.querySelector('strong').textContent.toLowerCase();
+    item.style.display = username.includes(query) ? 'flex' : 'none';
+  });
+});
+
+// ============================================================
+// 🕐 Formato de fecha
+// ============================================================
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now - date;
+  
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return 'Ahora';
+  if (minutes < 60) return `Hace ${minutes}m`;
+  if (hours < 24) return `Hace ${hours}h`;
+  if (days < 7) return `Hace ${days}d`;
+  
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
+// ============================================================
+// 🪟 Cerrar modales
+// ============================================================
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    e.target.classList.add('hidden');
+  }
+});
+
+document.querySelectorAll('.close-modal').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.closest('.modal').classList.add('hidden');
+  });
+});
+
+// ============================================================
+// 🚀 Inicializar
+// ============================================================
+async function initialize() {
+  await loadCurrentUser();
+  await loadGroupData();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
+</script>
+
+<style>
+:global(:root) {
+  --primary: #687450;
+  --primary-dark: #425638;
+  --accent: #7b8e62;
+  --secondary: #a0b38b;
+  --bg-light: #f4f7f3;
+  --card-bg: #ffffff;
+  --text-dark: #222;
+  --border-color: #c7d0c1;
+  --danger: #d32f2f;
+  --radius: 12px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-family: "Poppins", sans-serif;
+}
+
+:global(*),
+:global(*::before),
+:global(*::after) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:global(body) {
+  background: var(--bg-light);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   🎨 CONTENEDOR PRINCIPAL
+============================================================ */
+:global(.group-page-container) {
+  max-width: 1200px;
+  margin: 80px auto 30px;
+  padding: 0 20px;
+}
+
+/* ============================================================
+   📸 ENCABEZADO DEL GRUPO
+============================================================ */
+:global(.group-header) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+}
+
+:global(.group-banner) {
+  height: 250px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+:global(.group-banner img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+:global(.group-info-header) {
+  padding: 20px 30px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  position: relative;
+}
+
+:global(.group-avatar-container) {
+  margin-top: -60px;
+  position: relative;
+  z-index: 10;
+}
+
+:global(.group-avatar) {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 5px solid var(--card-bg);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+}
+
+:global(.group-details-header h1) {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  color: var(--text-dark);
+}
+
+:global(.group-details-header p) {
+  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+:global(.group-stats-header) {
+  display: flex;
+  gap: 12px;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+:global(.group-actions-header) {
+  display: flex;
+  gap: 12px;
+}
+
+/* ============================================================
+   🎯 BOTONES
+============================================================ */
+:global(.btn-join),
+:global(.btn-member),
+:global(.btn-settings),
+:global(.btn-primary),
+:global(.btn-secondary),
+:global(.btn-danger) {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+:global(.btn-join) {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(.btn-join:hover) {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+:global(.btn-member) {
+  background: var(--secondary);
+  color: white;
+}
+
+:global(.btn-settings) {
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+:global(.btn-settings:hover) {
+  background: var(--primary);
+  color: white;
+}
+
+:global(.btn-primary) {
+  background: var(--primary);
+  color: white;
+  width: 100%;
+}
+
+:global(.btn-primary:hover) {
+  background: var(--primary-dark);
+}
+
+:global(.btn-secondary) {
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+:global(.btn-secondary:hover) {
+  background: var(--primary);
+  color: white;
+}
+
+:global(.btn-danger) {
+  background: var(--danger);
+  color: white;
+  width: 100%;
+}
+
+:global(.btn-danger:hover) {
+  background: #b71c1c;
+}
+
+/* ============================================================
+   📑 NAVEGACIÓN DE TABS
+============================================================ */
+:global(.group-nav) {
+  display: flex;
+  gap: 8px;
+  background: var(--card-bg);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+:global(.nav-tab) {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+:global(.nav-tab:hover) {
+  background: var(--bg-light);
+  color: var(--primary);
+}
+
+:global(.nav-tab.active) {
+  background: var(--primary);
+  color: white;
+}
+
+/* ============================================================
+   📄 CONTENIDO DE TABS
+============================================================ */
+:global(.group-content) {
+  min-height: 500px;
+}
+
+:global(.tab-content) {
+  display: none;
+}
+
+:global(.tab-content.active) {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+:global(@keyframes fadeIn) {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   ✍️ CREAR PUBLICACIÓN
+============================================================ */
+:global(.create-post-card) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+:global(.create-post-card h3) {
+  margin-bottom: 16px;
+  color: var(--primary-dark);
+}
+
+:global(.create-post-card textarea) {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+:global(.create-post-card textarea:focus) {
+  outline: none;
+  border-color: var(--primary);
+}
+
+:global(.post-images-preview) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+:global(.preview-image) {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--border-color);
+}
+
+:global(.post-form-actions) {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ============================================================
+   📸 FEED DE PUBLICACIONES
+============================================================ */
+:global(.posts-feed) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+:global(.post-card) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+:global(.post-card:hover) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+:global(.post-header) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+:global(.post-author-pic) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+
+:global(.post-author-info strong) {
+  display: block;
+  color: var(--text-dark);
+  font-size: 0.95rem;
+}
+
+:global(.post-author-info span) {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+:global(.post-caption) {
+  margin-bottom: 14px;
+  line-height: 1.6;
+  color: var(--text-dark);
+}
+
+:global(.post-images) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+:global(.post-images img) {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+:global(.post-footer) {
+  display: flex;
+  gap: 20px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   👥 MIEMBROS
+============================================================ */
+:global(.members-section) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(.members-search input) {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+:global(.members-search input:focus) {
+  outline: none;
+  border-color: var(--primary);
+}
+
+:global(.members-filters) {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+:global(.filter-btn) {
+  padding: 8px 16px;
+  border: 2px solid var(--border-color);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  color: #666;
+}
+
+:global(.filter-btn:hover) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+:global(.filter-btn.active) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+:global(.members-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+:global(.member-card) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+:global(.member-card:hover) {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+:global(.member-card img) {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+
+:global(.member-info) {
+  flex: 1;
+}
+
+:global(.member-info strong) {
+  display: block;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+:global(.member-info p) {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 4px 0 0 0;
+}
+
+:global(.admin-badge) {
+  display: inline-block;
+  background: linear-gradient(90deg, #ffd700, #ffed4e);
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+/* ============================================================
+   ℹ️ INFORMACIÓN
+============================================================ */
+:global(.about-section) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+:global(.info-card) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(.info-card h3) {
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+}
+
+:global(.info-card p) {
+  color: #666;
+  line-height: 1.6;
+}
+
+:global(.stats-grid) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+:global(.stat-item) {
+  text-align: center;
+  padding: 16px;
+  background: var(--bg-light);
+  border-radius: 8px;
+}
+
+:global(.stat-number) {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+:global(.stat-label) {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+:global(.creator-card) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+:global(.creator-card:hover) {
+  background: white;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(.creator-card img) {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+}
+
+:global(.creator-card strong) {
+  display: block;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+:global(.creator-card span) {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   ⚡ ADMINISTRACIÓN
+============================================================ */
+:global(.manage-section) {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+:global(.manage-section h2) {
+  color: var(--primary-dark);
+  margin-bottom: 10px;
+}
+
+:global(.admin-card) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+:global(.admin-card h3) {
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+}
+
+:global(.help-text) {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+:global(.members-management input) {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+:global(.admin-members-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+:global(.admin-member-item) {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+:global(.admin-member-item:hover) {
+  border-color: var(--primary);
+}
+
+:global(.admin-member-item img) {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+}
+
+:global(.admin-member-info) {
+  flex: 1;
+}
+
+:global(.admin-member-info strong) {
+  display: block;
+  margin-bottom: 4px;
+}
+
+:global(.btn-kick),
+:global(.btn-toggle-admin) {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+}
+
+:global(.btn-kick) {
+  background: var(--danger);
+  color: white;
+}
+
+:global(.btn-kick:hover) {
+  background: #b71c1c;
+}
+
+:global(.btn-toggle-admin.add) {
+  background: #ffd700;
+  color: #333;
+}
+
+:global(.btn-toggle-admin.remove) {
+  background: #999;
+  color: white;
+}
+
+:global(.danger-zone) {
+  border: 2px solid var(--danger);
+}
+
+:global(.warning-text) {
+  color: var(--danger);
+  font-size: 0.9rem;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+/* ============================================================
+   🪟 MODALES
+============================================================ */
+:global(.modal) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+:global(.modal.hidden) {
+  display: none;
+}
+
+:global(.modal-content) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+:global(.modal-content h2) {
+  margin-bottom: 24px;
+  color: var(--primary-dark);
+}
+
+:global(.close-modal) {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+:global(.close-modal:hover) {
+  background: var(--danger);
+  color: white;
+  transform: rotate(90deg);
+}
+
+:global(.settings-options) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+:global(.settings-option) {
+  padding: 14px 20px;
+  border: 2px solid var(--border-color);
+  background: white;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:global(.settings-option:hover) {
+  border-color: var(--primary);
+  background: var(--bg-light);
+  transform: translateX(5px);
+}
+
+:global(.settings-option.danger) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+:global(.settings-option.danger:hover) {
+  background: var(--danger);
+  color: white;
+}
+
+:global(.form-group) {
+  margin-bottom: 20px;
+}
+
+:global(.form-group label) {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+:global(.current-image) {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 10px;
+  border: 2px solid var(--border-color);
+}
+
+/* ============================================================
+   📱 ESTADOS
+============================================================ */
+:global(.loading),
+:global(.empty-state),
+:global(.error-state) {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+:global(.empty-state) {
+  font-size: 1.1rem;
+}
+
+:global(.error-state) {
+  color: var(--danger);
+}
+
+/* ============================================================
+   🔔 NOTIFICACIONES
+============================================================ */
+:global(.notification) {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 99999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+:global(@keyframes slideIn) {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+:global(.notification.success) {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+}
+
+:global(.notification.error) {
+  background: linear-gradient(135deg, var(--danger), #b71c1c);
+}
+
+:global(.notification.hidden) {
+  display: none;
+}
+
+/* ============================================================
+   📱 RESPONSIVE
+============================================================ */
+:global(@media (max-width: 992px)) {
+  .group-page-container { margin-top: 70px; padding: 0 15px; }
+  .group-banner { height: 180px; }
+  .group-info-header { grid-template-columns: 1fr; padding: 15px 20px; }
+  .group-avatar { width: 100px; height: 100px; margin-top: -50px; }
+  .group-actions-header { width: 100%; justify-content: stretch; }
+  .group-actions-header button { flex: 1; }
+  .members-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+:global(@media (max-width: 768px)) {
+  .group-details-header h1 { font-size: 1.5rem; }
+  .group-nav { padding: 10px 15px; }
+  .nav-tab { font-size: 0.85rem; padding: 8px 14px; }
+  .post-images { grid-template-columns: 1fr; }
+  .post-images img { height: 200px; }
+  .modal-content { width: 95%; padding: 20px; }
+}
+
+:global(@media (max-width: 576px)) {
+  .group-page-container { padding: 0 10px; }
+  .group-banner { height: 150px; }
+  .group-avatar { width: 80px; height: 80px; }
+  .group-info-header { padding: 10px 15px; }
+  .group-details-header h1 { font-size: 1.3rem; }
+  .group-stats-header { flex-direction: column; gap: 6px; }
+  .create-post-card { padding: 16px; }
+  .post-card { padding: 16px; }
+  .post-form-actions { flex-direction: column; }
+  .post-form-actions button { width: 100%; }
+}
+</style>

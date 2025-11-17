@@ -1,113 +1,573 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import FavoritesSection from '../components/FavoritesSection.astro';
-import HistorySection from '../components/HistorySection.astro';
-import CategoriesSection from '../components/CategoriesSection.astro';
-import SeasonsSection from '../components/SeasonsSection.astro';
-import BlogSection from '../components/BlogSection.astro';
+
+const kitchenZones = [
+  { 
+    id: 'refrigerator',
+    name: 'Refrigerador',
+    subtitle: 'Sabores que decidiste conservar',
+    icon: '🧊',
+    count: 24,
+  },
+  { 
+    id: 'stove',
+    name: 'Estufa',
+    subtitle: 'Ideas que estás cocinando',
+    icon: '🔥',
+    count: 8,
+  },
+  { 
+    id: 'pantry',
+    name: 'Despensa',
+    subtitle: 'Tu mapa de sabores',
+    icon: '🏺',
+    count: 31,
+  },
+  { 
+    id: 'cookbook',
+    name: 'Libro de Recetas',
+    subtitle: 'Tus capítulos favoritos',
+    icon: '📖',
+    count: 12,
+  },
+  { 
+    id: 'counter',
+    name: 'Mesón Central',
+    subtitle: 'Recuerdos recientes servidos',
+    icon: '🍽️',
+    count: 18,
+  }
+];
 ---
 
-<Layout title="Archives">
-  <section class="archives-container mt-36">
-    <h1 class="archives-title">📚 Archives</h1>
+<Layout title="Archives - FoodEmotions Kitchen">
+  <div class="kitchen-archive">
+    <!-- Canvas Three.js -->
+    <canvas id="kitchen-scene"></canvas>
 
-    <!-- Barra de Búsqueda y Filtros -->
-    <div class="search-and-filter">
-      <input type="text" placeholder="Buscar en Archives..." class="search-input" />
-      <select class="filter-dropdown">
-        <option value="all">Todas las secciones</option>
-        <option value="favorites">Recetas Guardadas</option>
-        <option value="history">Historial</option>
-        <option value="categories">Categorías</option>
-        <option value="seasons">Temporadas</option>
-        <option value="blog">Blog</option>
-      </select>
-      <button class="search-btn">🔍 Buscar</button>
+    <!-- UI Overlay -->
+    <div class="ui-layer">
+      <!-- Intro Screen -->
+      <div class="intro-screen" id="intro-screen">
+        <div class="intro-content">
+          <h1 class="kitchen-title">
+            <span class="title-icon">🍳</span>
+            Tu Cocina de Recuerdos
+          </h1>
+          <p class="kitchen-subtitle">
+            En FoodEmotions, tus archivos no son solo datos.<br />
+            Son emociones, sabores y momentos que decidiste guardar.
+          </p>
+          <button class="explore-btn" id="start-tour">
+            <span>Comenzar tour emocional</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+        <div class="scroll-hint">
+          <span>Usa el scroll o las flechas para recorrer tus zonas</span>
+          <div class="mouse-icon">
+            <div class="mouse-wheel"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation dots -->
+      <div class="nav-dots" id="nav-dots">
+        {kitchenZones.map((zone, index) => (
+          <button 
+            class="nav-dot" 
+            data-index={index}
+            data-zone={zone.id}
+            aria-label={`Ir a ${zone.name}`}
+          >
+            <span class="dot-icon">{zone.icon}</span>
+            <span class="dot-label">
+              <strong>{zone.name}</strong><br />
+              <small>{zone.subtitle}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Zone Info Cards -->
+      <div class="zone-info" id="zone-info">
+        <button class="close-info" id="close-info">✕</button>
+        <div class="info-content">
+          <div class="info-icon" id="info-icon">🧊</div>
+          <h2 id="info-title">Refrigerador</h2>
+          <p id="info-subtitle">Sabores que decidiste conservar</p>
+          <p class="info-description" id="info-description">
+            Aquí guardamos tus recetas favoritas, momentos congelados en emoción.
+          </p>
+          <div class="info-count">
+            <span class="count-number" id="info-count">24</span>
+            <span class="count-label">recetas</span>
+          </div>
+          <button class="view-recipes-btn" id="view-recipes">
+            Ver todas las recetas de esta zona
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
     </div>
+  </div>
 
-    <!-- Navegación de Tabs -->
-    <div class="archive-tabs">
-      <button data-section="favorites">❤️ Recetas Guardadas (12)</button>
-      <button data-section="history">🕒 Historial de Recetas (8)</button>
-      <button data-section="categories">📂 Categorías (4)</button>
-      <button data-section="seasons">🍂 Temporadas</button>
-      <button data-section="blog">📝 Artículos del Blog (20)</button>
-    </div>
-
-    <!-- Componentes de cada sección -->
-    <FavoritesSection id="favorites" />
-    <HistorySection id="history" class="hidden" />
-    <CategoriesSection id="categories" class="hidden" />
-    <SeasonsSection id="seasons" class="hidden" />
-    <BlogSection id="blog" class="hidden" />
-  </section>
-
-  <script src="/src/scripts/archives.js" type="module" defer></script>
+  <!-- Script 3D externo -->
+  <script type="module" src="/src/scripts/kitchen-3d.js"></script>
 
   <style>
-    /* Estilos principales */
-    .archives-container {
-      padding: 20px;
-      background-color: #3B432B;
-      color: #ffffff;
-      border-radius: 10px;
+    :root {
+      --fe-dark: #425638;
+      --fe-light: #687450;
+      --fe-mint: #a3b89c;
+      --fe-bg-deep: #1a2310;
     }
 
-    .archives-title {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
+    .kitchen-archive {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at center,
+        var(--fe-dark) 0%,
+        #2f3a27 45%,
+        var(--fe-bg-deep) 100%
+      );
     }
 
-    .search-and-filter {
+    #kitchen-scene {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ui-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .ui-layer * {
+      pointer-events: auto;
+    }
+
+    /* Intro Screen */
+    .intro-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(26, 35, 16, 0.96), rgba(13, 18, 8, 1));
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+      z-index: 100;
     }
 
-    .search-input, .filter-dropdown {
-      padding: 8px;
-      border-radius: 5px;
-      border: none;
-      color: #353535;
+    .intro-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
     }
 
-    .filter-dropdown {
-      background-color: #ffffff;
-      color: #353535;
+    .intro-content {
+      text-align: center;
+      animation: fadeInUp 1.2s ease-out;
+      padding: 0 1.5rem;
     }
 
-    .search-btn {
-      background-color: #2f3725;
-      color: #ffffff;
-      padding: 8px 12px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .archive-tabs {
+    .kitchen-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900;
+      color: #e8ffe3;
+      margin: 0 0 20px 0;
+      text-shadow: 0 0 40px rgba(163, 184, 156, 0.8),
+                  0 10px 30px rgba(0, 0, 0, 0.5);
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
     }
 
-    .archive-tabs button {
-      background-color: #2f3725;
-      color: #ffffff;
-      padding: 8px 12px;
-      border-radius: 5px;
+    .title-icon {
+      font-size: 1.3em;
+      animation: rotate3d 4s ease-in-out infinite;
+    }
+
+    @keyframes rotate3d {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(360deg) scale(1.1); }
+    }
+
+    .kitchen-subtitle {
+      font-size: 1.1rem;
+      color: rgba(232, 255, 227, 0.82);
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    .explore-btn {
+      padding: 18px 45px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1a2310;
+      background: linear-gradient(135deg, var(--fe-mint), var(--fe-light));
       border: none;
+      border-radius: 999px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 10px 40px rgba(163, 184, 156, 0.45);
+      animation: pulse 2s ease-in-out infinite;
     }
 
-    .archive-tabs button:hover {
-      background-color: #4f5a36;
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
 
-    .archive-section.hidden {
-      display: none;
+    .explore-btn:hover {
+      transform: translateY(-4px) scale(1.07);
+      box-shadow: 0 15px 50px rgba(163, 184, 156, 0.6);
+    }
+
+    .btn-arrow {
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
+    }
+
+    .explore-btn:hover .btn-arrow {
+      transform: translateX(10px);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: rgba(232, 255, 227, 0.6);
+      font-size: 0.9rem;
+      animation: fadeIn 2s ease-out 0.8s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .mouse-icon {
+      width: 30px;
+      height: 50px;
+      border: 2px solid rgba(232, 255, 227, 0.4);
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .mouse-wheel {
+      width: 4px;
+      height: 10px;
+      background: rgba(232, 255, 227, 0.7);
+      border-radius: 2px;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: scroll 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scroll {
+      0%, 100% { top: 10px; opacity: 1; }
+      50% { top: 25px; opacity: 0.4; }
+    }
+
+    /* Navigation Dots */
+    .nav-dots {
+      position: fixed;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      z-index: 50;
+    }
+
+    .nav-dot {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(59, 67, 43, 0.7);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(163, 184, 156, 0.4);
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-dot:hover {
+      transform: scale(1.2) translateX(-6px);
+      background: rgba(163, 184, 156, 0.32);
+      border-color: var(--fe-mint);
+    }
+
+    .nav-dot.active {
+      transform: scale(1.3) translateX(-8px);
+      background: rgba(163, 184, 156, 0.5);
+      border-color: var(--fe-mint);
+      box-shadow: 0 0 26px rgba(163, 184, 156, 0.7);
+    }
+
+    .dot-icon {
+      font-size: 1.5rem;
+    }
+
+    .dot-label {
+      position: absolute;
+      right: 60px;
+      background: rgba(26, 35, 16, 0.96);
+      padding: 8px 14px;
+      border-radius: 10px;
+      color: #e8ffe3;
+      font-size: 0.8rem;
+      text-align: left;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      border: 1px solid rgba(163, 184, 156, 0.35);
+    }
+
+    .dot-label strong {
+      font-weight: 700;
+      display: block;
+    }
+
+    .dot-label small {
+      opacity: 0.8;
+    }
+
+    .nav-dot:hover .dot-label {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Zone Info Card */
+    .zone-info {
+      position: fixed;
+      top: 50%;
+      left: 50px;
+      transform: translateY(-50%) translateX(-480px);
+      width: 360px;
+      background: rgba(26, 35, 16, 0.96);
+      backdrop-filter: blur(18px);
+      border: 2px solid rgba(163, 184, 156, 0.32);
+      border-radius: 24px;
+      padding: 38px;
+      transition: transform 0.75s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 60;
+    }
+
+    .zone-info.active {
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .close-info {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .close-info:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: rotate(90deg);
+    }
+
+    .info-content {
+      text-align: center;
+    }
+
+    .info-icon {
+      font-size: 3.5rem;
+      margin-bottom: 14px;
+      filter: drop-shadow(0 0 18px rgba(163, 184, 156, 0.7));
+    }
+
+    #info-title {
+      font-size: 1.9rem;
+      font-weight: 900;
+      color: #e8ffe3;
+      margin: 0 0 8px 0;
+    }
+
+    #info-subtitle {
+      font-size: 1rem;
+      color: rgba(232, 255, 227, 0.78);
+      margin: 0 0 12px 0;
+    }
+
+    .info-description {
+      font-size: 0.9rem;
+      color: rgba(232, 255, 227, 0.7);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .info-count {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+
+    .count-number {
+      font-size: 2.7rem;
+      font-weight: 900;
+      color: var(--fe-mint);
+      text-shadow: 0 0 20px rgba(163, 184, 156, 0.8);
+    }
+
+    .count-label {
+      font-size: 0.9rem;
+      color: rgba(232, 255, 227, 0.7);
+    }
+
+    .view-recipes-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--fe-mint), var(--fe-light));
+      border: none;
+      border-radius: 14px;
+      color: #1a2310;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .view-recipes-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(163, 184, 156, 0.45);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(163, 184, 156, 0.22);
+      z-index: 50;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--fe-mint), var(--fe-light));
+      transition: width 0.5s ease;
+      box-shadow: 0 0 18px rgba(163, 184, 156, 0.7);
+    }
+
+    @media (max-width: 1024px) {
+      .nav-dots {
+        right: 20px;
+      }
+      .zone-info {
+        left: 32px;
+        width: 320px;
+        padding: 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-dots {
+        right: 18px;
+        gap: 14px;
+      }
+
+      .nav-dot {
+        width: 44px;
+        height: 44px;
+      }
+
+      .dot-label {
+        display: none;
+      }
+
+      .zone-info {
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%) scale(0.8);
+        width: calc(100% - 36px);
+      }
+
+      .zone-info.active {
+        transform: translateY(-50%) translateX(-50%) scale(1);
+      }
+
+      .kitchen-title {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+
+      .kitchen-subtitle {
+        font-size: 0.95rem;
+      }
+
+      .explore-btn {
+        padding: 14px 32px;
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .info-icon {
+        font-size: 3rem;
+      }
+
+      #info-title {
+        font-size: 1.6rem;
+      }
+
+      .count-number {
+        font-size: 2.3rem;
+      }
     }
   </style>
 </Layout>
+

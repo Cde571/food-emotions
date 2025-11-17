@@ -116,9 +116,9 @@ import PopularCollections from '../components/PopularCollections.astro';
           <!-- Se llenará dinámicamente -->
         </div>
 
-        <!-- Grupo predeterminado Royal UI Force -->
+        <!-- Grupo predeterminado FOOD EMOTIONS TEAM -->
         <div class="team-card">
-          <h4>ROYAL UI FORCE</h4>
+          <h4>FOOD EMOTIONS TEAM</h4>
           <p>Comunidad de desarrolladores creativos</p>
           <p><span id="team-members-count">1,234</span> miembros</p>
           <button id="join-team-button" class="team-action-btn" data-joined="false">👥 Unirse al grupo</button>
@@ -885,14 +885,14 @@ document.getElementById('likes-stat')?.addEventListener('click', async () => {
 });
 
 // ============================================================
-// 👥 Unirse al grupo Royal UI Force
+// 👥 Unirse al grupo Food Emotions Team
 // ============================================================
 document.getElementById('join-team-button')?.addEventListener('click', async () => {
   try {
     const btn = document.getElementById('join-team-button');
     const currentState = btn.dataset.joined === 'true';
     
-    const res = await fetch('http://localhost:3000/api/groups/royal-ui-force/join', {
+    const res = await fetch('http://localhost:3000/api/groups/food-emotions-team/join', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -929,7 +929,7 @@ document.getElementById('join-team-button')?.addEventListener('click', async () 
 // ✅ Cargar estado del grupo al iniciar
 async function loadGroupStatus() {
   try {
-    const res = await fetch('http://localhost:3000/api/groups/royal-ui-force', {
+    const res = await fetch('http://localhost:3000/api/groups/food-emotions-team', {
       credentials: 'include',
     });
     
@@ -1015,7 +1015,7 @@ document.getElementById('group-image-file')?.addEventListener('change', (e) => {
 });
 
 // ============================================================
-// ✅ CREAR GRUPO 
+// ✅ CREAR GRUPO - VERSIÓN CORREGIDA
 // ============================================================
 document.getElementById('create-group-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1035,14 +1035,14 @@ document.getElementById('create-group-form')?.addEventListener('submit', async (
     
     let imageUrl = '';
     
-    // ⚡ Primero subir la imagen a Cloudinary si existe
+    // ⚡ NUEVA LÓGICA: Primero subir imagen si existe
     if (imageFile) {
       try {
-        console.log('📤 Subiendo imagen del grupo...');
-        const imageFormData = new FormData();
-        imageFormData.append('file', imageFile);
+        console.log('📤 Subiendo imagen del grupo a Cloudinary...');
         
-        // Usar el endpoint de subida de banner como referencia
+        const imageFormData = new FormData();
+        imageFormData.append('bannerImage', imageFile); // ⚠️ Debe ser 'bannerImage'
+        
         const uploadRes = await fetch('http://localhost:3000/api/users/me/banner', {
           method: 'POST',
           credentials: 'include',
@@ -1052,30 +1052,32 @@ document.getElementById('create-group-form')?.addEventListener('submit', async (
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
           imageUrl = uploadData.bannerImage;
-          console.log('✅ Imagen subida:', imageUrl);
+          console.log('✅ Imagen subida correctamente:', imageUrl);
         } else {
-          console.warn('⚠️ Error subiendo imagen, continuando sin ella');
+          const errorData = await uploadRes.json();
+          console.warn('⚠️ Error subiendo imagen:', errorData);
+          showNotification('Advertencia: No se pudo subir la imagen, continuando sin ella', 'error');
         }
       } catch (imgErr) {
-        console.warn('⚠️ Error subiendo imagen:', imgErr);
+        console.warn('⚠️ Error en subida de imagen:', imgErr);
+        showNotification('Advertencia: Error al subir imagen', 'error');
       }
     }
     
-    // 📝 Crear el grupo con JSON (NO FormData)
+    // 📝 Ahora crear el grupo con la URL de Cloudinary
     const groupData = {
       name: name,
       description: description || '',
-      image: imageUrl || '' // URL de Cloudinary o vacío
+      image: imageUrl || '' // ⚡ URL de Cloudinary o vacío
     };
     
-    console.log('📤 Enviando datos del grupo:', groupData);
+    console.log('📤 Creando grupo con datos:', groupData);
     
-    // ⚠️ RUTA CORRECTA: /api/groups (SIN /create)
     const res = await fetch('http://localhost:3000/api/groups', {
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json', // ⚡ IMPORTANTE: JSON, no FormData
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(groupData),
     });
@@ -1106,7 +1108,7 @@ document.getElementById('create-group-form')?.addEventListener('submit', async (
     // Recargar lista de grupos
     await loadAllGroups();
     
-    // Opcional: Abrir detalles del grupo recién creado
+    // Abrir detalles del grupo recién creado
     setTimeout(() => {
       if (data.group.slug) {
         viewGroupDetails(data.group.slug);
@@ -1147,8 +1149,8 @@ async function loadAllGroups() {
     const groupsList = document.getElementById('groups-list');
     if (!groupsList) return;
     
-    // Filtrar el grupo royal-ui-force (ya se muestra por separado)
-    const otherGroups = groups.filter(g => g.slug !== 'royal-ui-force');
+    // Filtrar el grupo Food Emotions Team
+    const otherGroups = groups.filter(g => g.slug !== 'food-emotions-team');
     
     if (otherGroups.length === 0) {
       groupsList.innerHTML = '<p class="no-groups">No hay otros grupos disponibles. ¡Crea el primero!</p>';
@@ -1182,7 +1184,7 @@ async function loadAllGroups() {
 }
 
 // ============================================================
-// 🔍 VER DETALLES DE GRUPO - VERSIÓN MEJORADA
+// 🔍 VER DETALLES DE GRUPO - CON BOTÓN DE IR A PÁGINA
 // ============================================================
 async function viewGroupDetails(slug) {
   try {
@@ -1236,6 +1238,11 @@ async function viewGroupDetails(slug) {
         </div>
         
         <div class="group-actions">
+          <!-- ⚡ BOTÓN PRINCIPAL PARA IR A LA PÁGINA DEL GRUPO -->
+          <button id="go-to-group-page" class="modal-btn primary-btn" data-slug="${slug}">
+            🚀 Ver página completa del grupo
+          </button>
+          
           <button id="toggle-group-membership" class="modal-btn confirm" data-slug="${slug}" data-member="${group.isMember}">
             ${group.isMember ? '✓ Miembro del Grupo' : '👥 Unirse al Grupo'}
           </button>
@@ -1269,6 +1276,12 @@ async function viewGroupDetails(slug) {
     `;
     
     modal.classList.remove('hidden');
+    
+    // ⚡ Event listener para ir a la página del grupo
+    document.getElementById('go-to-group-page')?.addEventListener('click', (e) => {
+      const groupSlug = e.target.dataset.slug;
+      window.location.href = `/Group?slug=${groupSlug}`;
+    });
     
     // ⚡ Event listener para unirse/salir
     document.getElementById('toggle-group-membership')?.addEventListener('click', async (e) => {
@@ -1337,6 +1350,316 @@ async function viewGroupDetails(slug) {
     console.error('❌ Error cargando detalles del grupo:', err);
     showNotification('Error al cargar detalles del grupo', 'error');
   }
+}
+
+// ============================================================
+// ✏️ EDITAR GRUPO (agregar después de la función viewGroupDetails)
+// ============================================================
+document.addEventListener('click', async (e) => {
+  // Detectar clic en el botón de editar
+  if (e.target.id === 'edit-group-btn' || e.target.closest('#edit-group-btn')) {
+    const btn = e.target.id === 'edit-group-btn' ? e.target : e.target.closest('#edit-group-btn');
+    const slug = btn.dataset.slug;
+    
+    try {
+      console.log('✏️ Abriendo editor para grupo:', slug);
+      
+      // Obtener datos actuales del grupo
+      const res = await fetch(`http://localhost:3000/api/groups/${slug}`, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (!res.ok) throw new Error('Error cargando grupo');
+      
+      const group = await res.json();
+      
+      // Crear modal de edición
+      const editModal = createEditGroupModal(group, slug);
+      document.body.appendChild(editModal);
+      
+    } catch (err) {
+      console.error('❌ Error:', err);
+      showNotification('Error al cargar datos del grupo', 'error');
+    }
+  }
+});
+
+// ============================================================
+// 🎨 CREAR MODAL DE EDICIÓN DE GRUPO - CON SUBIDA DE ARCHIVOS
+// ============================================================
+function createEditGroupModal(group, slug) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.id = 'edit-group-modal-instance';
+  
+  modal.innerHTML = `
+    <div class="modal-content">
+      <button class="close-modal" id="close-edit-modal">×</button>
+      <h2>✏️ Editar Grupo</h2>
+      
+      <form id="edit-group-form">
+        <div class="form-group">
+          <label for="edit-group-name">Nombre del grupo *</label>
+          <input 
+            type="text" 
+            id="edit-group-name" 
+            value="${group.name || ''}" 
+            required 
+            placeholder="Nombre del grupo"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="edit-group-description">Descripción</label>
+          <textarea 
+            id="edit-group-description" 
+            rows="4" 
+            placeholder="Describe tu grupo..."
+          >${group.description || ''}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Imagen del grupo</label>
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button type="button" id="edit-upload-file-btn" class="modal-btn" style="flex: 1;">
+              📁 Subir imagen
+            </button>
+            <button type="button" id="edit-use-url-btn" class="modal-btn" style="flex: 1;">
+              🌐 Usar URL
+            </button>
+          </div>
+          <input type="file" id="edit-group-image-file" accept="image/*" hidden />
+          <input 
+            type="url" 
+            id="edit-group-image-url" 
+            value="${group.image || ''}" 
+            placeholder="https://ejemplo.com/imagen.jpg"
+            style="display: none; width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; margin-top: 10px;"
+          />
+        </div>
+        
+        ${group.image ? `
+          <div class="form-group">
+            <label>Vista previa</label>
+            <img 
+              id="edit-image-preview" 
+              src="${group.image}" 
+              alt="Preview"
+              style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; border: 2px solid var(--border-color);"
+            />
+          </div>
+        ` : `
+          <div class="form-group" id="preview-container" style="display: none;">
+            <label>Vista previa</label>
+            <img 
+              id="edit-image-preview" 
+              src="" 
+              alt="Preview"
+              style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; border: 2px solid var(--border-color);"
+            />
+          </div>
+        `}
+        
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+          <button type="submit" class="modal-btn confirm" style="flex: 1;">
+            💾 Guardar Cambios
+          </button>
+          <button type="button" id="cancel-edit-btn" class="modal-btn" style="flex: 1;">
+            Cancelar
+          </button>
+        </div>
+      </form>
+      
+      <div id="edit-loading" style="display: none; text-align: center; margin-top: 20px;">
+        <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="margin-top: 10px; color: #666;">Guardando cambios...</p>
+      </div>
+    </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  `;
+  
+  // Event listeners del modal
+  const form = modal.querySelector('#edit-group-form');
+  const closeBtn = modal.querySelector('#close-edit-modal');
+  const cancelBtn = modal.querySelector('#cancel-edit-btn');
+  const uploadFileBtn = modal.querySelector('#edit-upload-file-btn');
+  const useUrlBtn = modal.querySelector('#edit-use-url-btn');
+  const imageFileInput = modal.querySelector('#edit-group-image-file');
+  const imageUrlInput = modal.querySelector('#edit-group-image-url');
+  const imagePreview = modal.querySelector('#edit-image-preview');
+  const previewContainer = modal.querySelector('#preview-container');
+  const loadingDiv = modal.querySelector('#edit-loading');
+  
+  let uploadedImageUrl = group.image || ''; // Guardar la URL subida
+  
+  // Cerrar modal
+  const closeModal = () => {
+    modal.remove();
+  };
+  
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  
+  // Botón: Subir archivo
+  uploadFileBtn.addEventListener('click', () => {
+    imageFileInput.click();
+  });
+  
+  // Botón: Usar URL
+  useUrlBtn.addEventListener('click', () => {
+    const isVisible = imageUrlInput.style.display === 'block';
+    imageUrlInput.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) imageUrlInput.focus();
+  });
+  
+  // Subir archivo y mostrar preview
+  imageFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      showNotification('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+      e.target.value = '';
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification('La imagen no debe superar 5MB', 'error');
+      e.target.value = '';
+      return;
+    }
+    
+    // Mostrar preview local primero
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (imagePreview && previewContainer) {
+        imagePreview.src = event.target.result;
+        previewContainer.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(file);
+    
+    // Subir a Cloudinary
+    try {
+      showNotification('Subiendo imagen...', 'success');
+      
+      const formData = new FormData();
+      formData.append('bannerImage', file);
+      
+      const uploadRes = await fetch('http://localhost:3000/api/users/me/banner', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      
+      if (uploadRes.ok) {
+        const uploadData = await uploadRes.json();
+        uploadedImageUrl = uploadData.bannerImage;
+        
+        if (imagePreview) {
+          imagePreview.src = uploadedImageUrl;
+        }
+        
+        showNotification('Imagen subida correctamente', 'success');
+        console.log('✅ Nueva imagen subida:', uploadedImageUrl);
+      } else {
+        throw new Error('Error al subir imagen');
+      }
+    } catch (err) {
+      console.error('❌ Error subiendo imagen:', err);
+      showNotification('Error al subir imagen', 'error');
+    }
+  });
+  
+  // Preview de URL en tiempo real
+  imageUrlInput.addEventListener('input', (e) => {
+    const url = e.target.value.trim();
+    if (url && imagePreview && previewContainer) {
+      uploadedImageUrl = url;
+      imagePreview.src = url;
+      previewContainer.style.display = 'block';
+    }
+  });
+  
+  // Submit del formulario
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('edit-group-name').value.trim();
+    const description = document.getElementById('edit-group-description').value.trim();
+    
+    if (!name) {
+      showNotification('El nombre del grupo es requerido', 'error');
+      return;
+    }
+    
+    try {
+      form.style.display = 'none';
+      loadingDiv.style.display = 'block';
+      
+      console.log('📤 Actualizando grupo:', { name, description, image: uploadedImageUrl });
+      
+      const res = await fetch(`http://localhost:3000/api/groups/${slug}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          image: uploadedImageUrl // ⚡ Usar la URL guardada
+        })
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Error al actualizar grupo');
+      }
+      
+      const data = await res.json();
+      console.log('✅ Grupo actualizado:', data);
+      
+      showNotification('Grupo actualizado exitosamente');
+      closeModal();
+      
+      const detailsModal = document.getElementById('groupDetailsModal');
+      if (detailsModal) {
+        detailsModal.classList.add('hidden');
+      }
+      
+      await loadAllGroups();
+      
+      setTimeout(() => {
+        if (data.group && data.group.slug) {
+          viewGroupDetails(data.group.slug);
+        } else {
+          viewGroupDetails(slug);
+        }
+      }, 500);
+      
+    } catch (err) {
+      console.error('❌ Error actualizando grupo:', err);
+      showNotification(err.message || 'Error al actualizar grupo', 'error');
+      
+      form.style.display = 'block';
+      loadingDiv.style.display = 'none';
+    }
+  });
+  
+  return modal;
 }
 
 // ============================================================
@@ -1848,6 +2171,22 @@ body {
   box-shadow: 0 4px 12px rgba(104, 116, 80, 0.4);
 }
 
+/* Botón principal destacado */
+:global(.primary-btn) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+  border: none !important;
+  width: 100%;
+}
+
+:global(.primary-btn:hover) {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
 /* === LISTA DE GRUPOS MEJORADA === */
 :global(.groups-list) {
   margin-bottom: 20px;
@@ -1942,7 +2281,7 @@ body {
   border-radius: var(--radius);
 }
 
-/* === TARJETA ROYAL UI FORCE MEJORADA === */
+/* === TARJETA FOOD EMOTIONS TEAM === */
 .team-card {
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   color: white;
