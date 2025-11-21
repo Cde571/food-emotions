@@ -29,10 +29,10 @@ import Navigation from '../components/shared/Navigation.astro';
 
       <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">Todas</button>
-        <button class="filter-tab" data-filter="likes">Likes</button>
-        <button class="filter-tab" data-filter="comments">Comentarios</button>
-        <button class="filter-tab" data-filter="follows">Seguidores</button>
-        <button class="filter-tab" data-filter="mentions">Menciones</button>
+        <button class="filter-tab" data-filter="like">Likes</button>
+        <button class="filter-tab" data-filter="comment">Comentarios</button>
+        <button class="filter-tab" data-filter="follow">Seguidores</button>
+        <button class="filter-tab" data-filter="mention">Menciones</button>
       </div>
 
       <div id="notifications-list" class="notifications-list">
@@ -64,11 +64,20 @@ import Navigation from '../components/shared/Navigation.astro';
     `;
 
     try {
-      const res = await fetch(`${API_URL}/api/notifications?filter=${filter}`, {
+      // Construir URL con parámetros correctos
+      let url = `${API_URL}/api/notifications`;
+      if (filter !== 'all') {
+        url += `?type=${filter}`;
+      }
+
+      const res = await fetch(url, {
         credentials: 'include'
       });
+      
       if (!res.ok) throw new Error('Error al cargar notificaciones');
       const notifications = await res.json();
+
+      console.log('📦 Notificaciones cargadas:', notifications.length, 'Filtro:', filter);
 
       if (!notifications.length) {
         list.innerHTML = `
@@ -78,7 +87,7 @@ import Navigation from '../components/shared/Navigation.astro';
               <path d="M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
             <h3>No tienes notificaciones</h3>
-            <p>Cuando alguien interactúe con tu contenido, lo verás aquí</p>
+            <p>${filter === 'all' ? 'Cuando alguien interactúe con tu contenido, lo verás aquí' : 'No hay notificaciones de este tipo'}</p>
           </div>`;
         return;
       }
@@ -104,7 +113,7 @@ import Navigation from '../components/shared/Navigation.astro';
       list.innerHTML = `
         <div class="error-state">
           <p>Error al cargar notificaciones</p>
-          <button onclick="loadNotifications()">Reintentar</button>
+          <button onclick="location.reload()">Reintentar</button>
         </div>`;
     }
   }
@@ -121,16 +130,23 @@ import Navigation from '../components/shared/Navigation.astro';
       mention: 'te mencionó en una publicación'
     };
 
+    const avatarUrl = n.sender?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.sender?.username || 'Usuario')}`;
+    const targetId = n.post?._id || n.sender?._id || '';
+
     return `
       <div class="notification-item ${n.isRead ? 'read' : 'unread'}"
            data-id="${n._id}"
            data-type="${n.type}"
-           data-target="${n.post?._id || n.sender._id}">
+           data-target="${targetId}">
         <div class="notif-icon ${n.type}">${icons[n.type] || '🔔'}</div>
-        <img src="${n.sender.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(n.sender.username)}`}" 
-             alt="${n.sender.username}" class="notif-avatar" />
+        <img src="${avatarUrl}" 
+             alt="${n.sender?.username || 'Usuario'}" 
+             class="notif-avatar" />
         <div class="notif-content">
-          <p class="notif-text"><strong>${n.sender.username}</strong> ${messages[n.type] || ''}</p>
+          <p class="notif-text">
+            <strong>${n.sender?.username || 'Usuario'}</strong> 
+            ${messages[n.type] || 'interactuó contigo'}
+          </p>
           <span class="notif-time">${formatTime(n.createdAt)}</span>
         </div>
         ${n.post?.images?.[0] ? `<img src="${n.post.images[0]}" alt="Post" class="notif-thumbnail" />` : ''}
@@ -148,19 +164,25 @@ import Navigation from '../components/shared/Navigation.astro';
   // ============================================================
   async function handleNotificationClick(id, type, targetId) {
     try {
+      // Marcar como leída
       await fetch(`${API_URL}/api/notifications/${id}/read`, {
         method: 'PATCH',
         credentials: 'include'
       });
 
+      // Redirigir según el tipo
       switch (type) {
         case 'like':
         case 'comment':
         case 'mention':
-          window.location.href = `/Post/${targetId}`;
+          if (targetId) {
+            window.location.href = `/Post/${targetId}`;
+          }
           break;
         case 'follow':
-          window.location.href = `/Profile/${targetId}`;
+          if (targetId) {
+            window.location.href = `/Profile/${targetId}`;
+          }
           break;
         default:
           console.log('Tipo no manejado:', type);
@@ -180,9 +202,20 @@ import Navigation from '../components/shared/Navigation.astro';
         credentials: 'include'
       });
       if (!res.ok) throw new Error('Error al eliminar');
-      document.querySelector(`[data-id="${id}"]`)?.remove();
+      
+      const item = document.querySelector(`[data-id="${id}"]`);
+      if (item) {
+        item.style.opacity = '0';
+        setTimeout(() => item.remove(), 300);
+      }
+
+      // Actualizar contador si era no leída
+      if (item?.classList.contains('unread')) {
+        updateNotificationBadge();
+      }
     } catch (err) {
       console.error('❌ Error al eliminar notificación:', err);
+      alert('No se pudo eliminar la notificación');
     }
   }
 
@@ -191,10 +224,12 @@ import Navigation from '../components/shared/Navigation.astro';
   // ============================================================
   document.getElementById('mark-all-read')?.addEventListener('click', async () => {
     try {
-      await fetch(`${API_URL}/api/notifications/mark-read`, {
+      const res = await fetch(`${API_URL}/api/notifications/mark-read`, {
         method: 'POST',
         credentials: 'include'
       });
+
+      if (!res.ok) throw new Error('Error al marcar');
 
       document.querySelectorAll('.notification-item.unread').forEach(item => {
         item.classList.remove('unread');
@@ -202,15 +237,39 @@ import Navigation from '../components/shared/Navigation.astro';
         item.querySelector('.unread-dot')?.remove();
       });
 
-      const badge = document.getElementById('notif-badge-nav');
-      if (badge) {
-        badge.textContent = '0';
-        badge.classList.add('hidden');
-      }
+      updateNotificationBadge();
     } catch (err) {
       console.error('❌ Error al marcar todas como leídas:', err);
+      alert('No se pudieron marcar las notificaciones');
     }
   });
+
+  // ============================================================
+  // 🔄 ACTUALIZAR BADGE DE NOTIFICACIONES
+  // ============================================================
+  async function updateNotificationBadge() {
+    try {
+      const res = await fetch(`${API_URL}/api/notifications/unread-count`, {
+        credentials: 'include'
+      });
+      if (!res.ok) return;
+      
+      const data = await res.json();
+      const badge = document.getElementById('notif-badge-nav');
+      
+      if (badge) {
+        if (data.count > 0) {
+          badge.textContent = data.count > 99 ? '99+' : data.count;
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '0';
+          badge.classList.add('hidden');
+        }
+      }
+    } catch (err) {
+      console.error('Error al actualizar badge:', err);
+    }
+  }
 
   // ============================================================
   // 🎛️ FILTROS
@@ -220,6 +279,7 @@ import Navigation from '../components/shared/Navigation.astro';
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       currentFilter = tab.dataset.filter;
+      console.log('🔍 Filtro seleccionado:', currentFilter);
       loadNotifications(currentFilter);
     });
   });
@@ -245,10 +305,35 @@ import Navigation from '../components/shared/Navigation.astro';
   // 🔌 SOCKET TIEMPO REAL
   // ============================================================
   socketClient.on('notification', notif => {
-    const list = document.getElementById('notifications-list');
-    const empty = list.querySelector('.empty-state');
-    if (empty) list.innerHTML = '';
-    list.insertAdjacentHTML('afterbegin', createNotificationItem(notif));
+    console.log('🔔 Nueva notificación en tiempo real:', notif);
+    
+    // Solo agregar si estamos en "Todas" o coincide con el filtro actual
+    if (currentFilter === 'all' || notif.type === currentFilter) {
+      const list = document.getElementById('notifications-list');
+      const empty = list.querySelector('.empty-state');
+      if (empty) list.innerHTML = '';
+      
+      list.insertAdjacentHTML('afterbegin', createNotificationItem(notif));
+      
+      // Agregar listeners al nuevo item
+      const newItem = list.querySelector('.notification-item');
+      if (newItem) {
+        newItem.addEventListener('click', () =>
+          handleNotificationClick(notif._id, notif.type, notif.post?._id || notif.sender._id)
+        );
+        
+        const deleteBtn = newItem.querySelector('.delete-notif-btn');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            deleteNotification(notif._id);
+          });
+        }
+      }
+    }
+    
+    // Actualizar badge
+    updateNotificationBadge();
   });
 
   // ============================================================
@@ -256,6 +341,7 @@ import Navigation from '../components/shared/Navigation.astro';
   // ============================================================
   document.addEventListener('DOMContentLoaded', () => {
     loadNotifications();
+    updateNotificationBadge();
   });
 </script>
 
@@ -380,7 +466,7 @@ import Navigation from '../components/shared/Navigation.astro';
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     position: relative;
-    transition: all 0.2s;
+    transition: all 0.3s;
   }
 
   .notification-item:last-child {

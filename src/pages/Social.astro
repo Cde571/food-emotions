@@ -190,100 +190,186 @@ const showNavigation = currentPath === '/Social' || currentPath === '/Social/';
     <!-- Sidebar Derecha -->
     <aside class="sidebar-right">
       <!-- Trending Topics -->
-      <div class="widget trending-widget">
-        <h3 class="widget-title">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-            <polyline points="17 6 23 6 23 12"/>
-          </svg>
-          Tendencias
-        </h3>
-        <div id="trending-list" class="trending-list">
-          <div class="trending-item">
-            <span class="trend-rank">#1</span>
-            <div class="trend-info">
-              <h4 class="trend-topic">Tecnología</h4>
-              <p class="trend-count">12.5K publicaciones</p>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trend-rank">#2</span>
-            <div class="trend-info">
-              <h4 class="trend-topic">Viajes</h4>
-              <p class="trend-count">8.3K publicaciones</p>
-            </div>
-          </div>
-          <div class="trending-item">
-            <span class="trend-rank">#3</span>
-            <div class="trend-info">
-              <h4 class="trend-topic">Fotografía</h4>
-              <p class="trend-count">6.1K publicaciones</p>
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="widget trending-widget">
+  <div class="widget-header">
+    <h3 class="widget-title">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/>
+      </svg>
+      Tendencias de comida
+    </h3>
 
-      <!-- Suggested Users -->
-      <div class="widget suggestions-widget">
-        <div class="widget-header">
-          <h3 class="widget-title">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-              <circle cx="8.5" cy="7" r="4"/>
-              <line x1="20" y1="8" x2="20" y2="14"/>
-              <line x1="23" y1="11" x2="17" y2="11"/>
-            </svg>
-            Sugerencias
-          </h3>
-          <button class="refresh-btn" title="Actualizar">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 4 23 10 17 10"/>
-              <polyline points="1 20 1 14 7 14"/>
-              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-            </svg>
-          </button>
-        </div>
-        <SuggestedUsers />
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="widget stats-widget">
-        <h3 class="widget-title">Tu Actividad</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">👁️</div>
-            <div class="stat-data">
-              <span class="stat-value">2.5K</span>
-              <span class="stat-name">Vistas</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">❤️</div>
-            <div class="stat-data">
-              <span class="stat-value">856</span>
-              <span class="stat-name">Likes</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">💬</div>
-            <div class="stat-data">
-              <span class="stat-value">124</span>
-              <span class="stat-name">Comentarios</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">📤</div>
-            <div class="stat-data">
-              <span class="stat-value">43</span>
-              <span class="stat-name">Compartidos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
+    <!-- Botón para recargar recetas -->
+    <button id="refresh-recipes" class="refresh-btn" title="Actualizar">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+    </button>
   </div>
 
-  <PostModal />
+  <!-- 🟢 Aquí se cargan las recetas -->
+  <div id="trending-list" class="trending-list">
+    <p class="loading-text">Cargando recetas...</p>
+  </div>
+</div>
+
+
+      <!-- Suggested Users -->
+    <div class="widget suggestions-widget">
+      <div class="widget-header">
+        <h3 class="widget-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Sugerencias
+        </h3>
+
+    <!-- Botón actualizar -->
+    <button class="refresh-btn" id="refresh-suggestions" title="Actualizar">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 🔥 Aquí se insertan los usuarios sugeridos -->
+  <div id="suggested-users" class="suggested-users-list">
+    <p class="loading-text">Cargando...</p>
+  </div>
+</div>
+
+      <!-- ✨ MINI REPRODUCTOR DE YOUTUBE -->
+<div class="widget youtube-player-widget">
+  <div class="player-header">
+    <h3 class="widget-title">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+      </svg>
+      Música
+    </h3>
+    <button class="player-toggle-btn" id="yt-toggle" title="Minimizar">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+        <path d="M19 13H5v-2h14v2z"/>
+      </svg>
+    </button>
+  </div>
+  
+  <div class="player-content" id="yt-player-content">
+    <!-- Búsqueda -->
+    <div class="player-search">
+      <input type="text" 
+             class="player-search-input" 
+             placeholder="Buscar música..." 
+             id="yt-search-input" />
+      <button class="player-search-btn" id="yt-search-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Playlist -->
+    <div class="player-playlist" id="yt-playlist">
+      <p class="player-empty">🎵 Busca música para comenzar</p>
+    </div>
+    
+    <!-- Video actual -->
+    <div class="player-current hidden" id="yt-current">
+      <div class="current-info">
+        <img src="" alt="Thumbnail" class="current-thumbnail" id="yt-thumbnail" />
+        <div class="current-details">
+          <h4 class="current-title" id="yt-title">-</h4>
+          <p class="current-channel" id="yt-channel">-</p>
+        </div>
+      </div>
+      
+      <!-- Controles -->
+      <div class="player-controls">
+        <button class="control-btn" id="yt-prev" title="Anterior" disabled>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+          </svg>
+        </button>
+        <button class="control-btn control-play" id="yt-play" title="Reproducir">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
+        <button class="control-btn" id="yt-next" title="Siguiente" disabled>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+          </svg>
+        </button>
+        <button class="control-btn" id="yt-stop" title="Detener">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Contenedor del iframe -->
+    <div class="player-iframe-container hidden" id="yt-iframe-container">
+      <iframe
+    id="yt-iframe"
+    class="yt-iframe"
+    width="100%"
+    height="200"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+  ></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="widget stats-widget">
+  <h3 class="widget-title">Tu Actividad</h3>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👁️</div>
+      <div class="stat-data">
+        <span class="stat-value">2.5K</span>
+        <span class="stat-name">Vistas</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❤️</div>
+      <div class="stat-data">
+        <span class="stat-value">856</span>
+        <span class="stat-name">Likes</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💬</div>
+      <div class="stat-data">
+        <span class="stat-value">124</span>
+        <span class="stat-name">Comentarios</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📤</div>
+      <div class="stat-data">
+        <span class="stat-value">43</span>
+        <span class="stat-name">Compartidos</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</aside>
+</div>
+
+<PostModal />
 
   <!-- Toast Notification -->
   <div id="toast" class="toast-notification hidden">
@@ -381,6 +467,122 @@ const showNavigation = currentPath === '/Social' || currentPath === '/Social/';
       return null;
     }
   }
+
+// ============================================================
+// 🎵 MINI REPRODUCTOR DE YOUTUBE - VERSIÓN SIMPLIFICADA IFRAME
+// ============================================================
+const YOUTUBE_API_KEY = "AIzaSyCucqrSvOnDJvGkjNjzoRJWjto0xOHpRDc";
+
+async function searchYouTubeVideos(query) {
+  try {
+    const params = new URLSearchParams({
+      part: "snippet",
+      type: "video",
+      videoCategoryId: "10",
+      maxResults: "6",
+      q: query,
+      key: YOUTUBE_API_KEY,
+    });
+
+    const url = `https://www.googleapis.com/youtube/v3/search?${params.toString()}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error?.message || "Error en búsqueda");
+
+    return data.items.map((item) => ({
+      id: item.id.videoId,
+      title: item.snippet.title,
+      channel: item.snippet.channelTitle,
+      thumbnail: item.snippet.thumbnails.medium.url,
+    }));
+  } catch (err) {
+    console.error("❌ Error buscando videos:", err);
+    throw err;
+  }
+}
+
+// ============================================================
+// ▶️ CARGAR VIDEO EN IFRAME
+// ============================================================
+
+function loadVideoInIframe(videoId) {
+  const iframe = document.getElementById("yt-iframe");
+  const container = document.getElementById("yt-iframe-container");
+
+  if (!iframe || !container) return;
+
+  iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
+
+  container.classList.remove("hidden");
+}
+
+// ============================================================
+// 🎧 RENDERIZAR PLAYLIST SIMPLE
+// ============================================================
+
+function renderYouTubePlaylist(videos) {
+  const playlist = document.getElementById("yt-playlist");
+  playlist.innerHTML = videos
+    .map(
+      (v, i) => `
+    <div class="playlist-item" data-id="${v.id}">
+      <img src="${v.thumbnail}" class="playlist-thumbnail">
+      <div class="playlist-info">
+        <p class="playlist-title">${v.title}</p>
+        <p class="playlist-channel">${v.channel}</p>
+      </div>
+    </div>
+  `
+    )
+    .join("");
+
+  // Eventos de click para reproducir
+  playlist.querySelectorAll(".playlist-item").forEach((el) => {
+    el.addEventListener("click", () => {
+      const videoId = el.dataset.id;
+      loadVideoInIframe(videoId);
+    });
+  });
+}
+
+// ============================================================
+// 🔎 BÚSQUEDA
+// ============================================================
+
+async function handleYouTubeSearch() {
+  const input = document.getElementById("yt-search-input");
+  const query = input.value.trim();
+
+  if (!query) return;
+
+  const playlist = document.getElementById("yt-playlist");
+  playlist.innerHTML = "<p style='text-align:center;'>Buscando...</p>";
+
+  try {
+    const videos = await searchYouTubeVideos(query);
+    renderYouTubePlaylist(videos);
+  } catch (err) {
+    playlist.innerHTML = `<p>Error: ${err.message}</p>`;
+  }
+}
+
+// ============================================================
+// 🚀 INICIALIZACIÓN
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("yt-search-btn")
+    .addEventListener("click", handleYouTubeSearch);
+
+  document
+    .getElementById("yt-search-input")
+    .addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleYouTubeSearch();
+    });
+});
 
 // ============================================================
 // 🔔 NOTIFICACIONES CORREGIDAS
@@ -762,140 +964,16 @@ function formatTimeAgo(date) {
 }
 
 // ============================================================
-// 🌍 HISTORIAS MEJORADAS
+// 📸 SISTEMA DE HISTORIAS — VERSIÓN FUNCIONAL FINAL
 // ============================================================
-async function loadStories() {
-  try {
-    console.log('📸 Cargando historias...');
-    
-    const response = await fetch(`${API_URL}/api/stories`, { 
-      credentials: 'include' 
-    });
-    
-    if (!response.ok) {
-      console.warn('⚠️ Error al cargar historias');
-      return;
-    }
 
-    const stories = await response.json();
-    console.log(`✅ ${stories.length} historias cargadas`);
+// Para que otras funciones lo usen
+window.openStoryUploader = openStoryUploader;
+window.closeStoryUploader = closeStoryUploader;
 
-    const storiesContainer = document.querySelector('.stories-section');
-    if (!storiesContainer) return;
-
-    if (stories.length === 0) {
-      storiesContainer.innerHTML = `
-        <h2 class="section-title">Historias</h2>
-        <div class="empty-stories">
-          <p>No hay historias activas</p>
-          <button id="add-story-btn" class="add-story-btn">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="16"/>
-              <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            Crear Historia
-          </button>
-        </div>
-      `;
-      
-      document.getElementById('add-story-btn')?.addEventListener('click', openStoryUploader);
-      return;
-    }
-
-    // Renderizar historias
-    const storiesList = stories.map(story => {
-      const hasViewed = story.viewers?.includes(currentUser?._id);
-      return `
-        <div class="story-item" data-story-id="${story._id}">
-          <div class="story-avatar-wrapper ${hasViewed ? 'viewed' : ''}">
-            <img src="${story.author?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.author?.username || 'User')}`}" 
-                 alt="${story.author?.username || 'Usuario'}" 
-                 class="story-avatar" />
-          </div>
-          <span class="story-username">${story.author?.username || 'Usuario'}</span>
-        </div>
-      `;
-    }).join('');
-
-    storiesContainer.innerHTML = `
-      <h2 class="section-title">Historias</h2>
-      <div class="stories-list">
-        <div class="story-item add-story-item">
-          <div class="story-avatar-wrapper add-story">
-            <img src="${currentUser?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.username || 'You')}`}" 
-                 alt="Tu historia" 
-                 class="story-avatar" />
-            <div class="add-story-icon">+</div>
-          </div>
-          <span class="story-username">Tu historia</span>
-        </div>
-        ${storiesList}
-      </div>
-    `;
-
-    // Event listeners para historias
-    storiesContainer.querySelectorAll('.story-item[data-story-id]').forEach(item => {
-      item.addEventListener('click', async () => {
-        const storyId = item.dataset.storyId;
-        const story = stories.find(s => s._id === storyId);
-        if (story) openStoryViewer(story);
-      });
-    });
-
-    // Listener para crear historia
-    storiesContainer.querySelector('.add-story-item')?.addEventListener('click', openStoryUploader);
-
-  } catch (error) {
-    console.error('❌ Error cargando historias:', error);
-  }
-}
-
-function openStoryViewer(story) {
-  const modal = document.createElement('div');
-  modal.className = 'story-viewer-modal';
-  modal.innerHTML = `
-    <div class="story-viewer-content">
-      <div class="story-header">
-        <div class="story-author-info">
-          <img src="${story.author?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(story.author?.username || 'User')}`}" 
-               alt="${story.author?.username}" 
-               class="story-author-avatar" />
-          <div>
-            <h4>${story.author?.username || 'Usuario'}</h4>
-            <span class="story-time">${formatTime(story.createdAt)}</span>
-          </div>
-        </div>
-        <button class="close-story-btn">×</button>
-      </div>
-      
-      <div class="story-media-container">
-        <img src="${story.mediaUrl}" alt="Story" class="story-media" />
-        ${story.caption ? `<p class="story-caption">${story.caption}</p>` : ''}
-      </div>
-      
-      <div class="story-progress-bar">
-        <div class="story-progress-fill"></div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  // Cerrar modal
-  const closeBtn = modal.querySelector('.close-story-btn');
-  closeBtn?.addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.remove();
-  });
-
-  // Registrar vista
-  fetch(`${API_URL}/api/stories/${story._id}/view`, {
-    method: 'POST',
-    credentials: 'include'
-  }).catch(err => console.warn('Error registrando vista:', err));
-}
-
+// ============================================================
+// 🎨 ABRIR MODAL SUBIR HISTORIA
+// ============================================================
 function openStoryUploader() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -913,8 +991,6 @@ function openStoryUploader() {
     if (caption) formData.append('caption', caption);
 
     try {
-      showToast('Subiendo historia...', 'info');
-      
       const response = await fetch(`${API_URL}/api/stories`, {
         method: 'POST',
         credentials: 'include',
@@ -923,72 +999,382 @@ function openStoryUploader() {
 
       if (!response.ok) throw new Error('Error al subir historia');
 
-      showToast('Historia publicada exitosamente', 'success');
+      alert('Historia publicada exitosamente');
       await loadStories();
       
     } catch (error) {
-      console.error('❌ Error subiendo historia:', error);
-      showToast('Error al publicar historia', 'error');
+      console.error('Error subiendo historia:', error);
+      alert('Error al publicar historia');
     }
   };
 }
 
 // ============================================================
-// 🔥 TENDENCIAS MEJORADAS
+// 🚪 CERRAR MODAL
 // ============================================================
-async function loadTrendingTopics() {
-  try {
-    console.log('🔥 Cargando tendencias...');
-    
-    const response = await fetch(`${API_URL}/api/explore/trending`, {
-      credentials: 'include'
-    });
+function closeStoryUploader() {
+  const modal = document.getElementById("story-upload-modal");
+  if (!modal) return;
 
-    if (!response.ok) {
-      console.warn('⚠️ Error cargando tendencias');
-      return;
-    }
+  modal.classList.remove("active");
 
-    const posts = await response.json();
-    console.log(`✅ ${posts.length} posts en tendencia`);
+  const form = document.getElementById("story-upload-form");
+  const preview = document.getElementById("story-preview");
 
-    // Extraer hashtags y contar ocurrencias
-    const tagCounts = {};
-    posts.forEach(post => {
-      if (post.tags && Array.isArray(post.tags)) {
-        post.tags.forEach(tag => {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-      }
-    });
-
-    // Ordenar por popularidad
-    const trending = Object.entries(tagCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([tag, count]) => ({ tag, count }));
-
-    const trendingList = document.getElementById('trending-list');
-    if (!trendingList) return;
-
-    if (trending.length === 0) {
-      trendingList.innerHTML = '<p class="no-trends">No hay tendencias disponibles</p>';
-      return;
-    }
-
-    trendingList.innerHTML = trending.map((item, index) => `
-      <a href="/Explore?tag=${encodeURIComponent(item.tag)}" class="trending-item">
-        <span class="trend-rank">#${index + 1}</span>
-        <div class="trend-info">
-          <h4 class="trend-topic">#${item.tag}</h4>
-          <p class="trend-count">${formatNumber(item.count)} publicaciones</p>
-        </div>
-      </a>
-    `).join('');
-
-  } catch (error) {
-    console.error('❌ Error cargando tendencias:', error);
+  if (form) form.reset();
+  if (preview) {
+    preview.innerHTML = `
+      <div class="upload-placeholder">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <p>Selecciona una imagen o video</p>
+      </div>
+    `;
   }
+}
+
+// ============================================================
+// 🔍 PREVIEW DE IMAGEN / VIDEO
+// ============================================================
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById("story-preview");
+
+  if (!file || !preview) return;
+
+  const reader = new FileReader();
+
+  reader.onload = (ev) => {
+    if (file.type.startsWith("video/")) {
+      preview.innerHTML = `<video src="${ev.target.result}" controls autoplay muted loop></video>`;
+    } else {
+      preview.innerHTML = `<img src="${ev.target.result}" class="preview-img" />`;
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+// ============================================================
+// 📤 SUBIR HISTORIA — FUNCIONAL
+// ============================================================
+async function handleStoryUpload(e) {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("story-file-input");
+  const captionInput = document.getElementById("story-caption-input");
+
+  const file = fileInput?.files?.[0];
+  if (!file) {
+    alert("Selecciona una imagen o video");
+    return;
+  }
+
+  const btnText = document.querySelector(".btn-text");
+  const loader = document.querySelector(".btn-loader");
+  const submitBtn = document.querySelector(".btn-upload-story");
+
+  btnText.style.display = "none";
+  loader.style.display = "inline";
+  submitBtn.disabled = true;
+
+  try {
+    const form = new FormData();
+    form.append("media", file);
+    form.append("caption", captionInput.value || "");
+
+    const res = await fetch(`${API_URL}/api/stories`, {
+      method: "POST",
+      credentials: "include",
+      body: form
+    });
+
+    if (!res.ok) throw new Error("Error al subir historia");
+
+    closeStoryUploader();
+    await loadStories();
+
+  } catch (err) {
+    alert("No se pudo subir la historia");
+    console.error(err);
+  }
+
+  btnText.style.display = "inline";
+  loader.style.display = "none";
+  submitBtn.disabled = false;
+}
+
+// ============================================================
+// 📸 CARGAR HISTORIAS AGRUPADAS
+// ============================================================
+async function loadStories() {
+  const container = document.querySelector(".stories-section");
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_URL}/api/stories`, { credentials: "include" });
+    const stories = await res.json();
+
+    const grouped = {};
+
+    stories.forEach(s => {
+      const id = s.author._id;
+      if (!grouped[id]) grouped[id] = { user: s.author, stories: [] };
+      grouped[id].stories.push(s);
+    });
+
+    // 👇 CAMBIO AQUÍ: usar foto por defecto si no hay currentUser
+    const userAvatar = currentUser?.profilePic || 'https://ui-avatars.com/api/?name=Tu+Historia';
+
+    container.innerHTML = `
+      <h2 class="section-title">Historias</h2>
+
+      <div class="stories-list">
+        <div class="story-item add-story-item">
+          <div class="story-avatar-wrapper add-story">
+            <img src="${userAvatar}" class="story-avatar"/>
+            <div class="add-story-icon">+</div>
+          </div>
+          <span class="story-username">Tu historia</span>
+        </div>
+
+        ${Object.values(grouped)
+          .map(g => `
+            <div class="story-item" data-user-id="${g.user._id}">
+              <div class="story-avatar-wrapper">
+                <img src="${g.user.profilePic}" class="story-avatar"/>
+              </div>
+              <span class="story-username">${g.user.username}</span>
+            </div>
+          `).join("")}
+      </div>
+    `;
+
+    container.querySelector(".add-story-item").addEventListener("click", openStoryUploader);
+
+    container.querySelectorAll("[data-user-id]").forEach(el => {
+      el.addEventListener("click", () => {
+        const group = grouped[el.dataset.userId];
+        if (group) openStoryCarousel(group.stories, 0);
+      });
+    });
+  } catch (err) {
+    console.error("Error cargando historias:", err);
+  }
+}
+
+// ============================================================
+// 🎬 VISOR DE HISTORIAS CON NAVEGACIÓN
+// ============================================================
+function openStoryCarousel(stories, startIndex = 0) {
+  let currentIndex = startIndex;
+
+  const modal = document.createElement("div");
+  modal.className = "story-viewer-modal";
+
+  function renderStory() {
+    const story = stories[currentIndex];
+
+    modal.innerHTML = `
+      <div class="story-viewer-content">
+
+        <div class="story-header">
+          <div class="story-author-info">
+            <img src="${story.author.profilePic}" class="story-author-avatar"/>
+            <div>
+              <h4>${story.author.username}</h4>
+              <span>${formatTime(story.createdAt)}</span>
+            </div>
+          </div>
+          <button class="close-story-btn">×</button>
+        </div>
+
+        <div class="story-media-container">
+          ${
+            story.mediaUrl.endsWith(".mp4") || story.mediaUrl.endsWith(".mov")
+              ? `<video src="${story.mediaUrl}" autoplay loop muted controls></video>`
+              : `<img src="${story.mediaUrl}" />`
+          }
+          ${story.caption ? `<p class="story-caption">${story.caption}</p>` : ""}
+        </div>
+
+        <div class="story-progress-bars">
+          ${stories.map((_, i) => `
+            <div class="story-progress-bar ${i < currentIndex ? "complete" : i === currentIndex ? "active" : ""}">
+              <div class="story-progress-fill"></div>
+            </div>
+          `).join("")}
+        </div>
+
+        ${currentIndex > 0 ? `<button class="story-nav-btn prev">‹</button>` : ""}
+        ${currentIndex < stories.length - 1 ? `<button class="story-nav-btn next">›</button>` : ""}
+      </div>
+    `;
+
+    // Registrar vista de la historia actual
+    registerStoryView(story._id);
+  }
+
+  function handleNavigation(e) {
+    if (e.target.classList.contains("close-story-btn") || e.target === modal) {
+      modal.remove();
+    } else if (e.target.classList.contains("next") && currentIndex < stories.length - 1) {
+      currentIndex++;
+      renderStory();
+    } else if (e.target.classList.contains("prev") && currentIndex > 0) {
+      currentIndex--;
+      renderStory();
+    }
+  }
+
+  renderStory();
+  document.body.appendChild(modal);
+  
+  modal.addEventListener("click", handleNavigation);
+}
+
+// ============================================================
+// 👁 REGISTRAR VISTA DE HISTORIA
+// ============================================================
+async function registerStoryView(id) {
+  try {
+    await fetch(`${API_URL}/api/stories/${id}/view`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (err) {
+    console.warn("Error registrando vista:", err);
+  }
+}
+
+// ============================================================
+// 🍽️ TENDENCIAS (RECETAS) – VERSIÓN MODULAR, ESTABLE Y SIN ERRORES
+// ============================================================
+
+const RECIPES_API_URL = "https://api.spoonacular.com/recipes";
+const RECIPES_API_KEY = "0cb308270e0c4ee584f7c0c82e415d35";
+
+// ------------------------------------------
+// 🔥 Cargar recetas recomendadas
+// ------------------------------------------
+async function loadRecipeTrends() {
+  const container = document.getElementById("trending-list");
+  if (!container) {
+    console.warn("⚠️ trending-list no existe aún, esperando DOM...");
+    return null; 
+  }
+
+  try {
+    const response = await fetch(
+      `${RECIPES_API_URL}/random?number=5&apiKey=${RECIPES_API_KEY}`
+    );
+
+    if (!response.ok) throw new Error("Error al obtener recetas");
+
+    const data = await response.json();
+    const recipes = data.recipes || [];
+
+    // Guardamos recetas dentro del DOM para acceso rápido
+    container._recipes = recipes;
+
+    container.innerHTML = recipes
+      .map(
+        (recipe, i) => `
+        <button class="trending-item" data-index="${i}">
+          <span class="trend-rank">#${i + 1}</span>
+          <div class="trend-info">
+            <h4 class="trend-topic">${recipe.title}</h4>
+            <p class="trend-count">${recipe.readyInMinutes ?? "?"} min</p>
+          </div>
+        </button>
+      `
+      )
+      .join("");
+
+    // Eventos para abrir modal
+    container.querySelectorAll(".trending-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = btn.dataset.index;
+        openRecipeModal(container._recipes[idx]);
+      });
+    });
+
+  } catch (err) {
+    console.error("❌ Error cargando recetas:", err);
+    container.innerHTML = `<p class="no-trends">No se pudieron cargar las recetas</p>`;
+  }
+}
+
+// ------------------------------------------
+// 🍳 Modal para mostrar ingredientes y pasos
+// ------------------------------------------
+function openRecipeModal(recipe) {
+  const modal = document.createElement("div");
+  modal.className = "meal-modal";
+
+  const ingredients = (recipe.extendedIngredients || []).map((ing) => {
+    return (
+      ing.originalString ||
+      `${ing.measures?.metric?.amount ?? ""} ${
+        ing.measures?.metric?.unitShort ?? ""
+      } ${ing.name}`
+    );
+  });
+
+  modal.innerHTML = `
+    <div class="meal-modal-content">
+      <button class="close-meal-btn">×</button>
+      <h3 class="meal-title">${recipe.title}</h3>
+      <img src="${recipe.image}" class="meal-image" />
+
+      <h4>Ingredientes</h4>
+      <ul class="meal-ingredients">
+        ${ingredients.map((i) => `<li>${i}</li>`).join("")}
+      </ul>
+
+      ${
+        recipe.instructions
+          ? `<h4>Preparación</h4><p>${recipe.instructions}</p>`
+          : ""
+      }
+
+      ${
+        recipe.sourceUrl
+          ? `<a class="recipe-source" href="${recipe.sourceUrl}" target="_blank">Ver receta completa</a>`
+          : ""
+      }
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.classList.contains("close-meal-btn")) {
+      modal.remove();
+    }
+  });
+}
+
+// ------------------------------------------
+// 🌟 Función principal (controla la carga)
+// ------------------------------------------
+async function initTrendingRecipes() {
+  console.log("🍽️ Iniciando módulo de recetas...");
+
+  const trendingContainer = document.getElementById("trending-list");
+
+  if (!trendingContainer) {
+    console.warn("⏳ trending-list no encontrado, reintentando...");
+
+    // 🕒 Reintento automático si la UI aún no cargó
+    setTimeout(initTrendingRecipes, 300);
+    return;
+  }
+
+  await loadRecipeTrends();
 }
 
 // ============================================================
@@ -1102,8 +1488,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await Promise.all([
       loadFeed(1, 'all'),
       loadStories(),
-      loadTrendingTopics(),
-      loadNotificationCount()
+      loadNotificationCount(),
+      initTrendingRecipes(),
+      loadUserSuggestions()  
     ]);
 
     // 3. Cargar datos secundarios (no bloquean la UI)
@@ -1118,6 +1505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupInfiniteScroll();
     setupFilterTabs();
     setupQuickActions();
+    setupRefreshButton();
 
     console.log('✅ Inicialización completa');
 
@@ -1177,7 +1565,7 @@ function setupFilterTabs() {
 }
 
 // ============================================================
-// ⚡ ACCIONES RÁPIDAS
+// ⚡ ACCIONES RÁPIDAS - CORREGIDO
 // ============================================================
 function setupQuickActions() {
   // Botones de crear post
@@ -1196,12 +1584,177 @@ function setupQuickActions() {
   document.querySelector('.toast-close')?.addEventListener('click', () => {
     document.getElementById('toast')?.classList.add('hidden');
   });
+} // ✅ LLAVE FALTANTE AGREGADA
 
-  // Refresh de sugerencias
-  document.querySelector('.refresh-btn')?.addEventListener('click', () => {
-    // Aquí puedes recargar usuarios sugeridos si implementas ese endpoint
-    showToast('Sugerencias actualizadas', 'success');
-  });
+// ============================================================
+// 🛠️ UTILIDAD: Obtener usuario actual
+// ============================================================
+function getCurrentUser() {
+  return currentUser;
+}
+
+// ============================================================
+// 👥 SUGERENCIAS DE USUARIOS (SIN DUPLICAR addEventListener)
+// ============================================================
+async function loadUserSuggestions() {
+  const container = document.getElementById("suggested-users");
+  if (!container) return;
+
+  container.innerHTML = `<p class="loading-text">Cargando...</p>`;
+
+  try {
+    const res = await fetch(`${API_URL}/api/users/suggestions`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!res.ok) throw new Error("Error al obtener sugerencias");
+
+    const users = await res.json();
+
+    if (!users || users.length === 0) {
+      container.innerHTML = `<p class="no-suggestions">No hay sugerencias por ahora</p>`;
+      return;
+    }
+
+    container.innerHTML = users
+      .map((u) => {
+        const avatar =
+          u.profilePic ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&size=40&background=random`;
+
+        return `
+        <div class="suggestion-card" data-user-id="${u._id}">
+          <img src="${avatar}" alt="${u.username}" class="suggestion-avatar" />
+
+          <div class="suggestion-info">
+            <h4 class="suggestion-name">${u.username}</h4>
+            <p class="suggestion-status">${u.bio?.substring(0, 40) || "Usuario de FoodEmotions"}</p>
+          </div>
+
+          <button class="follow-btn" data-id="${u._id}">
+            Seguir
+          </button>
+        </div>
+      `;
+      })
+      .join("");
+
+    // ➕ Evento para seguir usuarios
+    container.querySelectorAll(".follow-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const userId = btn.dataset.id;
+        await followUser(userId);
+      });
+    });
+  } catch (err) {
+    console.error("❌ Error sugerencias:", err);
+    container.innerHTML = `<p class="no-suggestions">Error al cargar sugerencias</p>`;
+  }
+}
+
+// ============================================================
+// 🤝 FUNCIÓN PARA SEGUIR UN USUARIO
+// ============================================================
+async function followUser(userId) {
+  try {
+    const res = await fetch(`${API_URL}/api/users/${userId}/follow`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!res.ok) throw new Error("Error al seguir usuario");
+
+    // Encontrar y animar la tarjeta antes de removerla
+    const card = document.querySelector(`[data-user-id="${userId}"]`);
+    if (card) {
+      // Animación de salida
+      card.style.transition = 'all 0.3s ease';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(-20px)';
+      
+      // Esperar a que termine la animación
+      await new Promise(resolve => setTimeout(resolve, 300));
+      card.remove();
+    }
+
+    showToast("Ahora sigues a este usuario", "success");
+
+    // Cargar un nuevo usuario para reemplazar el que se fue
+    await loadOneNewSuggestion();
+
+  } catch (err) {
+    console.error("❌ Error siguiendo usuario:", err);
+    showToast("No se pudo seguir al usuario", "error");
+  }
+}
+
+// ============================================================
+// 🆕 CARGAR UN NUEVO USUARIO SUGERIDO
+// ============================================================
+async function loadOneNewSuggestion() {
+  try {
+    const res = await fetch(`${API_URL}/api/users/suggestions?limit=1`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!res.ok) return;
+
+    const users = await res.json();
+    if (!users || users.length === 0) return;
+
+    const container = document.getElementById("suggested-users");
+    if (!container) return;
+
+    const u = users[0];
+    const avatar =
+      u.profilePic ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&size=40&background=random`;
+
+    const newCard = document.createElement('div');
+    newCard.className = 'suggestion-card';
+    newCard.setAttribute('data-user-id', u._id);
+    newCard.style.opacity = '0';
+    newCard.style.transform = 'translateX(20px)';
+    
+    newCard.innerHTML = `
+      <img src="${avatar}" alt="${u.username}" class="suggestion-avatar" />
+      <div class="suggestion-info">
+        <h4 class="suggestion-name">${u.username}</h4>
+        <p class="suggestion-status">${u.bio?.substring(0, 40) || "Usuario de FoodEmotions"}</p>
+      </div>
+      <button class="follow-btn" data-id="${u._id}">
+        Seguir
+      </button>
+    `;
+
+    container.appendChild(newCard);
+
+    // Animar entrada
+    setTimeout(() => {
+      newCard.style.transition = 'all 0.3s ease';
+      newCard.style.opacity = '1';
+      newCard.style.transform = 'translateX(0)';
+    }, 50);
+
+    // Agregar evento al botón
+    newCard.querySelector('.follow-btn').addEventListener('click', async () => {
+      await followUser(u._id);
+    });
+
+  } catch (err) {
+    console.error("❌ Error cargando nueva sugerencia:", err);
+  }
+}
+
+// ============================================================
+// 🔄 REFRESH BUTTON - SOLO UNA VEZ
+// ============================================================
+function setupRefreshButton() {
+  document
+    .getElementById("refresh-suggestions")
+    ?.addEventListener("click", loadUserSuggestions);
 }
 
 // ============================================================
@@ -2760,13 +3313,13 @@ _global(.comment-item) {
 }
 
 /* ===== STATS WIDGET ===== */
-.stats-grid {
+:global(.stats-grid) {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.stat-card {
+:global(.stat-card) {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   padding: 16px;
   border-radius: var(--radius-sm);
@@ -3856,5 +4409,549 @@ textarea {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+:global(.youtube-player-widget) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+:global(.youtube-player-widget.minimized .player-content) {
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+:global(.player-header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+:global(.player-toggle-btn) {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gray);
+  transition: all 0.2s;
+}
+
+:global(.player-toggle-btn:hover) {
+  background: var(--gray-light);
+  color: var(--primary);
+}
+
+:global(.youtube-player-widget.minimized .player-toggle-btn svg) {
+  transform: rotate(180deg);
+}
+
+:global(.player-content) {
+  max-height: 800px;
+  opacity: 1;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+:global(.player-search) {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+:global(.player-search-input) {
+  flex: 1;
+  background: var(--gray-light);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--dark);
+  outline: none;
+  transition: all 0.2s;
+}
+
+:global(.player-search-input:focus) {
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
+}
+
+:global(.player-search-btn) {
+  background: var(--primary);
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+:global(.player-search-btn:hover) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+:global(.player-search-btn:active) {
+  transform: translateY(0);
+}
+
+/* Playlist */
+:global(.player-playlist) {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  border-radius: var(--radius-sm);
+  scrollbar-width: thin;
+}
+
+:global(.player-playlist::-webkit-scrollbar) {
+  width: 6px;
+}
+
+:global(.player-playlist::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+:global(.player-playlist::-webkit-scrollbar-thumb) {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+:global(.player-empty) {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray);
+  font-size: 14px;
+  background: var(--gray-light);
+  border-radius: var(--radius-sm);
+}
+
+:global(.playlist-item) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  margin-bottom: 8px;
+}
+
+:global(.playlist-item:hover) {
+  background: var(--gray-light);
+  transform: translateX(2px);
+}
+
+:global(.playlist-item.active) {
+  background: rgba(104, 116, 80, 0.1);
+  border-left: 3px solid var(--primary);
+}
+
+:global(.playlist-thumbnail) {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+:global(.playlist-info) {
+  flex: 1;
+  min-width: 0;
+}
+
+:global(.playlist-title) {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.playlist-channel) {
+  font-size: 11px;
+  color: var(--gray);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.playlist-play-btn) {
+  background: var(--primary);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+:global(.playlist-item:hover .playlist-play-btn) {
+  opacity: 1;
+}
+
+:global(.playlist-play-btn:hover) {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+/* Video actual */
+:global(.player-current) {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+:global(.player-current.hidden) {
+  display: none;
+}
+
+/* ===== ESTILOS ADICIONALES PARA MODAL DE RECETAS ===== */
+
+:global(.meal-modal) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+:global(.meal-modal-content) {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+
+:global(.close-meal-btn) {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: var(--gray);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+:global(.close-meal-btn:hover) {
+  background: var(--gray-light);
+  color: var(--dark);
+}
+
+:global(.meal-title) {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0 0 20px 0;
+  padding-right: 40px;
+}
+
+:global(.meal-image) {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+}
+
+:global(.meal-modal-content h4) {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 20px 0 12px 0;
+}
+
+:global(.meal-ingredients) {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+:global(.meal-ingredients li) {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--dark);
+}
+
+:global(.meal-ingredients li:last-child) {
+  border-bottom: none;
+}
+
+:global(.meal-modal-content p) {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--dark);
+  margin: 0 0 16px 0;
+}
+
+:global(.meal-modal-content a) {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+
+:global(.meal-modal-content a:hover) {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== SIDEBAR RIGHT (faltaba en el CSS) ===== */
+
+.sidebar-right {
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.social-layout[data-show-nav="false"] .sidebar-right {
+  top: 40px;
+}
+
+:global(.recipe-big-modal) {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+:global(.recipe-big-modal-content) {
+  background: linear-gradient(to bottom right, #425638, #516243, #687450);
+  color: #eef3ea;
+  padding: 28px;
+  border-radius: 20px;
+  max-width: 550px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+  animation: modal-pop 0.25s ease;
+}
+
+@keyframes modal-pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+:global(.recipe-big-close) {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  font-size: 26px;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  float: right;
+}
+
+:global(.recipe-big-image) {
+  width: 100%;
+  border-radius: 18px;
+  margin: 12px 0 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+
+:global(.recipe-big-title) {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+:global(.recipe-big-info) {
+  color: #d6e0d2;
+  font-size: 15px;
+  margin: 0 0 20px;
+}
+
+:global(.recipe-big-subtitle) {
+  margin-top: 18px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #f0f5ec;
+}
+
+:global(.recipe-big-list li) {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #e9f3e4;
+}
+
+:global(.recipe-big-text) {
+  margin-top: 10px;
+  color: #e7f0dc;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+:global(.recipe-big-link) {
+  display: block;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(255,255,255,0.15);
+  color: #ecf4e8;
+  text-align: center;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+:global(.recipe-big-link:hover) {
+  background: rgba(255,255,255,0.25);
+}
+
+:global(.suggested-users-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+:global(.suggestion-card) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: transparent;
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+  transition: background .2s;
+  width: 100%;
+}
+
+:global(.suggestion-card:last-child) {
+  border-bottom: none;
+}
+
+:global(.suggestion-card:hover) {
+  background: var(--gray-light, #f5f5f5);
+}
+
+:global(.suggestion-avatar) {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+:global(.suggestion-info) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+:global(.suggestion-name) {
+  font-weight: 600;
+  color: var(--dark, #1a1a1a);
+  margin: 0 0 2px 0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.suggestion-status) {
+  font-size: 12px;
+  color: var(--gray, #666);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.follow-btn) {
+  background: var(--primary, #1da1f2);
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:global(.follow-btn:hover) {
+  background: var(--primary-dark, #1a8cd8);
+}
+
+:global(.loading-text) {
+  text-align: center;
+  color: var(--gray, #666);
+  padding: 20px;
+  margin: 0;
 }
 </style>

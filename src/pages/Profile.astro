@@ -82,26 +82,30 @@ import PopularCollections from '../components/PopularCollections.astro';
       <div id="profile-search-results" class="search-results hidden"></div>
 
       <div class="banner">
-        <img id="banner-image" src="/src/img/1.png" alt="Banner" class="banner-image" />
-        <button id="change-banner-btn" class="change-banner-btn">📷 Cambiar portada</button>
-      </div>
+  <img id="banner-image" src="" alt="Banner" class="banner-image" />
+  <button id="change-banner-btn" class="change-banner-btn">📷 Cambiar portada</button>
+</div>
 
-      <!-- Modal para cambiar banner -->
-      <div id="bannerModal" class="modal hidden">
-        <div class="modal-content">
-          <button id="closeBannerModalBtn" class="close-modal">×</button>
-          <h2>Cambiar portada</h2>
-          <div class="modal-options">
-            <button id="banner-upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
-            <button id="banner-upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
-          </div>
-          <input type="file" id="banner-upload-input" accept="image/*" hidden />
-          <form id="bannerUrlForm" class="hidden">
-            <input type="url" id="bannerImageUrl" placeholder="Pega la URL de la imagen..." />
-            <button type="submit" class="modal-btn confirm">Guardar</button>
-          </form>
-        </div>
-      </div>
+<!-- Modal para cambiar banner -->
+<div id="bannerModal" class="modal hidden">
+  <div class="modal-content">
+    <button id="closeBannerModalBtn" class="close-modal">×</button>
+    <h2>Cambiar portada</h2>
+    <div class="modal-options">
+      <button id="banner-upload-file-btn" class="modal-btn">📁 Subir desde dispositivo</button>
+      <button id="banner-upload-url-btn" class="modal-btn">🌐 Usar imagen desde Internet</button>
+    </div>
+    <input type="file" id="banner-upload-input" accept="image/*" hidden />
+    <form id="bannerUrlForm" class="hidden">
+      <input type="url" id="bannerImageUrl" placeholder="Pega la URL de la imagen..." />
+      <button type="submit" class="modal-btn confirm">Guardar</button>
+    </form>
+    <div id="banner-loading" class="loading-indicator hidden">
+      <span class="spinner"></span>
+      <p>Subiendo imagen...</p>
+    </div>
+  </div>
+  </div>
 
       <PopularCollections />
 
@@ -518,6 +522,64 @@ uploadFileBtn?.addEventListener('click', () => uploadInput?.click());
 uploadUrlBtn?.addEventListener('click', () => urlForm?.classList.remove('hidden'));
 
 // ============================================================
+// 🎨 IMÁGENES ALEATORIAS POR DEFECTO
+// ============================================================
+const DEFAULT_BANNERS = [
+  'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1557682268-e3955ed5d83f?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=400&fit=crop'
+];
+
+// Función para obtener imagen aleatoria
+function getRandomBanner() {
+  const randomIndex = Math.floor(Math.random() * DEFAULT_BANNERS.length);
+  return DEFAULT_BANNERS[randomIndex];
+}
+
+// ============================================================
+// 🎨 CARGAR BANNER DEL USUARIO O ALEATORIO
+// ============================================================
+const API_URL = 'http://localhost:3000';
+const bannerImage = document.getElementById('banner-image');
+
+async function loadUserBanner() {
+  try {
+    const res = await fetch(`${API_URL}/api/user/me`, {
+      credentials: 'include'
+    });
+
+    if (!res.ok) throw new Error('No se pudo cargar el usuario');
+
+    const user = await res.json();
+    
+    // Si el usuario tiene banner, usarlo; si no, imagen aleatoria
+    // Tu backend usa 'bannerImage' como campo
+    if (user.bannerImage) {
+      bannerImage.src = user.bannerImage;
+      console.log('✅ Banner del usuario cargado:', user.bannerImage);
+    } else {
+      bannerImage.src = getRandomBanner();
+      console.log('🎲 Banner aleatorio asignado');
+    }
+
+  } catch (error) {
+    console.error('❌ Error cargando banner:', error);
+    // Si hay error, usar imagen aleatoria
+    bannerImage.src = getRandomBanner();
+  }
+}
+
+// Cargar banner al iniciar
+loadUserBanner();
+
+// ============================================================
 // 🎨 Modal de cambio de banner/portada
 // ============================================================
 const bannerModal = document.getElementById('bannerModal');
@@ -527,15 +589,179 @@ const bannerUploadFileBtn = document.getElementById('banner-upload-file-btn');
 const bannerUploadUrlBtn = document.getElementById('banner-upload-url-btn');
 const bannerUploadInput = document.getElementById('banner-upload-input');
 const bannerUrlForm = document.getElementById('bannerUrlForm');
+const bannerLoading = document.getElementById('banner-loading');
 
-changeBannerBtn?.addEventListener('click', () => bannerModal?.classList.remove('hidden'));
+// Abrir modal
+changeBannerBtn?.addEventListener('click', () => {
+  bannerModal?.classList.remove('hidden');
+  bannerUrlForm?.classList.add('hidden');
+});
+
+// Cerrar modal
 closeBannerModalBtn?.addEventListener('click', () => {
   bannerModal?.classList.add('hidden');
   bannerUrlForm?.classList.add('hidden');
   document.getElementById('bannerImageUrl').value = '';
 });
+
+// Cerrar modal al hacer clic fuera
+bannerModal?.addEventListener('click', (e) => {
+  if (e.target === bannerModal) {
+    bannerModal.classList.add('hidden');
+    bannerUrlForm?.classList.add('hidden');
+  }
+});
+
+// ============================================================
+// 📁 SUBIR DESDE DISPOSITIVO
+// ============================================================
 bannerUploadFileBtn?.addEventListener('click', () => bannerUploadInput?.click());
-bannerUploadUrlBtn?.addEventListener('click', () => bannerUrlForm?.classList.remove('hidden'));
+
+bannerUploadInput?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validar que sea una imagen
+  if (!file.type.startsWith('image/')) {
+    showToast('❌ Por favor selecciona una imagen válida', 'error');
+    return;
+  }
+
+  // Validar tamaño (máximo 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('❌ La imagen no debe superar 5MB', 'error');
+    return;
+  }
+
+  try {
+    // Mostrar loading
+    bannerLoading?.classList.remove('hidden');
+    
+    // Crear FormData con el nombre correcto del campo
+    const formData = new FormData();
+    formData.append('bannerImage', file); // ← Tu backend espera 'bannerImage'
+
+    // Subir imagen
+    const uploadRes = await fetch(`${API_URL}/api/users/me/banner`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+
+    if (!uploadRes.ok) throw new Error('Error al subir imagen');
+
+    const uploadData = await uploadRes.json();
+    
+    console.log('✅ Imagen subida:', uploadData);
+
+    // Actualizar la imagen en el DOM inmediatamente
+    // Tu backend retorna 'bannerImage'
+    if (uploadData.bannerImage) {
+      bannerImage.src = uploadData.bannerImage;
+    }
+
+    // Ocultar loading y modal
+    bannerLoading?.classList.add('hidden');
+    bannerModal?.classList.add('hidden');
+    
+    showToast('✅ Portada actualizada correctamente', 'success');
+    
+    // Recargar datos del usuario para confirmar
+    await loadUserBanner();
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    bannerLoading?.classList.add('hidden');
+    showToast('❌ Error al subir la imagen', 'error');
+  }
+
+  // Limpiar input
+  e.target.value = '';
+});
+
+// ============================================================
+// 🌐 USAR URL DE INTERNET
+// ============================================================
+bannerUploadUrlBtn?.addEventListener('click', () => {
+  bannerUrlForm?.classList.remove('hidden');
+});
+
+bannerUrlForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const imageUrl = document.getElementById('bannerImageUrl').value.trim();
+  
+  if (!imageUrl) {
+    showToast('❌ Por favor ingresa una URL válida', 'error');
+    return;
+  }
+
+  // Validar que sea una URL válida
+  try {
+    new URL(imageUrl);
+  } catch {
+    showToast('❌ URL no válida', 'error');
+    return;
+  }
+
+  try {
+    // Mostrar loading
+    bannerLoading?.classList.remove('hidden');
+
+    // Actualizar URL del banner - Tu backend espera 'imageUrl'
+    const res = await fetch(`${API_URL}/api/users/me/banner-url`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl: imageUrl })
+    });
+
+    if (!res.ok) throw new Error('Error al actualizar banner');
+
+    const data = await res.json();
+    console.log('✅ Banner actualizado:', data);
+
+    // Actualizar imagen en el DOM - Tu backend retorna 'bannerImage'
+    if (data.bannerImage) {
+      bannerImage.src = data.bannerImage;
+    } else {
+      bannerImage.src = imageUrl;
+    }
+
+    // Ocultar loading y modal
+    bannerLoading?.classList.add('hidden');
+    bannerModal?.classList.add('hidden');
+    bannerUrlForm?.classList.add('hidden');
+    document.getElementById('bannerImageUrl').value = '';
+
+    showToast('✅ Portada actualizada correctamente', 'success');
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    bannerLoading?.classList.add('hidden');
+    showToast('❌ Error al actualizar la portada', 'error');
+  }
+});
+
+// ============================================================
+// 🍞 SISTEMA DE NOTIFICACIONES TOAST
+// ============================================================
+function showToast(message, type = 'success') {
+  // Remover toasts anteriores
+  const existingToasts = document.querySelectorAll('.toast');
+  existingToasts.forEach(toast => toast.remove());
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
 
 // ✅ Subir archivo de perfil con validación
 uploadInput?.addEventListener('change', async e => {

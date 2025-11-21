@@ -1,0 +1,410 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Mi Dashboard de Cocina">
+  <section class="min-h-screen bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450] text-white px-6 py-20">
+    <div class="max-w-7xl mx-auto">
+      
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold text-[#eaf0e3] mb-4">
+          📊 Tu Dashboard de Cocina
+        </h1>
+        <p class="text-[#dce5d3] text-lg">
+          Historial completo de tus recetas, estados de ánimo y actividad
+        </p>
+      </div>
+
+      <!-- Estadísticas Principales -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <div class="text-5xl mb-3">🍳</div>
+          <div class="text-3xl font-bold text-[#f3f7ef]" id="totalRecipes">0</div>
+          <div class="text-sm text-[#dce5d3]">Recetas Cocinadas</div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <div class="text-5xl mb-3">📅</div>
+          <div class="text-3xl font-bold text-[#f3f7ef]" id="activeDays">0</div>
+          <div class="text-sm text-[#dce5d3]">Días Activo</div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <div class="text-5xl mb-3">⏱️</div>
+          <div class="text-3xl font-bold text-[#f3f7ef]" id="totalTime">0</div>
+          <div class="text-sm text-[#dce5d3]">Minutos Cocinando</div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <div class="text-5xl mb-3" id="favoriteMoodEmoji">😊</div>
+          <div class="text-lg font-bold text-[#f3f7ef]" id="favoriteMood">-</div>
+          <div class="text-sm text-[#dce5d3]">Estado Favorito</div>
+        </div>
+      </div>
+
+      <!-- Gráficas y Datos -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        
+        <!-- Estados de ánimo -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <h2 class="text-2xl font-bold mb-6 text-[#eaf0e3] flex items-center gap-2">
+            <span>🎭</span> Estados de Ánimo
+          </h2>
+          <div id="moodChart" class="space-y-3"></div>
+        </div>
+
+        <!-- Actividad por día -->
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+          <h2 class="text-2xl font-bold mb-6 text-[#eaf0e3] flex items-center gap-2">
+            <span>📈</span> Actividad Semanal
+          </h2>
+          <div id="activityChart" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Recetas -->
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-[#eaf0e3] flex items-center gap-2">
+            <span>📖</span> Historial de Recetas
+          </h2>
+          <button 
+            id="clearHistoryBtn"
+            class="bg-red-600/50 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition"
+          >
+            🗑️ Limpiar Historial
+          </button>
+        </div>
+        <div id="recipeHistory" class="space-y-3"></div>
+        <div id="emptyState" class="text-center py-12 text-[#dce5d3] hidden">
+          <div class="text-6xl mb-4">🍽️</div>
+          <p class="text-xl">Aún no has cocinado ninguna receta</p>
+          <p class="text-sm mt-2">¡Empieza a cocinar para ver tu historial aquí!</p>
+        </div>
+      </div>
+
+      <!-- Calendario de Actividad -->
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-[#a0b38b]/30 shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-[#eaf0e3] flex items-center gap-2">
+          <span>📅</span> Calendario de Actividad
+        </h2>
+        <div id="activityCalendar" class="grid grid-cols-7 gap-2"></div>
+        <div class="flex items-center gap-4 mt-4 text-sm text-[#dce5d3]">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-[#687450]/30 rounded"></div>
+            <span>Sin actividad</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-[#a0b38b]/50 rounded"></div>
+            <span>1-2 recetas</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-[#a0b38b] rounded"></div>
+            <span>3+ recetas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    interface RecipeLog {
+      id: string;
+      recipeId: number;
+      recipeName: string;
+      recipeImage: string;
+      completedAt: string;
+      cookingTime: number;
+      mood: string | null;
+      servings: number;
+    }
+
+    interface DailyActivity {
+      date: string;
+      recipes: number;
+    }
+
+    // Cargar datos del localStorage
+    function loadRecipeHistory(): RecipeLog[] {
+      const history = localStorage.getItem('recipeHistory');
+      return history ? JSON.parse(history) : [];
+    }
+
+    function loadDailyActivity(): DailyActivity[] {
+      const activity = localStorage.getItem('dailyActivity');
+      return activity ? JSON.parse(activity) : [];
+    }
+
+    // Registrar actividad diaria
+    function registerDailyActivity() {
+      const today = new Date().toISOString().split('T')[0];
+      let activity = loadDailyActivity();
+      
+      const todayActivity = activity.find(a => a.date === today);
+      if (todayActivity) {
+        todayActivity.recipes++;
+      } else {
+        activity.push({ date: today, recipes: 1 });
+      }
+      
+      localStorage.setItem('dailyActivity', JSON.stringify(activity));
+    }
+
+    // Calcular estadísticas
+    function calculateStats() {
+      const history = loadRecipeHistory();
+      const activity = loadDailyActivity();
+      
+      // Total recetas
+      document.getElementById('totalRecipes')!.textContent = history.length.toString();
+      
+      // Días activos
+      document.getElementById('activeDays')!.textContent = activity.length.toString();
+      
+      // Tiempo total
+      const totalMinutes = history.reduce((sum, r) => sum + r.cookingTime, 0);
+      document.getElementById('totalTime')!.textContent = totalMinutes.toString();
+      
+      // Estado de ánimo favorito
+      const moodCount: Record<string, number> = {};
+      history.forEach(r => {
+        if (r.mood) {
+          moodCount[r.mood] = (moodCount[r.mood] || 0) + 1;
+        }
+      });
+      
+      const moods = Object.entries(moodCount);
+      if (moods.length > 0) {
+        const favorite = moods.sort((a, b) => b[1] - a[1])[0];
+        const moodEmojis: Record<string, string> = {
+          energetic: '⚡',
+          focus: '🎯'
+        };
+        const moodNames: Record<string, string> = {
+          energetic: 'Energético',
+          focus: 'Concentración'
+        };
+        document.getElementById('favoriteMoodEmoji')!.textContent = moodEmojis[favorite[0]] || '😊';
+        document.getElementById('favoriteMood')!.textContent = moodNames[favorite[0]] || 'Sin datos';
+      }
+    }
+
+    // Renderizar gráfico de estados de ánimo
+    function renderMoodChart() {
+      const history = loadRecipeHistory();
+      const moodCount: Record<string, number> = { energetic: 0, focus: 0 };
+      
+      history.forEach(r => {
+        if (r.mood && moodCount.hasOwnProperty(r.mood)) {
+          moodCount[r.mood]++;
+        }
+      });
+      
+      const total = Object.values(moodCount).reduce((a, b) => a + b, 0);
+      const container = document.getElementById('moodChart');
+      
+      if (total === 0) {
+        container!.innerHTML = '<p class="text-center text-[#dce5d3] py-8">No hay datos aún</p>';
+        return;
+      }
+      
+      const moods = [
+        { key: 'energetic', label: 'Energético ⚡', color: 'bg-yellow-500' },
+        { key: 'focus', label: 'Concentración 🎯', color: 'bg-blue-500' }
+      ];
+      
+      container!.innerHTML = moods.map(mood => {
+        const count = moodCount[mood.key];
+        const percentage = total > 0 ? (count / total * 100).toFixed(1) : 0;
+        return `
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-[#dce5d3]">${mood.label}</span>
+              <span class="text-[#f3f7ef] font-semibold">${count} (${percentage}%)</span>
+            </div>
+            <div class="w-full bg-[#425638] rounded-full h-3">
+              <div class="${mood.color} h-3 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Renderizar actividad semanal
+    function renderActivityChart() {
+      const activity = loadDailyActivity();
+      const last7Days: string[] = [];
+      const today = new Date();
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        last7Days.push(date.toISOString().split('T')[0]);
+      }
+      
+      const container = document.getElementById('activityChart');
+      const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      
+      container!.innerHTML = last7Days.map((date, idx) => {
+        const dayActivity = activity.find(a => a.date === date);
+        const count = dayActivity ? dayActivity.recipes : 0;
+        const dayDate = new Date(date);
+        const dayName = dayNames[dayDate.getDay()];
+        const maxHeight = 100;
+        const height = Math.min((count / 5) * 100, 100);
+        
+        return `
+          <div class="flex items-end gap-2">
+            <div class="flex-1">
+              <div class="bg-[#425638]/50 rounded-lg overflow-hidden" style="height: ${maxHeight}px">
+                <div class="bg-[#a0b38b] w-full transition-all duration-500" style="height: ${height}%"></div>
+              </div>
+            </div>
+            <div class="text-xs text-[#dce5d3] w-8">
+              <div class="font-semibold">${dayName}</div>
+              <div class="text-[#a0b38b]">${count}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Renderizar historial de recetas
+    function renderRecipeHistory() {
+      const history = loadRecipeHistory();
+      const container = document.getElementById('recipeHistory');
+      const emptyState = document.getElementById('emptyState');
+      
+      if (history.length === 0) {
+        container!.classList.add('hidden');
+        emptyState!.classList.remove('hidden');
+        return;
+      }
+      
+      container!.classList.remove('hidden');
+      emptyState!.classList.add('hidden');
+      
+      const moodEmojis: Record<string, string> = {
+        energetic: '⚡',
+        focus: '🎯'
+      };
+      
+      container!.innerHTML = history.slice().reverse().map((log, idx) => {
+        const date = new Date(log.completedAt);
+        const dateStr = date.toLocaleDateString('es-ES', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        return `
+          <div class="flex items-center gap-4 bg-[#425638]/30 rounded-xl p-4 hover:bg-[#425638]/50 transition">
+            <img 
+              src="${log.recipeImage}" 
+              alt="${log.recipeName}"
+              class="w-20 h-20 rounded-lg object-cover shadow-lg"
+            />
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-[#f3f7ef]">${log.recipeName}</h3>
+              <div class="flex items-center gap-3 text-sm text-[#dce5d3] mt-1">
+                <span>📅 ${dateStr}</span>
+                <span>⏱️ ${log.cookingTime} min</span>
+                <span>🍽️ ${log.servings} porciones</span>
+                ${log.mood ? `<span>${moodEmojis[log.mood]} ${log.mood === 'energetic' ? 'Energético' : 'Concentración'}</span>` : ''}
+              </div>
+            </div>
+            <button 
+              class="delete-log-btn bg-red-600/30 hover:bg-red-600/50 p-2 rounded-lg transition"
+              data-id="${log.id}"
+            >
+              🗑️
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // Eventos para eliminar
+      document.querySelectorAll('.delete-log-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = (btn as HTMLElement).dataset.id;
+          deleteRecipeLog(id!);
+        });
+      });
+    }
+
+    // Renderizar calendario
+    function renderActivityCalendar() {
+      const activity = loadDailyActivity();
+      const container = document.getElementById('activityCalendar');
+      const today = new Date();
+      const last49Days: string[] = [];
+      
+      for (let i = 48; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        last49Days.push(date.toISOString().split('T')[0]);
+      }
+      
+      container!.innerHTML = last49Days.map(date => {
+        const dayActivity = activity.find(a => a.date === date);
+        const count = dayActivity ? dayActivity.recipes : 0;
+        
+        let bgColor = 'bg-[#687450]/30';
+        if (count >= 3) {
+          bgColor = 'bg-[#a0b38b]';
+        } else if (count >= 1) {
+          bgColor = 'bg-[#a0b38b]/50';
+        }
+        
+        return `
+          <div 
+            class="${bgColor} aspect-square rounded transition hover:scale-110 cursor-pointer"
+            title="${date}: ${count} receta(s)"
+          ></div>
+        `;
+      }).join('');
+    }
+
+    // Eliminar log individual
+    function deleteRecipeLog(id: string) {
+      if (!confirm('¿Eliminar esta receta del historial?')) return;
+      
+      let history = loadRecipeHistory();
+      history = history.filter(log => log.id !== id);
+      localStorage.setItem('recipeHistory', JSON.stringify(history));
+      
+      refreshDashboard();
+    }
+
+    // Limpiar historial completo
+    function clearAllHistory() {
+      if (!confirm('¿Estás seguro de eliminar todo el historial? Esta acción no se puede deshacer.')) return;
+      
+      localStorage.removeItem('recipeHistory');
+      localStorage.removeItem('dailyActivity');
+      refreshDashboard();
+    }
+
+    // Refrescar dashboard
+    function refreshDashboard() {
+      calculateStats();
+      renderMoodChart();
+      renderActivityChart();
+      renderRecipeHistory();
+      renderActivityCalendar();
+    }
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshDashboard();
+      
+      document.getElementById('clearHistoryBtn')?.addEventListener('click', clearAllHistory);
+      
+      // Refrescar cada 30 segundos
+      setInterval(refreshDashboard, 30000);
+    });
+  </script>
+</Layout>

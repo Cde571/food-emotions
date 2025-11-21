@@ -1,41 +1,187 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+// Datos de ejemplo quemados (se cargarán desde localStorage en el cliente)
 const kitchenZones = [
   { 
     id: 'refrigerator',
     name: 'Refrigerador',
     subtitle: 'Sabores que decidiste conservar',
     icon: '🧊',
-    count: 24,
+    count: 0, // Se calculará en el cliente
+    color: '#687450',
+    model: 'fridge',
+    description: 'Aquí guardamos tus recetas favoritas, momentos congelados en emoción que decidiste preservar para siempre.',
+    examples: [
+      {
+        id: 'rec_1',
+        title: 'Pasta Carbonara de la Nonna',
+        emotion: 'nostalgia',
+        tags: ['italiana', 'comfort', 'familiar'],
+        savedDate: '2024-11-15',
+        notes: 'La receta que mi abuela me enseñó cuando tenía 8 años. Siempre me hace sentir en casa.'
+      },
+      {
+        id: 'rec_2',
+        title: 'Tarta de Manzana del Domingo',
+        emotion: 'alegría',
+        tags: ['postre', 'domingo', 'tradicional'],
+        savedDate: '2024-11-10',
+        notes: 'Perfecta para las tardes lluviosas con café caliente.'
+      },
+      {
+        id: 'rec_3',
+        title: 'Sopa de Lentejas Reconfortante',
+        emotion: 'calma',
+        tags: ['saludable', 'invernal', 'vegetariana'],
+        savedDate: '2024-11-08',
+        notes: 'Mi medicina favorita para los días difíciles.'
+      }
+    ]
   },
   { 
     id: 'stove',
     name: 'Estufa',
     subtitle: 'Ideas que estás cocinando',
     icon: '🔥',
-    count: 8,
+    count: 0,
+    color: '#d97757',
+    model: 'stove',
+    description: 'Proyectos en progreso, recetas que estás perfeccionando, sabores que aún están tomando forma.',
+    examples: [
+      {
+        id: 'rec_4',
+        title: 'Ramen Casero (En progreso)',
+        emotion: 'curiosidad',
+        tags: ['japonesa', 'experimental', 'en-proceso'],
+        savedDate: '2024-11-18',
+        notes: 'Tercer intento del caldo. Creo que ya casi lo tengo.'
+      },
+      {
+        id: 'rec_5',
+        title: 'Pan de Masa Madre - Día 5',
+        emotion: 'paciencia',
+        tags: ['panadería', 'fermentación', 'challenge'],
+        savedDate: '2024-11-17',
+        notes: 'La masa madre está burbujeando. Mañana será el gran día.'
+      }
+    ]
   },
   { 
     id: 'pantry',
     name: 'Despensa',
     subtitle: 'Tu mapa de sabores',
     icon: '🏺',
-    count: 31,
+    count: 0,
+    color: '#8b7355',
+    model: 'pantry',
+    description: 'Tu inventario completo de ingredientes y recetas base, organizados y listos para cuando los necesites.',
+    examples: [
+      {
+        id: 'rec_6',
+        title: 'Salsa de Tomate Básica',
+        emotion: 'fundamento',
+        tags: ['básica', 'versátil', 'italiana'],
+        savedDate: '2024-10-20',
+        notes: 'La base de todo. Tomate, ajo, albahaca y amor.'
+      },
+      {
+        id: 'rec_7',
+        title: 'Caldo de Pollo Casero',
+        emotion: 'esencial',
+        tags: ['básica', 'reconfortante', 'versátil'],
+        savedDate: '2024-10-15',
+        notes: 'Para cuando necesito una base sólida.'
+      },
+      {
+        id: 'rec_8',
+        title: 'Vinagreta Clásica',
+        emotion: 'simplicidad',
+        tags: ['aderezo', 'básica', 'rápida'],
+        savedDate: '2024-10-10',
+        notes: '3 partes aceite, 1 parte vinagre. Nunca falla.'
+      },
+      {
+        id: 'rec_9',
+        title: 'Arroz Blanco Perfecto',
+        emotion: 'maestría',
+        tags: ['básica', 'acompañamiento', 'técnica'],
+        savedDate: '2024-10-05',
+        notes: 'Después de 100 intentos, finalmente lo domino.'
+      }
+    ]
   },
   { 
     id: 'cookbook',
     name: 'Libro de Recetas',
     subtitle: 'Tus capítulos favoritos',
     icon: '📖',
-    count: 12,
+    count: 0,
+    color: '#a3b89c',
+    model: 'book',
+    description: 'Colecciones especiales, recetas heredadas, tus creaciones más preciadas escritas con el corazón.',
+    examples: [
+      {
+        id: 'rec_10',
+        title: 'Secretos de la Cocina Francesa',
+        emotion: 'elegancia',
+        tags: ['francesa', 'colección', 'avanzada'],
+        savedDate: '2024-09-20',
+        notes: 'Mi viaje culinario por París, receta por receta.'
+      },
+      {
+        id: 'rec_11',
+        title: 'Recetario de Mamá',
+        emotion: 'herencia',
+        tags: ['familiar', 'tradicional', 'tesoro'],
+        savedDate: '2024-09-15',
+        notes: 'Las recetas que pasaron de generación en generación.'
+      },
+      {
+        id: 'rec_12',
+        title: 'Postres que Enamoran',
+        emotion: 'romance',
+        tags: ['postres', 'especial', 'celebración'],
+        savedDate: '2024-09-10',
+        notes: 'Para las ocasiones más dulces de la vida.'
+      }
+    ]
   },
   { 
     id: 'counter',
     name: 'Mesón Central',
     subtitle: 'Recuerdos recientes servidos',
     icon: '🍽️',
-    count: 18,
+    count: 0,
+    color: '#687450',
+    model: 'counter',
+    description: 'Tus últimas creaciones, recetas recién exploradas, lo más fresco de tu cocina emocional.',
+    examples: [
+      {
+        id: 'rec_13',
+        title: 'Tacos de Pescado Baja',
+        emotion: 'aventura',
+        tags: ['mexicana', 'nuevo', 'verano'],
+        savedDate: '2024-11-19',
+        notes: 'Probado ayer. ¡Explosión de sabor! Definitivamente lo vuelvo a hacer.'
+      },
+      {
+        id: 'rec_14',
+        title: 'Bowl de Buddha Arcoíris',
+        emotion: 'bienestar',
+        tags: ['saludable', 'vegano', 'colorido'],
+        savedDate: '2024-11-18',
+        notes: 'Comida que alimenta el cuerpo y el alma.'
+      },
+      {
+        id: 'rec_15',
+        title: 'Tiramisú Sin Secretos',
+        emotion: 'logro',
+        tags: ['italiana', 'postre', 'celebración'],
+        savedDate: '2024-11-17',
+        notes: 'Por fin lo hice bien. Todos quedaron impresionados.'
+      }
+    ]
   }
 ];
 ---
@@ -79,33 +225,105 @@ const kitchenZones = [
             data-index={index}
             data-zone={zone.id}
             aria-label={`Ir a ${zone.name}`}
+            style={`--zone-color: ${zone.color}`}
           >
             <span class="dot-icon">{zone.icon}</span>
             <span class="dot-label">
               <strong>{zone.name}</strong><br />
               <small>{zone.subtitle}</small>
+              <span class="dot-count" data-zone-count={zone.id}>0</span>
             </span>
           </button>
         ))}
       </div>
 
-      <!-- Zone Info Cards -->
-      <div class="zone-info" id="zone-info">
-        <button class="close-info" id="close-info">✕</button>
-        <div class="info-content">
-          <div class="info-icon" id="info-icon">🧊</div>
-          <h2 id="info-title">Refrigerador</h2>
-          <p id="info-subtitle">Sabores que decidiste conservar</p>
-          <p class="info-description" id="info-description">
-            Aquí guardamos tus recetas favoritas, momentos congelados en emoción.
-          </p>
-          <div class="info-count">
-            <span class="count-number" id="info-count">24</span>
-            <span class="count-label">recetas</span>
+      <!-- Modal Zone Info -->
+      <div class="zone-modal" id="zone-modal">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+          <button class="close-modal" id="close-modal">✕</button>
+          <div class="modal-header">
+            <div class="modal-icon" id="modal-icon">🧊</div>
+            <h2 id="modal-title">Refrigerador</h2>
+            <p id="modal-subtitle">Sabores que decidiste conservar</p>
           </div>
-          <button class="view-recipes-btn" id="view-recipes">
-            Ver todas las recetas de esta zona
-          </button>
+          <div class="modal-body">
+            <p class="modal-description" id="modal-description">
+              Aquí guardamos tus recetas favoritas, momentos congelados en emoción.
+            </p>
+            <div class="modal-stats">
+              <div class="stat-item">
+                <span class="stat-number" id="modal-count">0</span>
+                <span class="stat-label">recetas guardadas</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="modal-recent">0</span>
+                <span class="stat-label">esta semana</span>
+              </div>
+            </div>
+            
+            <!-- Lista de recetas en esta zona -->
+            <div class="recipes-preview" id="recipes-preview">
+              <!-- Se llenará dinámicamente -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="add-recipe-btn" id="add-recipe-btn">
+              <span>+ Agregar nueva receta</span>
+            </button>
+            <button class="manage-btn" id="manage-recipes-btn">
+              <span>Gestionar recetas</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Agregar Receta -->
+      <div class="add-recipe-modal" id="add-recipe-modal">
+        <div class="modal-backdrop" id="add-recipe-backdrop"></div>
+        <div class="modal-content add-recipe-content">
+          <button class="close-modal" id="close-add-recipe">✕</button>
+          <div class="modal-header">
+            <h2>Agregar Nueva Receta</h2>
+            <p>Guarda un nuevo sabor en <strong id="target-zone-name">esta zona</strong></p>
+          </div>
+          <div class="modal-body">
+            <form id="recipe-form">
+              <div class="form-group">
+                <label for="recipe-title">Título de la receta</label>
+                <input type="text" id="recipe-title" placeholder="Ej: Pasta Carbonara de la Nonna" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="recipe-emotion">¿Qué emoción te trae?</label>
+                <select id="recipe-emotion" required>
+                  <option value="">Selecciona una emoción</option>
+                  <option value="alegría">😊 Alegría</option>
+                  <option value="nostalgia">🥹 Nostalgia</option>
+                  <option value="amor">❤️ Amor</option>
+                  <option value="calma">😌 Calma</option>
+                  <option value="curiosidad">🤔 Curiosidad</option>
+                  <option value="logro">🎉 Logro</option>
+                  <option value="confort">🤗 Confort</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="recipe-tags">Etiquetas (separadas por comas)</label>
+                <input type="text" id="recipe-tags" placeholder="italiana, comfort, familiar">
+              </div>
+              
+              <div class="form-group">
+                <label for="recipe-notes">Notas especiales</label>
+                <textarea id="recipe-notes" rows="4" placeholder="¿Qué hace especial esta receta? ¿Qué recuerdos trae?"></textarea>
+              </div>
+              
+              <button type="submit" class="save-recipe-btn">
+                <span>💾 Guardar en mi cocina</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -116,8 +334,13 @@ const kitchenZones = [
     </div>
   </div>
 
-  <!-- Script 3D externo -->
-  <script type="module" src="/src/scripts/kitchen-3d.js"></script>
+  <!-- Pasar datos a JavaScript -->
+  <script define:vars={{ kitchenZones }}>
+    window.KITCHEN_ZONES_DATA = kitchenZones;
+  </script>
+
+  <!-- Script 3D con objetos reales -->
+  <script type="module" src="/src/scripts/kitchen-3d-realistic.js"></script>
 
   <style>
     :root {
@@ -125,6 +348,12 @@ const kitchenZones = [
       --fe-light: #687450;
       --fe-mint: #a3b89c;
       --fe-bg-deep: #1a2310;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     .kitchen-archive {
@@ -181,6 +410,7 @@ const kitchenZones = [
     .intro-screen.hidden {
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
     }
 
     .intro-content {
@@ -332,14 +562,14 @@ const kitchenZones = [
     .nav-dot:hover {
       transform: scale(1.2) translateX(-6px);
       background: rgba(163, 184, 156, 0.32);
-      border-color: var(--fe-mint);
+      border-color: var(--zone-color, var(--fe-mint));
     }
 
     .nav-dot.active {
       transform: scale(1.3) translateX(-8px);
       background: rgba(163, 184, 156, 0.5);
-      border-color: var(--fe-mint);
-      box-shadow: 0 0 26px rgba(163, 184, 156, 0.7);
+      border-color: var(--zone-color, var(--fe-mint));
+      box-shadow: 0 0 26px var(--zone-color, rgba(163, 184, 156, 0.7));
     }
 
     .dot-icon {
@@ -369,6 +599,15 @@ const kitchenZones = [
 
     .dot-label small {
       opacity: 0.8;
+      display: block;
+    }
+
+    .dot-count {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.75rem;
+      color: var(--fe-mint);
+      font-weight: 600;
     }
 
     .nav-dot:hover .dot-label {
@@ -376,112 +615,348 @@ const kitchenZones = [
       transform: translateX(0);
     }
 
-    /* Zone Info Card */
-    .zone-info {
+    /* Modal Zone Info */
+    .zone-modal, .add-recipe-modal {
       position: fixed;
-      top: 50%;
-      left: 50px;
-      transform: translateY(-50%) translateX(-480px);
-      width: 360px;
-      background: rgba(26, 35, 16, 0.96);
-      backdrop-filter: blur(18px);
-      border: 2px solid rgba(163, 184, 156, 0.32);
-      border-radius: 24px;
-      padding: 38px;
-      transition: transform 0.75s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      z-index: 60;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
 
-    .zone-info.active {
-      transform: translateY(-50%) translateX(0);
+    .zone-modal.active, .add-recipe-modal.active {
+      opacity: 1;
+      visibility: visible;
     }
 
-    .close-info {
+    .modal-backdrop {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-size: 1.1rem;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
       cursor: pointer;
-      transition: all 0.25s ease;
     }
 
-    .close-info:hover {
-      background: rgba(255, 255, 255, 0.22);
+    .modal-content {
+      position: relative;
+      width: 90%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(135deg, 
+        var(--fe-dark) 0%, 
+        #2f3a27 50%, 
+        var(--fe-light) 100%
+      );
+      border-radius: 28px;
+      padding: 0;
+      transform: scale(0.9) translateY(30px);
+      transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
+                  0 0 60px rgba(163, 184, 156, 0.3);
+      border: 2px solid rgba(163, 184, 156, 0.4);
+    }
+
+    .zone-modal.active .modal-content,
+    .add-recipe-modal.active .modal-content {
+      transform: scale(1) translateY(0);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      background: rgba(255, 255, 255, 0.3);
       transform: rotate(90deg);
     }
 
-    .info-content {
+    .modal-header {
+      text-align: center;
+      padding: 50px 40px 30px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(163, 184, 156, 0.3);
+    }
+
+    .modal-icon {
+      font-size: 5rem;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 25px rgba(163, 184, 156, 0.8));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    #modal-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: #e8ffe3;
+      margin: 0 0 10px 0;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #modal-subtitle {
+      font-size: 1.1rem;
+      color: rgba(232, 255, 227, 0.85);
+      margin: 0;
+      font-style: italic;
+    }
+
+    .modal-body {
+      padding: 35px 40px;
+    }
+
+    .modal-description {
+      font-size: 1rem;
+      color: rgba(232, 255, 227, 0.9);
+      line-height: 1.7;
+      margin-bottom: 30px;
       text-align: center;
     }
 
-    .info-icon {
-      font-size: 3.5rem;
-      margin-bottom: 14px;
-      filter: drop-shadow(0 0 18px rgba(163, 184, 156, 0.7));
+    .modal-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
     }
 
-    #info-title {
-      font-size: 1.9rem;
-      font-weight: 900;
-      color: #e8ffe3;
-      margin: 0 0 8px 0;
+    .stat-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid rgba(163, 184, 156, 0.25);
     }
 
-    #info-subtitle {
-      font-size: 1rem;
-      color: rgba(232, 255, 227, 0.78);
-      margin: 0 0 12px 0;
-    }
-
-    .info-description {
-      font-size: 0.9rem;
-      color: rgba(232, 255, 227, 0.7);
-      margin-bottom: 22px;
-      line-height: 1.5;
-    }
-
-    .info-count {
-      display: flex;
-      justify-content: center;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 26px;
-    }
-
-    .count-number {
-      font-size: 2.7rem;
+    .stat-number {
+      display: block;
+      font-size: 3rem;
       font-weight: 900;
       color: var(--fe-mint);
-      text-shadow: 0 0 20px rgba(163, 184, 156, 0.8);
+      text-shadow: 0 0 25px rgba(163, 184, 156, 0.9);
+      margin-bottom: 6px;
     }
 
-    .count-label {
-      font-size: 0.9rem;
+    .stat-label {
+      display: block;
+      font-size: 0.85rem;
       color: rgba(232, 255, 227, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .view-recipes-btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--fe-mint), var(--fe-light));
-      border: none;
-      border-radius: 14px;
-      color: #1a2310;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
+    /* Recipes Preview */
+    .recipes-preview {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .recipe-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(163, 184, 156, 0.2);
       transition: all 0.3s ease;
     }
 
-    .view-recipes-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 28px rgba(163, 184, 156, 0.45);
+    .recipe-item:hover {
+      background: rgba(0, 0, 0, 0.4);
+      border-color: rgba(163, 184, 156, 0.4);
+      transform: translateX(5px);
+    }
+
+    .recipe-item h4 {
+      color: #e8ffe3;
+      font-size: 1.1rem;
+      margin: 0 0 8px 0;
+    }
+
+    .recipe-item .recipe-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .recipe-tag {
+      background: rgba(163, 184, 156, 0.3);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      color: var(--fe-mint);
+    }
+
+    .recipe-item .recipe-notes {
+      font-size: 0.85rem;
+      color: rgba(232, 255, 227, 0.7);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .recipe-item .recipe-date {
+      font-size: 0.75rem;
+      color: rgba(232, 255, 227, 0.5);
+      margin-top: 8px;
+    }
+
+    .modal-footer {
+      padding: 0 40px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .add-recipe-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+    }
+
+    .add-recipe-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 35px rgba(74, 222, 128, 0.6);
+    }
+
+    .manage-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--fe-mint), var(--fe-light));
+      border: none;
+      border-radius: 16px;
+      color: #1a2310;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 8px 25px rgba(163, 184, 156, 0.4);
+    }
+
+    .manage-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 35px rgba(163, 184, 156, 0.6);
+    }
+
+    .manage-btn .btn-arrow {
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
+    }
+
+    .manage-btn:hover .btn-arrow {
+      transform: translateX(8px);
+    }
+
+    /* Form Styles */
+    .add-recipe-content {
+      max-width: 500px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #e8ffe3;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(163, 184, 156, 0.3);
+      border-radius: 12px;
+      color: #e8ffe3;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--fe-mint);
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 20px rgba(163, 184, 156, 0.3);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group select option {
+      background: var(--fe-dark);
+      color: #e8ffe3;
+    }
+
+    .save-recipe-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+      margin-top: 10px;
+    }
+
+    .save-recipe-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 35px rgba(74, 222, 128, 0.6);
     }
 
     /* Progress Bar */
@@ -503,14 +978,33 @@ const kitchenZones = [
       box-shadow: 0 0 18px rgba(163, 184, 156, 0.7);
     }
 
+    /* Scrollbar personalizado */
+    .recipes-preview::-webkit-scrollbar,
+    .modal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .recipes-preview::-webkit-scrollbar-track,
+    .modal-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .recipes-preview::-webkit-scrollbar-thumb,
+    .modal-content::-webkit-scrollbar-thumb {
+      background: rgba(163, 184, 156, 0.5);
+      border-radius: 10px;
+    }
+
+    .recipes-preview::-webkit-scrollbar-thumb:hover,
+    .modal-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(163, 184, 156, 0.7);
+    }
+
+    /* Responsive */
     @media (max-width: 1024px) {
       .nav-dots {
         right: 20px;
-      }
-      .zone-info {
-        left: 32px;
-        width: 320px;
-        padding: 30px;
       }
     }
 
@@ -529,45 +1023,255 @@ const kitchenZones = [
         display: none;
       }
 
-      .zone-info {
-        left: 50%;
-        transform: translateY(-50%) translateX(-50%) scale(0.8);
-        width: calc(100% - 36px);
+      .modal-content {
+        width: 95%;
       }
 
-      .zone-info.active {
-        transform: translateY(-50%) translateX(-50%) scale(1);
+      .modal-header {
+        padding: 40px 30px 25px;
+      }
+
+      .modal-body {
+        padding: 25px 30px;
+      }
+
+      .modal-footer {
+        padding: 0 30px 30px;
+      }
+
+      #modal-title {
+        font-size: 1.9rem;
+      }
+
+      .modal-icon {
+        font-size: 4rem;
       }
 
       .kitchen-title {
         flex-direction: column;
         gap: 10px;
-        text-align: center;
       }
 
-      .kitchen-subtitle {
-        font-size: 0.95rem;
-      }
-
-      .explore-btn {
-        padding: 14px 32px;
-        font-size: 0.95rem;
+      .modal-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
       }
     }
 
     @media (max-width: 480px) {
-      .info-icon {
-        font-size: 3rem;
+      .stat-number {
+        font-size: 2.5rem;
       }
 
-      #info-title {
-        font-size: 1.6rem;
-      }
-
-      .count-number {
-        font-size: 2.3rem;
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 0.95rem;
+        padding: 10px 14px;
       }
     }
   </style>
+
+  <!-- Script para manejar localStorage -->
+  <script>
+    // ========================================
+    // SISTEMA DE ALMACENAMIENTO LOCAL
+    // ========================================
+
+    const STORAGE_KEY = 'foodemotions_recipes';
+    let currentZoneId = null;
+
+    // Inicializar localStorage con datos de ejemplo si está vacío
+    function initializeStorage() {
+      const existing = localStorage.getItem(STORAGE_KEY);
+      if (!existing) {
+        const initialData = {};
+        window.KITCHEN_ZONES_DATA.forEach(zone => {
+          initialData[zone.id] = zone.examples || [];
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
+      }
+    }
+
+    // Obtener todas las recetas
+    function getAllRecipes() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : {};
+    }
+
+    // Obtener recetas de una zona específica
+    function getRecipesByZone(zoneId) {
+      const allRecipes = getAllRecipes();
+      return allRecipes[zoneId] || [];
+    }
+
+    // Guardar receta en una zona
+    function saveRecipe(zoneId, recipe) {
+      const allRecipes = getAllRecipes();
+      if (!allRecipes[zoneId]) {
+        allRecipes[zoneId] = [];
+      }
+      
+      recipe.id = `rec_${Date.now()}`;
+      recipe.savedDate = new Date().toISOString().split('T')[0];
+      
+      allRecipes[zoneId].push(recipe);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecipes));
+      
+      return recipe;
+    }
+
+    // Eliminar receta
+    function deleteRecipe(zoneId, recipeId) {
+      const allRecipes = getAllRecipes();
+      if (allRecipes[zoneId]) {
+        allRecipes[zoneId] = allRecipes[zoneId].filter(r => r.id !== recipeId);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecipes));
+      }
+    }
+
+    // Contar recetas por zona
+    function countRecipesByZone(zoneId) {
+      const recipes = getRecipesByZone(zoneId);
+      return recipes.length;
+    }
+
+    // Contar recetas recientes (última semana)
+    function countRecentRecipes(zoneId) {
+      const recipes = getRecipesByZone(zoneId);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      return recipes.filter(r => {
+        const recipeDate = new Date(r.savedDate);
+        return recipeDate >= weekAgo;
+      }).length;
+    }
+
+    // Actualizar contadores en la UI
+    function updateCounters() {
+      window.KITCHEN_ZONES_DATA.forEach(zone => {
+        const count = countRecipesByZone(zone.id);
+        const countElement = document.querySelector(`[data-zone-count="${zone.id}"]`);
+        if (countElement) {
+          countElement.textContent = count;
+        }
+      });
+    }
+
+    // Mostrar recetas en el modal
+    function displayRecipesInModal(zoneId) {
+      const recipes = getRecipesByZone(zoneId);
+      const container = document.getElementById('recipes-preview');
+      
+      if (recipes.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: rgba(232, 255, 227, 0.6);">
+            <p style="font-size: 3rem; margin-bottom: 10px;">🍽️</p>
+            <p>Aún no hay recetas en esta zona</p>
+            <p style="font-size: 0.85rem; margin-top: 8px;">¡Agrega tu primera receta emocional!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recipes.map(recipe => `
+        <div class="recipe-item" data-recipe-id="${recipe.id}">
+          <h4>${recipe.title}</h4>
+          <div class="recipe-meta">
+            <span class="recipe-tag">${recipe.emotion}</span>
+            ${recipe.tags ? recipe.tags.split(',').map(tag => 
+              `<span class="recipe-tag">${tag.trim()}</span>`
+            ).join('') : ''}
+          </div>
+          <p class="recipe-notes">${recipe.notes || 'Sin notas'}</p>
+          <p class="recipe-date">Guardada el ${new Date(recipe.savedDate).toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}</p>
+        </div>
+      `).join('');
+    }
+
+    // Modal de agregar receta
+    function openAddRecipeModal(zoneId) {
+      currentZoneId = zoneId;
+      const zone = window.KITCHEN_ZONES_DATA.find(z => z.id === zoneId);
+      document.getElementById('target-zone-name').textContent = zone.name;
+      document.getElementById('add-recipe-modal').classList.add('active');
+    }
+
+    // Manejar formulario
+    document.getElementById('recipe-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const recipe = {
+        title: document.getElementById('recipe-title').value,
+        emotion: document.getElementById('recipe-emotion').value,
+        tags: document.getElementById('recipe-tags').value,
+        notes: document.getElementById('recipe-notes').value
+      };
+
+      saveRecipe(currentZoneId, recipe);
+      
+      // Limpiar formulario
+      e.target.reset();
+      
+      // Cerrar modal
+      document.getElementById('add-recipe-modal').classList.remove('active');
+      
+      // Actualizar contadores
+      updateCounters();
+      
+      // Mostrar notificación
+      alert('¡Receta guardada exitosamente! 🎉');
+      
+      // Si el modal de zona está abierto, actualizar
+      if (document.getElementById('zone-modal').classList.contains('active')) {
+        displayRecipesInModal(currentZoneId);
+        document.getElementById('modal-count').textContent = countRecipesByZone(currentZoneId);
+        document.getElementById('modal-recent').textContent = countRecentRecipes(currentZoneId);
+      }
+    });
+
+    // Botones de modal
+    document.getElementById('add-recipe-btn')?.addEventListener('click', () => {
+      const zoneId = window.KITCHEN_ZONES_DATA[window.currentZoneIndex || 0].id;
+      openAddRecipeModal(zoneId);
+    });
+
+    document.getElementById('close-add-recipe')?.addEventListener('click', () => {
+      document.getElementById('add-recipe-modal').classList.remove('active');
+    });
+
+    document.getElementById('add-recipe-backdrop')?.addEventListener('click', () => {
+      document.getElementById('add-recipe-modal').classList.remove('active');
+    });
+
+    document.getElementById('manage-recipes-btn')?.addEventListener('click', () => {
+      // Aquí podrías redirigir a una página de gestión completa
+      alert('Función de gestión en desarrollo. Por ahora puedes ver y agregar recetas desde aquí.');
+    });
+
+    // Inicializar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeStorage();
+      updateCounters();
+    });
+
+    // Exponer funciones globalmente para que kitchen-3d-realistic.js las use
+    window.FoodEmotionsStorage = {
+      getAllRecipes,
+      getRecipesByZone,
+      saveRecipe,
+      deleteRecipe,
+      countRecipesByZone,
+      countRecentRecipes,
+      displayRecipesInModal,
+      openAddRecipeModal,
+      updateCounters
+    };
+  </script>
 </Layout>
 

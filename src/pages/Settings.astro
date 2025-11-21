@@ -1,0 +1,644 @@
+---
+import Layout from "../layouts/Layout.astro";
+const API_URL = "http://localhost:3000";
+---
+
+<Layout title="Configuración ⚙️">
+  <section class="settings-container">
+
+    <!-- 🧩 ENCABEZADO -->
+    <h1 class="settings-title">Configuración de tu cuenta</h1>
+    <p class="settings-subtitle">Administra tu perfil, seguridad y preferencias</p>
+
+    <!-- ============================== -->
+    <!-- 👤 INFORMACIÓN PERSONAL -->
+    <!-- ============================== -->
+
+    <div class="settings-card">
+      <h2>Perfil</h2>
+
+      <div class="profile-section">
+        <img id="settings-avatar" class="profile-photo" src="" alt="Foto de perfil">
+        
+        <div>
+          <label>Actualizar foto</label>
+          <input type="file" id="upload-avatar" accept="image/*">
+        </div>
+      </div>
+
+      <label>Nombre de usuario</label>
+      <div class="input-with-validation">
+        <input id="username-input" type="text" placeholder="Tu nombre">
+        <span id="username-status" class="validation-msg"></span>
+      </div>
+
+      <label>Estado</label>
+      <select id="status-input">
+        <option value="Online">Online</option>
+        <option value="Busy">Busy</option>
+        <option value="Away">Away</option>
+        <option value="Offline">Offline</option>
+      </select>
+
+      <label>Bio</label>
+      <textarea id="bio-input" rows="3" placeholder="Cuéntanos algo sobre ti"></textarea>
+
+      <button class="settings-btn" id="save-profile">
+        <span id="save-profile-text">Guardar cambios</span>
+      </button>
+    </div>
+
+    <!-- ============================== -->
+    <!-- 🎨 PREFERENCIAS -->
+    <!-- ============================== -->
+
+    <div class="settings-card">
+      <h2>Preferencias</h2>
+
+      <label>Tema</label>
+      <select id="theme-select">
+        <option value="light">Claro</option>
+        <option value="dark">Oscuro</option>
+        <option value="system">Sistema</option>
+      </select>
+
+      <label>Idioma</label>
+      <select id="lang-select">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+      </select>
+
+      <button class="settings-btn" id="save-preferences">
+        <span id="save-preferences-text">Guardar preferencias</span>
+      </button>
+    </div>
+
+    <!-- ============================== -->
+    <!-- 🔐 SEGURIDAD -->
+    <!-- ============================== -->
+
+    <div class="settings-card">
+      <h2>Seguridad</h2>
+
+      <label>Nueva contraseña</label>
+      <input id="new-pass" type="password" placeholder="Nueva contraseña">
+
+      <label>Confirmar contraseña</label>
+      <input id="confirm-pass" type="password" placeholder="Confirmar contraseña">
+
+      <button class="settings-btn danger" id="change-password">
+        <span id="change-password-text">Cambiar contraseña</span>
+      </button>
+    </div>
+
+    <!-- ============================== -->
+    <!-- 🔥 DISPOSITIVOS ACTIVOS -->
+    <!-- ============================== -->
+
+    <div class="settings-card">
+      <h2>Sesión actual</h2>
+
+      <button class="settings-btn" id="logout-btn">Cerrar sesión</button>
+    </div>
+
+    <!-- ============================== -->
+    <!-- 🗑️ ELIMINAR CUENTA -->
+    <!-- ============================== -->
+
+    <div class="settings-card danger-zone">
+      <h2>Zona peligrosa</h2>
+      <p>Una vez elimines tu cuenta, no podrás recuperarla.</p>
+
+      <button class="settings-btn danger" id="delete-account">
+        Eliminar cuenta permanentemente
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ===================================== -->
+  <!-- 📌 SCRIPT OPTIMIZADO CON ENDPOINTS ESPECÍFICOS -->
+  <!-- ===================================== -->
+  <script is:inline>
+    const API_URL = "http://localhost:3000";
+    let currentUser = null;
+    let usernameCheckTimeout = null;
+
+    // =======================
+    // UTILIDADES
+    // =======================
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function setButtonLoading(btnId, loading, text = null) {
+      const btn = document.getElementById(btnId);
+      const textSpan = document.getElementById(`${btnId}-text`);
+      
+      if (loading) {
+        btn.disabled = true;
+        if (textSpan) textSpan.textContent = 'Cargando...';
+      } else {
+        btn.disabled = false;
+        if (textSpan && text) textSpan.textContent = text;
+      }
+    }
+
+    // =======================
+    // CARGAR DATOS DEL USUARIO
+    // =======================
+    async function loadUser() {
+      try {
+        const res = await fetch(`${API_URL}/api/user/me`, { 
+          credentials: "include" 
+        });
+        
+        if (!res.ok) throw new Error('No se pudo cargar el usuario');
+        
+        const data = await res.json();
+        currentUser = data;
+
+        document.getElementById("settings-avatar").src = data.profilePic || '/default-avatar.png';
+        document.getElementById("username-input").value = data.username || '';
+        document.getElementById("status-input").value = data.status || 'Online';
+        document.getElementById("bio-input").value = data.bio || '';
+      } catch (error) {
+        showToast('Error al cargar los datos', 'error');
+        console.error(error);
+      }
+    }
+
+    loadUser();
+
+    // =======================
+    // VALIDACIÓN DE USERNAME EN TIEMPO REAL
+    // =======================
+    document.getElementById("username-input").addEventListener('input', (e) => {
+      const username = e.target.value.trim();
+      const statusEl = document.getElementById("username-status");
+      
+      // Limpiar timeout anterior
+      clearTimeout(usernameCheckTimeout);
+      
+      // No validar si es el username actual
+      if (username === currentUser?.username) {
+        statusEl.textContent = '';
+        statusEl.className = 'validation-msg';
+        return;
+      }
+
+      if (username.length < 3) {
+        statusEl.textContent = 'Mínimo 3 caracteres';
+        statusEl.className = 'validation-msg error';
+        return;
+      }
+
+      // Validar después de 500ms de inactividad
+      usernameCheckTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(
+            `${API_URL}/api/users/check-username/${username}`,
+            { credentials: "include" }
+          );
+          const data = await res.json();
+          
+          if (data.available) {
+            statusEl.textContent = '✓ Disponible';
+            statusEl.className = 'validation-msg success';
+          } else {
+            statusEl.textContent = '✗ No disponible';
+            statusEl.className = 'validation-msg error';
+          }
+        } catch (error) {
+          statusEl.textContent = '';
+          statusEl.className = 'validation-msg';
+        }
+      }, 500);
+    });
+
+    // =======================
+    // GUARDAR CAMBIOS DE PERFIL (OPTIMIZADO)
+    // =======================
+    document.getElementById("save-profile").onclick = async () => {
+      setButtonLoading('save-profile', true);
+      
+      const username = document.getElementById("username-input").value.trim();
+      const status = document.getElementById("status-input").value;
+      const bio = document.getElementById("bio-input").value.trim();
+
+      try {
+        // 1. Actualizar username (si cambió)
+        if (username !== currentUser.username) {
+          const checkRes = await fetch(
+            `${API_URL}/api/users/check-username/${username}`,
+            { credentials: "include" }
+          );
+          const checkData = await checkRes.json();
+          
+          if (!checkData.available) {
+            showToast('El nombre de usuario no está disponible', 'error');
+            setButtonLoading('save-profile', false, 'Guardar cambios');
+            return;
+          }
+
+          await fetch(`${API_URL}/profile/update`, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username })
+          });
+        }
+
+        // 2. Actualizar status usando endpoint específico
+        if (status !== currentUser.status) {
+          await fetch(`${API_URL}/profile/status`, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+          });
+        }
+
+        // 3. Actualizar bio usando endpoint específico
+        if (bio !== currentUser.bio) {
+          await fetch(`${API_URL}/api/users/me/bio`, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bio })
+          });
+        }
+
+        showToast('Perfil actualizado correctamente', 'success');
+        await loadUser(); // Recargar datos actualizados
+      } catch (error) {
+        showToast('Error al actualizar el perfil', 'error');
+        console.error(error);
+      } finally {
+        setButtonLoading('save-profile', false, 'Guardar cambios');
+      }
+    };
+
+    // =======================
+    // ACTUALIZAR FOTO (OPTIMIZADO)
+    // =======================
+    document.getElementById("upload-avatar").onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validar tipo y tamaño
+      if (!file.type.startsWith('image/')) {
+        showToast('Por favor selecciona una imagen válida', 'error');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('La imagen no debe superar 5MB', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        showToast('Subiendo imagen...', 'info');
+        
+        const uploadRes = await fetch(`${API_URL}/profile/upload`, {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        });
+
+        if (!uploadRes.ok) throw new Error('Error al subir imagen');
+
+        const data = await uploadRes.json();
+        
+        // Actualizar URL usando endpoint específico
+        if (data.url) {
+          await fetch(`${API_URL}/profile/update-pic-url`, {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ profilePicUrl: data.url })
+          });
+        }
+
+        showToast('Foto actualizada correctamente', 'success');
+        await loadUser();
+      } catch (error) {
+        showToast('Error al actualizar la foto', 'error');
+        console.error(error);
+      }
+    };
+
+    // =======================
+    // PREFERENCIAS (OPTIMIZADO)
+    // =======================
+    document.getElementById("save-preferences").onclick = async () => {
+      setButtonLoading('save-preferences', true);
+      
+      const body = {
+        theme: document.getElementById("theme-select").value,
+        language: document.getElementById("lang-select").value
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/users/preferences`, {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) throw new Error('Error al guardar preferencias');
+
+        showToast('Preferencias guardadas correctamente', 'success');
+        
+        // Aplicar tema inmediatamente
+        if (body.theme !== 'system') {
+          document.documentElement.setAttribute('data-theme', body.theme);
+        }
+      } catch (error) {
+        showToast('Error al guardar las preferencias', 'error');
+        console.error(error);
+      } finally {
+        setButtonLoading('save-preferences', false, 'Guardar preferencias');
+      }
+    };
+
+    // =======================
+    // CAMBIAR CONTRASEÑA
+    // =======================
+    document.getElementById("change-password").onclick = async () => {
+      const newPass = document.getElementById("new-pass").value;
+      const confirm = document.getElementById("confirm-pass").value;
+
+      if (!newPass || !confirm) {
+        showToast('Por favor completa ambos campos', 'error');
+        return;
+      }
+
+      if (newPass.length < 6) {
+        showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+
+      if (newPass !== confirm) {
+        showToast('Las contraseñas no coinciden', 'error');
+        return;
+      }
+
+      setButtonLoading('change-password', true);
+
+      try {
+        const res = await fetch(`${API_URL}/api/auth/reset-password`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: newPass })
+        });
+
+        if (!res.ok) throw new Error('Error al cambiar contraseña');
+
+        showToast('Contraseña actualizada correctamente', 'success');
+        document.getElementById("new-pass").value = '';
+        document.getElementById("confirm-pass").value = '';
+      } catch (error) {
+        showToast('Error al cambiar la contraseña', 'error');
+        console.error(error);
+      } finally {
+        setButtonLoading('change-password', false, 'Cambiar contraseña');
+      }
+    };
+
+    // =======================
+    // CERRAR SESIÓN
+    // =======================
+    document.getElementById("logout-btn").onclick = async () => {
+      try {
+        await fetch(`${API_URL}/logout`, {
+          method: "POST",
+          credentials: "include"
+        });
+        window.location.href = "/";
+      } catch (error) {
+        showToast('Error al cerrar sesión', 'error');
+        console.error(error);
+      }
+    };
+
+    // =======================
+    // ELIMINAR CUENTA
+    // =======================
+    document.getElementById("delete-account").onclick = async () => {
+      const confirmed = confirm(
+        "⚠️ ATENCIÓN: Esta acción es irreversible.\n\n" +
+        "¿Estás completamente seguro de que deseas eliminar tu cuenta?\n" +
+        "Se borrarán todos tus posts, mensajes y datos."
+      );
+      
+      if (!confirmed) return;
+
+      const doubleConfirm = prompt(
+        'Escribe "ELIMINAR" para confirmar la eliminación de tu cuenta:'
+      );
+
+      if (doubleConfirm !== "ELIMINAR") {
+        showToast('Eliminación cancelada', 'info');
+        return;
+      }
+
+      try {
+        // Nota: Endpoint no documentado - verificar con backend
+        const res = await fetch(`${API_URL}/api/users/me/delete`, {
+          method: "DELETE",
+          credentials: "include"
+        });
+
+        if (!res.ok) throw new Error('Error al eliminar cuenta');
+
+        showToast('Cuenta eliminada. Adiós 👋', 'success');
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 2000);
+      } catch (error) {
+        showToast('Error al eliminar la cuenta', 'error');
+        console.error(error);
+      }
+    };
+  </script>
+
+  <style>
+    .settings-container {
+      max-width: 780px;
+      margin: auto;
+      padding: 40px 20px;
+      color: white;
+    }
+
+    .settings-title {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .settings-subtitle {
+      opacity: 0.7;
+      margin-bottom: 32px;
+    }
+
+    .settings-card {
+      background: rgba(255,255,255,0.07);
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .settings-card h2 {
+      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .settings-card label {
+      font-size: 14px;
+      margin-bottom: 6px;
+      display: block;
+      font-weight: 500;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 12px;
+      background: rgba(0,0,0,0.3);
+      color: white;
+      font-size: 14px;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #6a7f5f;
+    }
+
+    .input-with-validation {
+      position: relative;
+    }
+
+    .validation-msg {
+      font-size: 12px;
+      display: block;
+      margin-top: -8px;
+      margin-bottom: 8px;
+    }
+
+    .validation-msg.success {
+      color: #4ade80;
+    }
+
+    .validation-msg.error {
+      color: #f87171;
+    }
+
+    .settings-btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: #6a7f5f;
+      color: white;
+      cursor: pointer;
+      border: none;
+      margin-top: 10px;
+      transition: 0.2s;
+      font-weight: 500;
+    }
+    
+    .settings-btn:hover { 
+      background: #819b74;
+      transform: translateY(-1px);
+    }
+
+    .settings-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .danger { 
+      background: #c34646 !important; 
+    }
+    
+    .danger:hover { 
+      background: #d95a5a !important; 
+    }
+
+    .danger-zone {
+      border-color: rgba(195, 70, 70, 0.3);
+    }
+
+    .danger-zone p { 
+      opacity: 0.8;
+      margin-bottom: 12px;
+    }
+    
+    .profile-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255,255,255,0.2);
+    }
+
+    .profile-section { 
+      display: flex; 
+      gap: 20px; 
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-success {
+      background: linear-gradient(135deg, #4ade80, #22c55e);
+    }
+
+    .toast-error {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+    }
+
+    .toast-info {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    }
+  </style>
+</Layout>
+

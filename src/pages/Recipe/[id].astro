@@ -1,21 +1,16 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 
-export async function getStaticPaths() {
-  return [];
-}
+export const prerender = false;
 
 const { id } = Astro.params;
 const API_KEY = import.meta.env.PUBLIC_SPOONACULAR_KEY;
 
-// 🔹 Llamada a Spoonacular
 let recipe = null;
 try {
   const res = await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${API_KEY}`);
   if (res.ok) {
     recipe = await res.json();
-  } else {
-    console.error("Error al obtener receta:", res.status);
   }
 } catch (err) {
   console.error("Error al conectar con Spoonacular:", err);
@@ -30,7 +25,6 @@ const imageSrc = recipe?.image || fallbackImage;
     <div class="max-w-5xl mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-lg shadow-[#687450]/30">
       {recipe ? (
         <>
-          <!-- Encabezado -->
           <div class="flex flex-col md:flex-row items-center gap-8">
             <img 
               src={imageSrc} 
@@ -43,12 +37,18 @@ const imageSrc = recipe?.image || fallbackImage;
               <p class="text-[#d9e0d3] mb-4">
                 ⏱ Tiempo: {recipe.readyInMinutes} min | 🍽 Porciones: {recipe.servings}
               </p>
-              <div class="text-[#e6e9e3] leading-relaxed" set:html={recipe.summary}></div>
+              <div class="text-[#e6e9e3] leading-relaxed mb-6" set:html={recipe.summary}></div>
+              
+              <button 
+                id="cookingModeBtn"
+                class="bg-[#687450] hover:bg-[#7a8660] text-white font-semibold px-6 py-3 rounded-lg transition shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                🧑‍🍳 Iniciar experiencia de cocina
+              </button>
             </div>
           </div>
 
-          <!-- Contenido -->
-          <div class="mt-10">
+          <div id="normalView" class="mt-10">
             <h2 class="text-2xl font-semibold mb-3 text-[#a0b38b]">🧂 Ingredientes</h2>
             <ul class="grid sm:grid-cols-2 gap-2 text-[#e6e9e3]">
               {recipe.extendedIngredients?.map((i) => (
@@ -61,11 +61,819 @@ const imageSrc = recipe?.image || fallbackImage;
             <h2 class="text-2xl font-semibold mt-10 mb-3 text-[#cce5b5]">👩‍🍳 Instrucciones</h2>
             <div class="text-[#e6e9e3] leading-relaxed space-y-4" set:html={recipe.instructions}></div>
           </div>
+
+          <!-- Modo cocina inmersivo -->
+          <div id="cookingMode" class="hidden fixed inset-0 bg-[#425638] z-50 overflow-y-auto">
+            
+            <!-- Escena 3D -->
+            <div id="threeScene" class="w-full h-80 relative bg-gradient-to-b from-[#425638] to-[#516243]"></div>
+
+            <!-- Panel de control de música -->
+            <div class="bg-[#687450]/40 backdrop-blur-md p-4 border-b border-white/10 shadow-lg">
+              <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                  <div class="flex items-center gap-3">
+                    <button id="playPauseBtn" class="bg-white/20 hover:bg-white/30 p-3 rounded-full transition transform hover:scale-110 shadow-lg">
+                      ▶️
+                    </button>
+                    <div>
+                      <div id="musicStatus" class="text-sm font-semibold text-[#f3f7ef]">🎵 Selecciona tu ambiente</div>
+                      <div id="currentMood" class="text-xs text-[#dce5d3]"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex gap-2 flex-wrap">
+                    <button class="mood-btn bg-[#687450] hover:bg-[#7a8660] px-4 py-2 rounded-lg text-sm transition transform hover:scale-105 shadow-md" data-mood="energetic">
+                      ⚡ Energético
+                    </button>
+                    <button class="mood-btn bg-[#687450] hover:bg-[#7a8660] px-4 py-2 rounded-lg text-sm transition transform hover:scale-105 shadow-md" data-mood="focus">
+                      🎯 Concentración
+                    </button>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[#dce5d3]">🔊</span>
+                    <input 
+                      id="volumeSlider" 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value="30" 
+                      class="w-24 accent-[#a0b38b]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="bg-[#425638] border-b border-white/10 p-4 shadow-inner">
+              <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between text-sm text-[#e6e9e3] mb-2">
+                  <span id="currentStepLabel">🔸 Fase de preparación</span>
+                  <span id="progressText" class="font-semibold">0%</span>
+                </div>
+                <div class="w-full bg-[#687450]/30 rounded-full h-4 shadow-inner">
+                  <div id="progressBar" class="bg-gradient-to-r from-[#a0b38b] to-[#cce5b5] h-4 rounded-full transition-all duration-500 shadow-lg" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="max-w-4xl mx-auto p-6">
+              
+              <!-- FASE 1: Selección de ingredientes -->
+              <div id="ingredientsPhase" class="phase-content">
+                <h2 class="text-3xl font-bold mb-6 text-[#f4f7f3] flex items-center gap-3">
+                  <span class="text-4xl">🧺</span> Selecciona tus ingredientes
+                </h2>
+                <p class="text-[#dce5d3] mb-6">Haz clic en cada ingrediente para agregarlo a tu canasta:</p>
+                
+                <div class="grid sm:grid-cols-2 gap-3">
+                  {recipe.extendedIngredients?.map((i, idx) => (
+                    <button 
+                      class="ingredient-btn text-left flex items-center gap-3 p-4 rounded-xl bg-white/10 hover:bg-white/15 transition cursor-pointer border-2 border-[#a0b38b]/20 hover:border-[#a0b38b]/60 group transform hover:scale-105"
+                      data-index={idx}
+                      data-name={i.original}
+                    >
+                      <span class="ingredient-icon text-3xl">🥕</span>
+                      <span class="text-[#e6e9e3] group-hover:text-[#f3f7ef] transition flex-1">{i.original}</span>
+                      <span class="ingredient-check-icon text-2xl opacity-0">✅</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div class="mt-8 p-6 bg-gradient-to-br from-[#687450]/30 to-[#425638]/30 rounded-2xl border-2 border-[#a0b38b]/40 shadow-xl">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <span class="text-5xl">🧺</span>
+                      <div>
+                        <div class="text-sm text-[#dce5d3]">Ingredientes en tu canasta</div>
+                        <div class="text-3xl font-bold text-[#f3f7ef]">
+                          <span id="basketCount">0</span> / {recipe.extendedIngredients?.length || 0}
+                        </div>
+                      </div>
+                    </div>
+                    <button 
+                      id="startCookingBtn" 
+                      class="bg-[#687450] hover:bg-[#7a8660] disabled:opacity-40 disabled:cursor-not-allowed px-8 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105 shadow-lg disabled:hover:scale-100"
+                      disabled
+                    >
+                      Empezar a cocinar 🔥
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FASE 2: Cocinando -->
+              <div id="cookingPhase" class="phase-content hidden">
+                <h2 class="text-3xl font-bold mb-6 text-[#f4f7f3] flex items-center gap-3">
+                  <span class="text-4xl">👨‍🍳</span> Cocinando tu receta...
+                </h2>
+
+                <div class="bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-8 border-2 border-[#a0b38b]/30 shadow-xl mb-6">
+                  <div id="currentStepDisplay" class="mb-6">
+                    <div class="flex items-center gap-3 mb-4">
+                      <span class="text-6xl animate-pulse">🔥</span>
+                      <div>
+                        <div class="text-[#a0b38b] text-lg font-semibold">Paso <span id="stepNumber">1</span></div>
+                        <div class="text-sm text-[#dce5d3]">Sigue las instrucciones</div>
+                      </div>
+                    </div>
+                    <p id="stepInstruction" class="text-2xl font-semibold text-[#f4f7f3] leading-relaxed mb-6">
+                      Cargando instrucciones...
+                    </p>
+
+                    <!-- Temporizador de cocción -->
+                    <div class="flex items-center gap-4 p-4 bg-[#425638]/50 rounded-xl">
+                      <span class="text-3xl">⏱️</span>
+                      <div class="flex-1">
+                        <div class="text-xs text-[#dce5d3] mb-1">Tiempo de cocción estimado</div>
+                        <div class="text-2xl font-bold text-[#f3f7ef]">
+                          <span id="cookingTimer">0:00</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-4">
+                    <button 
+                      id="skipStepBtn"
+                      class="flex-1 bg-white/10 hover:bg-white/20 px-6 py-4 rounded-xl font-semibold transition border-2 border-white/20 hover:border-white/40"
+                    >
+                      ⏭️ Saltar paso
+                    </button>
+                    <button 
+                      id="nextStepBtn"
+                      class="flex-1 bg-[#687450] hover:bg-[#7a8660] px-6 py-4 rounded-xl font-bold transition transform hover:scale-105 shadow-lg"
+                    >
+                      Siguiente paso ▶️
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FASE 3: Platillo terminado -->
+              <div id="finishedPhase" class="phase-content hidden">
+                <div class="text-center">
+                  <div class="text-8xl mb-6 animate-bounce">🎉</div>
+                  <h2 class="text-4xl font-bold mb-4 text-[#f4f7f3]">¡Tu platillo está listo!</h2>
+                  <p class="text-xl text-[#dce5d3] mb-8">{recipe.title}</p>
+                  
+                  <div class="bg-gradient-to-br from-white/15 to-white/5 rounded-2xl p-8 border-2 border-[#a0b38b]/30 shadow-xl mb-8">
+                    <img 
+                      src={imageSrc} 
+                      alt={recipe.title}
+                      class="w-full max-w-2xl mx-auto rounded-xl shadow-2xl mb-6"
+                    />
+                    <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto">
+                      <div class="p-4 bg-[#425638]/50 rounded-xl">
+                        <div class="text-3xl mb-2">⏱️</div>
+                        <div class="text-sm text-[#dce5d3]">Tiempo total</div>
+                        <div class="text-xl font-bold text-[#f3f7ef]">{recipe.readyInMinutes} min</div>
+                      </div>
+                      <div class="p-4 bg-[#425638]/50 rounded-xl">
+                        <div class="text-3xl mb-2">🍽️</div>
+                        <div class="text-sm text-[#dce5d3]">Porciones</div>
+                        <div class="text-xl font-bold text-[#f3f7ef]">{recipe.servings}</div>
+                      </div>
+                      <div class="p-4 bg-[#425638]/50 rounded-xl">
+                        <div class="text-3xl mb-2">✅</div>
+                        <div class="text-sm text-[#dce5d3]">Completado</div>
+                        <div class="text-xl font-bold text-[#f3f7ef]">100%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button 
+                    id="restartBtn"
+                    class="bg-[#687450] hover:bg-[#7a8660] px-8 py-4 rounded-xl font-bold text-lg transition transform hover:scale-105 shadow-lg"
+                  >
+                    🔄 Cocinar de nuevo
+                  </button>
+                </div>
+              </div>
+
+              <!-- Botón salir -->
+              <div class="flex justify-center mt-8">
+                <button id="exitBtn" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl text-sm transition hover:shadow-lg">
+                  ❌ Salir del modo cocina
+                </button>
+              </div>
+            </div>
+          </div>
         </>
       ) : (
-        <p class="text-center text-gray-300">No se pudo cargar la receta. Intenta de nuevo.</p>
+        <p class="text-center text-gray-300">No se pudo cargar la receta.</p>
       )}
     </div>
   </section>
-</Layout>
 
+  <script define:vars={{ recipe }}>
+    const musicLibrary = {
+      energetic: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
+      focus: "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3"
+    };
+
+    let currentAudio = null;
+    let steps = [];
+    let scene, camera, renderer, kitchen = {};
+    let ingredients3D = [];
+    let animationFrame;
+    let selectedIngredients = new Set();
+    let currentCookingStep = 0;
+    let cookingInterval;
+
+    // Emojis para ingredientes aleatorios
+    const ingredientEmojis = ['🥕', '🥔', '🧅', '🍅', '🥒', '🌶️', '🧄', '🥬', '🫑', '🌽', '🥦', '🍄', '🥑', '🫛', '🥜'];
+
+    // Parsear pasos
+    function parseSteps() {
+      const instructions = recipe.instructions || "";
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = instructions;
+      
+      const olElements = tempDiv.querySelectorAll('ol li');
+      if (olElements.length > 0) {
+        steps = Array.from(olElements).map((li, idx) => ({
+          number: idx + 1,
+          text: li.textContent.trim()
+        }));
+      } else {
+        const paragraphs = tempDiv.querySelectorAll('p');
+        const allText = Array.from(paragraphs).map(p => p.textContent).join(' ');
+        const sentences = allText.split(/\.\s+/).filter(s => s.length > 20);
+        steps = sentences.map((s, idx) => ({
+          number: idx + 1,
+          text: s.trim() + '.'
+        }));
+      }
+
+      if (steps.length === 0) {
+        steps = [
+          { number: 1, text: "Prepara todos los ingredientes y tenlos listos." },
+          { number: 2, text: "Sigue las instrucciones específicas de la receta." },
+          { number: 3, text: "Cocina con amor y paciencia para obtener el mejor resultado." }
+        ];
+      }
+    }
+
+    // Three.js
+    function initThreeScene() {
+      const container = document.getElementById('threeScene');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x425638);
+      scene.fog = new THREE.Fog(0x425638, 8, 20);
+
+      camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 4, 10);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      // Luces
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(5, 10, 7);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+
+      const pointLight = new THREE.PointLight(0xffa500, 1.5, 50);
+      pointLight.position.set(-2, 3, 0);
+      scene.add(pointLight);
+      kitchen.fireLight = pointLight;
+
+      // Mesón
+      const counter = new THREE.Mesh(
+        new THREE.BoxGeometry(10, 0.5, 4),
+        new THREE.MeshPhongMaterial({ color: 0x8b7355 })
+      );
+      counter.position.y = 0;
+      counter.receiveShadow = true;
+      scene.add(counter);
+
+      // Estufa
+      const stove = new THREE.Mesh(
+        new THREE.BoxGeometry(2.5, 0.3, 2.5),
+        new THREE.MeshPhongMaterial({ color: 0x333333 })
+      );
+      stove.position.set(-2.5, 0.4, 0);
+      scene.add(stove);
+
+      // Hornillas encendidas
+      for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 2; j++) {
+          const burner = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.35, 0.35, 0.05, 32),
+            new THREE.MeshPhongMaterial({ 
+              color: 0x111111, 
+              emissive: 0xff4400, 
+              emissiveIntensity: 0.8 
+            })
+          );
+          burner.position.set(-3 + i * 1, 0.65, -0.5 + j * 1);
+          scene.add(burner);
+        }
+      }
+
+      // Olla grande
+      const pot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.8, 0.7, 1, 32),
+        new THREE.MeshPhongMaterial({ color: 0xc0c0c0, metalness: 0.8, roughness: 0.2 })
+      );
+      pot.position.set(-2.5, 1.2, 0);
+      pot.castShadow = true;
+      scene.add(pot);
+      kitchen.pot = pot;
+
+      // Tapa
+      const lid = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.85, 0.8, 0.15, 32),
+        new THREE.MeshPhongMaterial({ color: 0xa0a0a0 })
+      );
+      lid.position.set(-2.5, 1.85, 0);
+      scene.add(lid);
+      kitchen.lid = lid;
+
+      // Canasta para ingredientes
+      createBasket();
+
+      // Ingredientes 3D
+      createIngredients3D();
+
+      // Animación
+      function animate() {
+        animationFrame = requestAnimationFrame(animate);
+        
+        // Vapor de la olla
+        if (kitchen.lid) {
+          kitchen.lid.position.y = 1.85 + Math.sin(Date.now() * 0.003) * 0.08;
+        }
+
+        // Parpadeo del fuego
+        if (kitchen.fireLight) {
+          kitchen.fireLight.intensity = 1.5 + Math.sin(Date.now() * 0.01) * 0.3;
+        }
+
+        // Ingredientes flotantes
+        ingredients3D.forEach((ing, idx) => {
+          if (ing.visible && !ing.userData.inBasket) {
+            ing.rotation.y += 0.02;
+            ing.position.y = ing.userData.baseY + Math.sin(Date.now() * 0.002 + idx) * 0.15;
+          }
+        });
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+    }
+
+    function createBasket() {
+      const basketGroup = new THREE.Group();
+      
+      // Base de la canasta
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 0.8, 0.5, 8),
+        new THREE.MeshPhongMaterial({ color: 0x8b4513 })
+      );
+      basketGroup.add(base);
+
+      // Asa
+      const handle = new THREE.Mesh(
+        new THREE.TorusGeometry(0.6, 0.08, 8, 16, Math.PI),
+        new THREE.MeshPhongMaterial({ color: 0x8b4513 })
+      );
+      handle.rotation.x = Math.PI / 2;
+      handle.position.y = 0.8;
+      basketGroup.add(handle);
+
+      basketGroup.position.set(3, 0.5, 0);
+      scene.add(basketGroup);
+      kitchen.basket = basketGroup;
+    }
+
+    function createIngredients3D() {
+      const numIngredients = Math.min(recipe.extendedIngredients?.length || 6, 12);
+      
+      for (let i = 0; i < numIngredients; i++) {
+        const geometry = new THREE.SphereGeometry(0.25, 16, 16);
+        const hue = (i / numIngredients) * 0.8;
+        const material = new THREE.MeshPhongMaterial({ 
+          color: new THREE.Color().setHSL(hue, 0.7, 0.6),
+          transparent: true,
+          opacity: 0.9
+        });
+        
+        const ingredient = new THREE.Mesh(geometry, material);
+        const angle = (i / numIngredients) * Math.PI * 2;
+        const radius = 4;
+        ingredient.position.set(
+          Math.cos(angle) * radius,
+          2 + Math.random() * 2,
+          Math.sin(angle) * radius - 2
+        );
+        ingredient.userData.baseY = ingredient.position.y;
+        ingredient.userData.inBasket = false;
+        ingredient.userData.index = i;
+        ingredient.castShadow = true;
+        
+        scene.add(ingredient);
+        ingredients3D.push(ingredient);
+      }
+    }
+
+    function collectIngredient(index) {
+      if (index >= ingredients3D.length) return;
+      
+      const ing = ingredients3D[index];
+      if (ing.userData.inBasket) return;
+
+      ing.userData.inBasket = true;
+      const startPos = ing.position.clone();
+      const targetPos = new THREE.Vector3(3, 1.2, 0);
+      const duration = 1000;
+      const startTime = Date.now();
+
+      function moveToBasket() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        
+        ing.position.lerpVectors(startPos, targetPos, easeProgress);
+        ing.rotation.y += 0.1;
+        
+        if (progress < 1) {
+          requestAnimationFrame(moveToBasket);
+        }
+      }
+      moveToBasket();
+    }
+
+    function cookIngredients() {
+      ingredients3D.forEach((ing, idx) => {
+        if (ing.userData.inBasket) {
+          const startPos = ing.position.clone();
+          const targetPos = new THREE.Vector3(-2.5, 1.5, 0);
+          const duration = 1500;
+          const startTime = Date.now();
+          const delay = idx * 100;
+
+          setTimeout(() => {
+            function moveToPot() {
+              const elapsed = Date.now() - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const easeProgress = 1 - Math.pow(1 - progress, 3);
+              
+              ing.position.lerpVectors(startPos, targetPos, easeProgress);
+              ing.scale.setScalar(1 - easeProgress * 0.7);
+              ing.rotation.y += 0.15;
+              
+              if (progress < 1) {
+                requestAnimationFrame(moveToPot);
+              } else {
+                ing.visible = false;
+              }
+            }
+            moveToPot();
+          }, delay);
+        }
+      });
+    }
+
+    // Control de música
+    function playMusic(mood) {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      
+      currentAudio = new Audio(musicLibrary[mood]);
+      currentAudio.loop = true;
+      currentAudio.volume = document.getElementById('volumeSlider').value / 100;
+      
+      currentAudio.play().then(() => {
+        document.getElementById('musicStatus').textContent = '🎵 Reproduciendo';
+        document.getElementById('currentMood').textContent = mood === 'energetic' ? 'Energético ⚡' : 'Concentración 🎯';
+        document.getElementById('playPauseBtn').textContent = '⏸️';
+      }).catch(err => {
+        console.error('Error al reproducir:', err);
+        document.getElementById('musicStatus').textContent = '⚠️ Error de audio';
+      });
+    }
+
+    // Actualizar progreso
+    function updateProgress() {
+      const totalPhases = 3;
+      let currentPhase = 1;
+      
+      if (document.getElementById('cookingPhase').classList.contains('hidden') === false) {
+        currentPhase = 2;
+      } else if (document.getElementById('finishedPhase').classList.contains('hidden') === false) {
+        currentPhase = 3;
+      }
+      
+      const progress = (currentPhase / totalPhases) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      document.getElementById('progressText').textContent = Math.round(progress) + '%';
+    }
+
+    // Mostrar paso de cocción
+    function showCookingStep(stepIndex) {
+      if (stepIndex >= steps.length) {
+        showFinishedPhase();
+        return;
+      }
+
+      const step = steps[stepIndex];
+      document.getElementById('stepNumber').textContent = step.number;
+      document.getElementById('stepInstruction').textContent = step.text;
+      document.getElementById('currentStepLabel').textContent = `🔥 Cocinando - Paso ${step.number} de ${steps.length}`;
+      
+      // Temporizador simulado
+      let seconds = 0;
+      if (cookingInterval) clearInterval(cookingInterval);
+      cookingInterval = setInterval(() => {
+        seconds++;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        document.getElementById('cookingTimer').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function showFinishedPhase() {
+      document.getElementById('cookingPhase').classList.add('hidden');
+      document.getElementById('finishedPhase').classList.remove('hidden');
+      document.getElementById('currentStepLabel').textContent = '✅ Receta completada';
+      if (cookingInterval) clearInterval(cookingInterval);
+      updateProgress();
+      
+      // 📊 Registrar receta completada
+      saveRecipeToHistory();
+    }
+
+    // Guardar receta en historial
+    function saveRecipeToHistory() {
+      const history = JSON.parse(localStorage.getItem('recipeHistory') || '[]');
+      
+      // Obtener el estado de ánimo seleccionado
+      const selectedMoodBtn = document.querySelector('.mood-btn.ring-2.ring-white');
+      const mood = selectedMoodBtn ? selectedMoodBtn.getAttribute('data-mood') : null;
+      
+      const recipeLog = {
+        id: Date.now().toString(),
+        recipeId: recipe.id,
+        recipeName: recipe.title,
+        recipeImage: recipe.image || '/img/food-fallback.jpg',
+        completedAt: new Date().toISOString(),
+        cookingTime: recipe.readyInMinutes || 0,
+        mood: mood,
+        servings: recipe.servings || 0
+      };
+      
+      history.push(recipeLog);
+      localStorage.setItem('recipeHistory', JSON.stringify(history));
+      
+      // Registrar actividad diaria
+      registerDailyActivity();
+      
+      // Mostrar notificación
+      showNotification('¡Receta guardada en tu historial! 📊');
+    }
+
+    // Registrar actividad diaria
+    function registerDailyActivity() {
+      const today = new Date().toISOString().split('T')[0];
+      let activity = JSON.parse(localStorage.getItem('dailyActivity') || '[]');
+      
+      const todayActivity = activity.find(a => a.date === today);
+      if (todayActivity) {
+        todayActivity.recipes++;
+      } else {
+        activity.push({ date: today, recipes: 1 });
+      }
+      
+      localStorage.setItem('dailyActivity', JSON.stringify(activity));
+    }
+
+    // Mostrar notificación
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-24 right-6 bg-[#687450] text-white px-6 py-4 rounded-xl shadow-2xl z-[60] animate-slide-in';
+      notification.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">✅</span>
+          <span class="font-semibold">${message}</span>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Event Listeners
+    document.getElementById('cookingModeBtn')?.addEventListener('click', () => {
+      parseSteps();
+      document.getElementById('normalView').classList.add('hidden');
+      document.getElementById('cookingMode').classList.remove('hidden');
+      initThreeScene();
+      updateProgress();
+
+      // Asignar emojis aleatorios a ingredientes
+      document.querySelectorAll('.ingredient-icon').forEach(icon => {
+        icon.textContent = ingredientEmojis[Math.floor(Math.random() * ingredientEmojis.length)];
+      });
+    });
+
+    document.getElementById('exitBtn')?.addEventListener('click', () => {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      if (cookingInterval) {
+        clearInterval(cookingInterval);
+      }
+      document.getElementById('normalView').classList.remove('hidden');
+      document.getElementById('cookingMode').classList.add('hidden');
+      selectedIngredients.clear();
+      currentCookingStep = 0;
+      
+      // Reset UI
+      document.getElementById('ingredientsPhase').classList.remove('hidden');
+      document.getElementById('cookingPhase').classList.add('hidden');
+      document.getElementById('finishedPhase').classList.add('hidden');
+    });
+
+    // Seleccionar ingredientes
+    document.querySelectorAll('.ingredient-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = parseInt(btn.dataset.index);
+        const checkIcon = btn.querySelector('.ingredient-check-icon');
+        
+        if (selectedIngredients.has(index)) {
+          selectedIngredients.delete(index);
+          btn.classList.remove('bg-[#a0b38b]/30', 'border-[#a0b38b]');
+          btn.classList.add('border-[#a0b38b]/20');
+          checkIcon.classList.remove('opacity-100');
+          checkIcon.classList.add('opacity-0');
+        } else {
+          selectedIngredients.add(index);
+          btn.classList.add('bg-[#a0b38b]/30', 'border-[#a0b38b]');
+          btn.classList.remove('border-[#a0b38b]/20');
+          checkIcon.classList.remove('opacity-0');
+          checkIcon.classList.add('opacity-100');
+          collectIngredient(index);
+        }
+        
+        document.getElementById('basketCount').textContent = selectedIngredients.size;
+        
+        const totalIngredients = recipe.extendedIngredients?.length || 0;
+        const startBtn = document.getElementById('startCookingBtn');
+        if (selectedIngredients.size === totalIngredients) {
+          startBtn.disabled = false;
+          startBtn.classList.add('animate-pulse');
+        } else {
+          startBtn.disabled = true;
+          startBtn.classList.remove('animate-pulse');
+        }
+      });
+    });
+
+    // Empezar a cocinar
+    document.getElementById('startCookingBtn')?.addEventListener('click', () => {
+      document.getElementById('ingredientsPhase').classList.add('hidden');
+      document.getElementById('cookingPhase').classList.remove('hidden');
+      document.getElementById('currentStepLabel').textContent = '🔥 Fase de cocción';
+      updateProgress();
+      
+      // Animar ingredientes a la olla
+      cookIngredients();
+      
+      // Mostrar primer paso después de animación
+      setTimeout(() => {
+        currentCookingStep = 0;
+        showCookingStep(currentCookingStep);
+      }, 2000);
+    });
+
+    // Siguiente paso de cocción
+    document.getElementById('nextStepBtn')?.addEventListener('click', () => {
+      currentCookingStep++;
+      if (currentCookingStep < steps.length) {
+        showCookingStep(currentCookingStep);
+      } else {
+        showFinishedPhase();
+      }
+    });
+
+    // Saltar paso
+    document.getElementById('skipStepBtn')?.addEventListener('click', () => {
+      currentCookingStep++;
+      if (currentCookingStep < steps.length) {
+        showCookingStep(currentCookingStep);
+      } else {
+        showFinishedPhase();
+      }
+    });
+
+    // Reiniciar
+    document.getElementById('restartBtn')?.addEventListener('click', () => {
+      selectedIngredients.clear();
+      currentCookingStep = 0;
+      
+      document.getElementById('finishedPhase').classList.add('hidden');
+      document.getElementById('ingredientsPhase').classList.remove('hidden');
+      document.getElementById('basketCount').textContent = '0';
+      
+      // Reset ingredientes
+      document.querySelectorAll('.ingredient-btn').forEach(btn => {
+        btn.classList.remove('bg-[#a0b38b]/30', 'border-[#a0b38b]');
+        btn.classList.add('border-[#a0b38b]/20');
+        btn.querySelector('.ingredient-check-icon').classList.remove('opacity-100');
+        btn.querySelector('.ingredient-check-icon').classList.add('opacity-0');
+      });
+      
+      document.getElementById('startCookingBtn').disabled = true;
+      document.getElementById('startCookingBtn').classList.remove('animate-pulse');
+      
+      // Recrear escena 3D
+      if (renderer) {
+        const container = document.getElementById('threeScene');
+        container.innerHTML = '';
+        ingredients3D = [];
+        initThreeScene();
+      }
+      
+      updateProgress();
+    });
+
+    // Control de música
+    document.getElementById('playPauseBtn')?.addEventListener('click', () => {
+      if (currentAudio) {
+        if (currentAudio.paused) {
+          currentAudio.play();
+          document.getElementById('playPauseBtn').textContent = '⏸️';
+        } else {
+          currentAudio.pause();
+          document.getElementById('playPauseBtn').textContent = '▶️';
+        }
+      } else {
+        document.getElementById('musicStatus').textContent = '⚠️ Selecciona un ambiente primero';
+      }
+    });
+
+    document.getElementById('volumeSlider')?.addEventListener('input', (e) => {
+      if (currentAudio) {
+        currentAudio.volume = e.target.value / 100;
+      }
+    });
+
+    document.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mood-btn').forEach(b => {
+          b.classList.remove('ring-2', 'ring-white', 'bg-[#7a8660]');
+          b.classList.add('bg-[#687450]');
+        });
+        btn.classList.add('ring-2', 'ring-white', 'bg-[#7a8660]');
+        btn.classList.remove('bg-[#687450]');
+        playMusic(btn.dataset.mood);
+      });
+    });
+  </script>
+
+  <style>
+    @keyframes slide-in {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    .animate-slide-in {
+      animation: slide-in 0.3s ease-out;
+      transition: all 0.3s ease-out;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</Layout>

@@ -11,19 +11,87 @@ const defaultSongs = [
 ];
 
 const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
+
+// Música ambiente tipo Spotify
+const ambientMusic = {
+  happy: {
+    name: "Alegre ☀️",
+    url: "https://cdn.pixabay.com/audio/2022/03/10/audio_5ecb04070e.mp3",
+    description: "Para momentos alegres y llenos de energía positiva"
+  },
+  calm: {
+    name: "Tranquilo 🌙",
+    url: "https://cdn.pixabay.com/audio/2022/03/24/audio_c52ef58cf2.mp3",
+    description: "Música relajante para meditar o estudiar"
+  },
+  energetic: {
+    name: "Energético ⚡",
+    url: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
+    description: "Perfecta para entrenar o actividades intensas"
+  },
+  focus: {
+    name: "Concentración 🎯",
+    url: "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3",
+    description: "Ideal para trabajar o concentrarte"
+  }
+};
 ---
 
 <Layout title="Música">
   <section class="pt-20 min-h-screen flex text-white bg-gradient-to-br from-[#425638] via-[#516243] to-[#687450]">
     
-    <!-- 🎵 SIDEBAR - Playlists -->
-    <aside class="w-80 bg-[#ffffff0d] backdrop-blur-md p-6 overflow-y-auto border-r border-[#a0b38b]/30">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-[#eaf0e3]">
+    <!-- 🎵 SIDEBAR - Playlists y Ambiente -->
+    <aside class="w-80 bg-[#ffffff0d] backdrop-blur-md p-6 overflow-y-auto border-r border-[#a0b38b]/30 shadow-xl">
+      
+      <!-- Sección de música ambiente -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-[#eaf0e3]">
+          <span>🎭</span> Ambiente Musical
+        </h2>
+        <p class="text-xs text-[#dce5d3] mb-4">Música relajante de fondo mientras navegas</p>
+        
+        <div class="space-y-2">
+          {Object.entries(ambientMusic).map(([key, mood]) => (
+            <button
+              class="ambient-btn w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 transition border border-[#a0b38b]/20 hover:border-[#a0b38b]/40"
+              data-mood={key}
+              data-url={mood.url}
+            >
+              <div class="font-semibold text-sm text-[#f3f7ef]">{mood.name}</div>
+              <div class="text-xs text-[#dce5d3] mt-1">{mood.description}</div>
+            </button>
+          ))}
+        </div>
+
+        <div id="ambientPlayer" class="mt-4 p-3 rounded-lg bg-[#425638]/50 border border-[#a0b38b]/30 hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <button id="ambientPlayPause" class="text-xl hover:scale-110 transition">⏸️</button>
+              <div>
+                <div class="text-xs text-[#dce5d3]">Reproduciendo</div>
+                <div id="ambientMoodName" class="text-sm font-semibold text-[#f3f7ef]"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs">🔊</span>
+            <input 
+              id="ambientVolume" 
+              type="range" 
+              min="0" 
+              max="100" 
+              value="20" 
+              class="flex-1 accent-[#a0b38b]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 pt-6">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-[#eaf0e3]">
           <span>📚</span> Mis playlists
         </h2>
         
-        <!-- Crear nueva playlist -->
         <div class="mb-4">
           <input
             id="newPlaylistInput"
@@ -33,14 +101,13 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
           />
           <button
             id="createPlaylistBtn"
-            class="w-full mt-2 bg-gradient-to-r from-[#687450] to-[#425638] px-4 py-2 rounded-lg hover:scale-105 transition font-semibold text-[#f3f7ef]"
+            class="w-full mt-2 bg-gradient-to-r from-[#687450] to-[#425638] px-4 py-2 rounded-lg hover:scale-105 transition font-semibold text-[#f3f7ef] shadow-lg"
           >
             + Crear playlist
           </button>
         </div>
       </div>
 
-      <!-- Lista de playlists -->
       <div id="playlistsList" class="space-y-2"></div>
     </aside>
 
@@ -56,7 +123,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         </p>
       </div>
 
-      <!-- 🔹 Buscador -->
       <div class="flex justify-center w-full mb-6">
         <input
           id="searchInput"
@@ -66,14 +132,12 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         />
       </div>
 
-      <!-- 🔹 Resultados -->
       <div id="searchResults" class="w-full max-w-3xl mx-auto space-y-3 mb-8 hidden"></div>
 
-      <!-- 🔹 Lista predeterminada -->
       <div id="defaultList" class="w-full max-w-3xl mx-auto space-y-3">
         {defaultSongs.map((song) => (
           <div
-            class="song-item flex justify-between items-center bg-white/10 backdrop-blur-md p-4 rounded-xl hover:bg-white/20 transition cursor-pointer border border-[#a0b38b]/20 hover:border-[#a0b38b]/40"
+            class="song-item flex justify-between items-center bg-white/10 backdrop-blur-md p-4 rounded-xl hover:bg-white/20 transition cursor-pointer border border-[#a0b38b]/20 hover:border-[#a0b38b]/40 shadow-md"
             data-title={song.title}
             data-artist={song.artist}
           >
@@ -82,7 +146,7 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
               <p class="text-sm text-[#dce5d3]">{song.artist}</p>
             </div>
             <button
-              class="btn-play bg-gradient-to-r from-[#687450] to-[#425638] px-3 py-2 rounded-lg hover:scale-110 transition"
+              class="btn-play bg-gradient-to-r from-[#687450] to-[#425638] px-3 py-2 rounded-lg hover:scale-110 transition shadow-lg"
             >
               ▶
             </button>
@@ -90,9 +154,8 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         ))}
       </div>
 
-      <!-- 🔹 Reproductor -->
       <footer class="mt-auto pt-10">
-        <div class="bg-[#ffffff0d] backdrop-blur-md rounded-2xl px-6 py-4 w-full max-w-3xl mx-auto flex flex-col items-center space-y-3 border border-[#a0b38b]/30">
+        <div class="bg-[#ffffff0d] backdrop-blur-md rounded-2xl px-6 py-4 w-full max-w-3xl mx-auto flex flex-col items-center space-y-3 border border-[#a0b38b]/30 shadow-xl">
           <div class="text-center">
             <h3 id="now-title" class="font-semibold text-lg text-[#f3f7ef]">
               Selecciona una canción
@@ -100,13 +163,13 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
             <p id="now-artist" class="text-sm text-[#cdd4c9]"></p>
           </div>
 
-          <div id="playerContainer" class="w-full aspect-video rounded-xl overflow-hidden hidden bg-black"></div>
+          <div id="playerContainer" class="w-full aspect-video rounded-xl overflow-hidden hidden bg-black shadow-2xl"></div>
 
           <div class="flex justify-center space-x-6 text-3xl">
-            <button id="prevBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Anterior">⏮️</button>
-            <button id="pauseBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Pausar">⏸️</button>
-            <button id="playBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Reproducir">▶️</button>
-            <button id="nextBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed" title="Siguiente">⏭️</button>
+            <button id="prevBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110" title="Anterior">⏮️</button>
+            <button id="pauseBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110" title="Pausar">⏸️</button>
+            <button id="playBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110" title="Reproducir">▶️</button>
+            <button id="nextBtn" class="hover:text-[#a0b38b] transition disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110" title="Siguiente">⏭️</button>
           </div>
         </div>
       </footer>
@@ -121,7 +184,10 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
     let playlists = [];
     let currentPlaylistId = null;
 
-    // Cargar YouTube iFrame API
+    // Control de música ambiente
+    let ambientAudio = null;
+    let currentAmbientMood = null;
+
     function loadYouTubeAPI() {
       if (window.YT) {
         isAPIReady = true;
@@ -138,19 +204,16 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       isAPIReady = true;
     };
 
-    // Cargar playlists desde memoria
     function loadPlaylists() {
       const saved = JSON.parse(localStorage.getItem('musicPlaylists') || '[]');
       playlists = saved;
       renderPlaylists();
     }
 
-    // Guardar playlists
     function savePlaylists() {
       localStorage.setItem('musicPlaylists', JSON.stringify(playlists));
     }
 
-    // Renderizar lista de playlists
     function renderPlaylists() {
       const container = document.getElementById('playlistsList');
       
@@ -159,12 +222,12 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         return;
       }
 
-      container.innerHTML = playlists.map((pl, index) => `
-        <div class="playlist-item bg-white/5 hover:bg-white/10 rounded-lg p-3 cursor-pointer transition ${currentPlaylistId === pl.id ? 'ring-2 ring-purple-500' : ''}" data-id="${pl.id}">
+      container.innerHTML = playlists.map((pl) => `
+        <div class="playlist-item bg-white/5 hover:bg-white/10 rounded-lg p-3 cursor-pointer transition shadow-md ${currentPlaylistId === pl.id ? 'ring-2 ring-[#a0b38b]' : ''}" data-id="${pl.id}">
           <div class="flex justify-between items-start mb-2">
             <div class="flex-1">
-              <h3 class="font-semibold text-sm">${pl.name}</h3>
-              <p class="text-xs text-gray-400">${pl.songs.length} canciones</p>
+              <h3 class="font-semibold text-sm text-[#f3f7ef]">${pl.name}</h3>
+              <p class="text-xs text-[#dce5d3]">${pl.songs.length} canciones</p>
             </div>
             <button class="delete-playlist text-red-400 hover:text-red-300 text-xs" data-id="${pl.id}">🗑️</button>
           </div>
@@ -174,7 +237,7 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
                 <div class="flex items-center justify-between text-xs bg-black/20 rounded p-1 hover:bg-black/30 transition group">
                   <span class="truncate flex-1">${idx + 1}. ${song.title}</span>
                   <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                    <button class="play-song-btn hover:text-purple-400" data-playlist-id="${pl.id}" data-song-index="${idx}">▶️</button>
+                    <button class="play-song-btn hover:text-[#a0b38b]" data-playlist-id="${pl.id}" data-song-index="${idx}">▶️</button>
                     <button class="remove-song-btn hover:text-red-400" data-playlist-id="${pl.id}" data-song-index="${idx}">✕</button>
                   </div>
                 </div>
@@ -184,7 +247,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         </div>
       `).join('');
 
-      // Eventos para playlists
       document.querySelectorAll('.playlist-item').forEach(item => {
         item.addEventListener('click', (e) => {
           if (!e.target.closest('.delete-playlist') && !e.target.closest('.play-song-btn') && !e.target.closest('.remove-song-btn')) {
@@ -194,7 +256,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         });
       });
 
-      // Eventos para eliminar playlist
       document.querySelectorAll('.delete-playlist').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -210,7 +271,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         });
       });
 
-      // Eventos para reproducir canción de playlist
       document.querySelectorAll('.play-song-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -220,7 +280,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         });
       });
 
-      // Eventos para eliminar canción
       document.querySelectorAll('.remove-song-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -236,7 +295,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       });
     }
 
-    // Cargar playlist
     function loadPlaylist(id) {
       const playlist = playlists.find(pl => pl.id === id);
       if (!playlist || playlist.songs.length === 0) return;
@@ -248,7 +306,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       playVideoByIndex(0);
     }
 
-    // Reproducir canción desde playlist
     function playSongFromPlaylist(playlistId, songIndex) {
       const playlist = playlists.find(pl => pl.id === playlistId);
       if (!playlist) return;
@@ -260,7 +317,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       playVideoByIndex(songIndex);
     }
 
-    // Agregar canción a playlist
     function addToPlaylist(song) {
       if (playlists.length === 0) {
         alert('Primero crea una playlist');
@@ -281,6 +337,32 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       }
     }
 
+    // Función para reproducir música ambiente
+    function playAmbient(url, moodName) {
+      const playerDiv = document.getElementById('ambientPlayer');
+      const moodNameDiv = document.getElementById('ambientMoodName');
+      const playPauseBtn = document.getElementById('ambientPlayPause');
+      
+      if (ambientAudio) {
+        ambientAudio.pause();
+        ambientAudio = null;
+      }
+
+      ambientAudio = new Audio(url);
+      ambientAudio.loop = true;
+      ambientAudio.volume = document.getElementById('ambientVolume').value / 100;
+      
+      ambientAudio.play().then(() => {
+        playerDiv.classList.remove('hidden');
+        moodNameDiv.textContent = moodName;
+        playPauseBtn.textContent = '⏸️';
+        currentAmbientMood = moodName;
+      }).catch(err => {
+        console.error('Error al reproducir música ambiente:', err);
+        alert('No se pudo reproducir la música ambiente. Intenta de nuevo.');
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const API_KEY = YOUTUBE_API_KEY;
       const searchInput = document.getElementById("searchInput");
@@ -299,7 +381,40 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
       loadYouTubeAPI();
       loadPlaylists();
 
-      // Crear playlist
+      // Botones de música ambiente
+      document.querySelectorAll('.ambient-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.ambient-btn').forEach(b => {
+            b.classList.remove('ring-2', 'ring-[#a0b38b]', 'bg-white/15');
+          });
+          btn.classList.add('ring-2', 'ring-[#a0b38b]', 'bg-white/15');
+          
+          const url = btn.dataset.url;
+          const mood = btn.querySelector('.font-semibold').textContent;
+          playAmbient(url, mood);
+        });
+      });
+
+      // Control de volumen ambiente
+      document.getElementById('ambientVolume')?.addEventListener('input', (e) => {
+        if (ambientAudio) {
+          ambientAudio.volume = e.target.value / 100;
+        }
+      });
+
+      // Play/Pause ambiente
+      document.getElementById('ambientPlayPause')?.addEventListener('click', () => {
+        if (ambientAudio) {
+          if (ambientAudio.paused) {
+            ambientAudio.play();
+            document.getElementById('ambientPlayPause').textContent = '⏸️';
+          } else {
+            ambientAudio.pause();
+            document.getElementById('ambientPlayPause').textContent = '▶️';
+          }
+        }
+      });
+
       createPlaylistBtn.addEventListener('click', () => {
         const name = newPlaylistInput.value.trim();
         if (!name) {
@@ -318,7 +433,6 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
         newPlaylistInput.value = '';
       });
 
-      // Enter para crear playlist
       newPlaylistInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           createPlaylistBtn.click();
@@ -363,15 +477,15 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
 
           searchResults.innerHTML = currentPlaylist
             .map((v, index) => `
-              <div class="result-item flex items-center bg-white/10 backdrop-blur-md p-3 rounded-xl hover:bg-white/20 transition" data-index="${index}">
-                <img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" class="w-24 h-16 rounded-lg mr-4 object-cover"/>
+              <div class="result-item flex items-center bg-white/10 backdrop-blur-md p-3 rounded-xl hover:bg-white/20 transition shadow-md border border-[#a0b38b]/20" data-index="${index}">
+                <img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" class="w-24 h-16 rounded-lg mr-4 object-cover shadow-lg"/>
                 <div class="flex-1">
-                  <h3 class="text-base font-semibold line-clamp-2">${v.title}</h3>
-                  <p class="text-sm text-gray-300">${v.channel}</p>
+                  <h3 class="text-base font-semibold line-clamp-2 text-[#f3f7ef]">${v.title}</h3>
+                  <p class="text-sm text-[#dce5d3]">${v.channel}</p>
                 </div>
                 <div class="flex gap-2">
-                  <button class="add-to-playlist-btn bg-purple-600/50 hover:bg-purple-600 px-3 py-2 rounded-lg transition text-sm" data-index="${index}" title="Agregar a playlist">➕</button>
-                  <button class="play-result-btn bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-2 rounded-lg hover:scale-110 transition ml-2">▶</button>
+                  <button class="add-to-playlist-btn bg-[#687450] hover:bg-[#7a8660] px-3 py-2 rounded-lg transition text-sm shadow-md" data-index="${index}" title="Agregar a playlist">➕</button>
+                  <button class="play-result-btn bg-gradient-to-r from-[#687450] to-[#425638] px-3 py-2 rounded-lg hover:scale-110 transition shadow-lg">▶</button>
                 </div>
               </div>`)
             .join("");
@@ -496,6 +610,5 @@ const YOUTUBE_API_KEY = import.meta.env.PUBLIC_YOUTUBE_API_KEY;
   </script>
   <ChatbotWidget />
 </Layout>
-
 
 
