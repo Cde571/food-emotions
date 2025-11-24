@@ -4,7 +4,6 @@
 
 <header id="header-nav" class="fixed w-screen py-1 z-40 top-0 px-8 lg:px-0">
   <div class="grid grid-cols-3 max-w-7xl mx-auto items-center justify-between">
-    <!-- 🔹 Logo -->
     <a href="/" class="col-span-1 flex items-center">
       <img 
         src="/img/chatbot.png" 
@@ -13,17 +12,13 @@
       />
     </a>
 
-    <!-- 🔹 Navegación dinámica -->
     <nav class="col-span-1 justify-self-center">
       <ul id="nav-menu" class="flex gap-4 items-center text-white font-medium">
-        <!-- Se llena dinámicamente con JavaScript -->
-      </ul>
+        </ul>
     </nav>
 
-    <!-- 🔹 Sección de autenticación (botón o perfil) -->
     <div id="auth-section" class="justify-self-end">
-      <!-- Se llena dinámicamente -->
-    </div>
+      </div>
   </div>
 </header>
 
@@ -35,11 +30,29 @@
     if (!navMenu || !authSection) return;
 
     try {
-      const res = await fetch('http://localhost:3000/auth/status', { credentials: 'include' });
-      const data = await res.json();
+      // 1. Verificamos si hay sesión activa
+      const statusRes = await fetch('http://localhost:3000/auth/status', { credentials: 'include' });
+      const statusData = await statusRes.json();
 
-      if (data.loggedIn) {
+      if (statusData.loggedIn) {
         // ✅ Usuario autenticado
+        // 2. PEDIMOS LOS DATOS COMPLETOS (FOTO, BIO, ETC) A /api/user/me
+        let user = statusData.user || {}; // Fallback inicial
+        
+        try {
+            const meRes = await fetch('http://localhost:3000/api/user/me', { credentials: 'include' });
+            if (meRes.ok) {
+                user = await meRes.json();
+            }
+        } catch (err) {
+            console.error('Error obteniendo detalles completos del usuario:', err);
+        }
+
+        // Definimos la imagen y el nombre asegurando que no queden vacíos
+        const userName = user.username || 'Usuario';
+        // Si no hay profilePic, usamos ui-avatars con el nombre REAL del usuario
+        const userImage = user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=72B340&color=fff`;
+
         navMenu.innerHTML = `
           <li><a class="hover:underline" href="/Musica">🎵 Music section</a></li>
           <li><a class="hover:underline" href="/Comida">🍽️ Food section</a></li>
@@ -52,11 +65,11 @@
           <div class="flex items-center gap-4">
             <a href="/Profile" class="flex items-center gap-2 hover:opacity-80 transition">
               <img 
-                src="${data.user?.profilePic || 'https://ui-avatars.com/api/?name=Usuario&background=72B340&color=fff'}" 
+                src="${userImage}" 
                 alt="Profile" 
                 class="w-10 h-10 rounded-full object-cover border-2 border-white"
               />
-              <span class="text-white font-medium hidden md:inline">${data.user?.username || 'Usuario'}</span>
+              <span class="text-white font-medium hidden md:inline">${userName}</span>
             </a>
             <button
               id="logout-btn"
@@ -67,6 +80,7 @@
           </div>
         `;
 
+        // Lógica de Logout
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
           logoutBtn.addEventListener('click', async () => {
@@ -102,6 +116,7 @@
       }
     } catch (error) {
       console.error('Error verificando sesión:', error);
+      // Fallback en caso de error de red
       navMenu.innerHTML = `
         <li><a class="hover:underline" href="/Social">Social</a></li>
         <li><a class="hover:underline" href="/Testimonials">Testimonials</a></li>

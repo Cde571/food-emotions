@@ -231,13 +231,14 @@ import Navigation from '../components/shared/Navigation.astro';
   import socketClient from '../scripts/websocket/socketClient.js';
 
   const API_URL = "http://localhost:3000";
-  const currentUserId = localStorage.getItem("userId");
+  const currentUserId = (localStorage.getItem("userId") || '').replace(/"/g, '');
   let currentRecipientId = null;
   let currentRecipientUsername = '';
   let conversations = [];
   let currentCallType = null;
   let localStream = null;
   let peerConnection = null;
+  let usersSearchTimeout = null;
 
   console.log('🔌 Socket conectado:', socketClient.connected);
   console.log('👤 Usuario actual:', currentUserId);
@@ -360,97 +361,223 @@ import Navigation from '../components/shared/Navigation.astro';
     await loadMessages(userId);
   }
 
-  async function loadMessages(userId) {
-    try {
-      const res = await fetch(`${API_URL}/api/messages/${userId}`, { credentials: "include" });
-      const messages = await res.json();
+    async function loadMessages(userId) {
+  try {
+    const res = await fetch(`${API_URL}/api/messages/${userId}`, { credentials: "include" });
+    const messages = await res.json();
 
-      const container = document.getElementById("messages-list");
-      container.innerHTML = "";
+    const container = document.getElementById("messages-list");
+    container.innerHTML = "";
 
-      if (messages.length === 0) {
-        container.innerHTML = `
-          <div class="no-messages">
-            <div class="no-messages-icon">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-              </svg>
-            </div>
-            <p>No hay mensajes aún. ¡Inicia la conversación!</p>
+    if (!messages || messages.length === 0) {
+      container.innerHTML = `
+        <div class="no-messages">
+          <div class="no-messages-icon">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
           </div>
-        `;
-        return;
+          <p>No hay mensajes aún. ¡Inicia la conversación!</p>
+        </div>
+      `;
+      return;
+    }
+
+    messages.forEach(msg => {
+      // sender puede venir como id, como objeto, etc.
+      const senderId =
+        (msg.sender && msg.sender._id) ||  // si viene populado
+        msg.senderId ||                    // si guardas senderId explícito
+        msg.sender;                        // si es solo el id
+
+      const normalizedSenderId = String(senderId || '').replace(/"/g, '');
+      const isMine = normalizedSenderId === currentUserId;
+
+      const senderName =
+        msg.senderName ||
+        (isMine
+          ? (localStorage.getItem('username') || 'Tú')
+          : (currentRecipientUsername || 'Usuario'));
+
+      const senderAvatar =
+        (msg.sender && msg.sender.profilePic) ||
+        msg.senderAvatar ||
+        null;
+
+      const options = {};
+      // Soporte si en el futuro guardas imágenes
+      if ((msg.type === 'image' || msg.messageType === 'image') && (msg.fileUrl || msg.imageUrl)) {
+        options.imageUrl = msg.fileUrl || msg.imageUrl;
       }
 
-      messages.forEach(msg => {
-        const isMine = msg.sender === currentUserId;
-        appendMessage(msg.text, isMine, msg.createdAt, msg.senderName, msg._id);
+      appendMessage(
+        msg.text || '',
+        isMine,
+        msg.createdAt,
+        senderName,
+        msg._id,
+        senderAvatar,
+        options
+      );
+    });
+
+    scrollToBottom();
+  } catch (err) {
+    console.error("❌ Error cargando mensajes:", err);
+  }
+}
+
+async function searchUsers(query = '') {
+  try {
+    // Ajusta el nombre del parámetro (?q=) si tu backend usa otro (por ejemplo ?search=)
+    const res = await fetch(
+      `${API_URL}/api/users/search?q=${encodeURIComponent(query)}`,
+      { credentials: "include" }
+    );
+
+    const users = await res.json();
+    const list = document.getElementById("users-list");
+    list.innerHTML = "";
+
+    if (!users || users.length === 0) {
+      list.innerHTML = `<p class="no-users">No se encontraron usuarios.</p>`;
+      return;
+    }
+
+    users.forEach(user => {
+      if (String(user._id) === String(currentUserId)) return; // no nos listamos a nosotros mismos
+
+      const item = document.createElement("div");
+      item.className = "user-item";
+
+      const avatar = user.profilePic ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=667BC6&color=fff`;
+
+      item.innerHTML = `
+        <img src="${avatar}" alt="${user.username}" class="user-avatar" />
+        <div class="user-info">
+          <h4>${user.username}</h4>
+          <p>${user.email || 'Usuario'}</p>
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        openConversation(user._id, user.username, user.profilePic);
+        document.getElementById("new-message-modal").classList.add("hidden");
       });
 
-      scrollToBottom();
-    } catch (err) {
-      console.error("❌ Error cargando mensajes:", err);
-    }
+      list.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error("❌ Error buscando usuarios:", err);
+  }
+}
+
+  function appendMessage(
+  text,
+  isMine,
+  timestamp = new Date(),
+  senderName = '',
+  messageId = null,
+  senderAvatar = null,
+  options = {}
+) {
+  const container = document.getElementById("messages-list");
+
+  const noMessages = container.querySelector('.no-messages');
+  if (noMessages) {
+    noMessages.remove();
   }
 
-  function appendMessage(text, isMine, timestamp = new Date(), senderName = '', messageId = null) {
-    const container = document.getElementById("messages-list");
-    
-    const noMessages = container.querySelector('.no-messages');
-    if (noMessages) {
-      noMessages.remove();
-    }
-    
-    const div = document.createElement("div");
-    div.classList.add("message", isMine ? "mine" : "theirs");
-    if (messageId) div.dataset.messageId = messageId;
-    
-    const avatarUrl = isMine 
-      ? `https://ui-avatars.com/api/?name=${localStorage.getItem('username') || 'Tú'}&background=667BC6&color=fff`
-      : `https://ui-avatars.com/api/?name=${senderName || currentRecipientUsername}&background=DA7297&color=fff`;
-    
-    div.innerHTML = `
-      ${!isMine ? `<img src="${avatarUrl}" alt="${senderName}" class="message-avatar" />` : ""}
-      <div class="message-content">
-        <div class="message-bubble">
-          <p class="message-text">${escapeHtml(text)}</p>
-          ${isMine ? `
-            <button class="delete-message-btn" data-message-id="${messageId}" title="Eliminar mensaje">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-              </svg>
-            </button>
-          ` : ''}
-        </div>
-        <span class="message-time">${formatMessageTime(timestamp)}</span>
+  const div = document.createElement("div");
+  div.classList.add("message", isMine ? "mine" : "theirs");
+  if (messageId) div.dataset.messageId = messageId;
+
+  const avatarUrl = senderAvatar
+    ? senderAvatar
+    : (isMine
+        ? `https://ui-avatars.com/api/?name=${encodeURIComponent(localStorage.getItem('username') || 'Tú')}&background=667BC6&color=fff`
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(senderName || currentRecipientUsername || 'Usuario')}&background=DA7297&color=fff`);
+
+  const avatarClass = isMine
+    ? 'message-avatar message-avatar-mine'
+    : 'message-avatar message-avatar-theirs';
+
+  const hasImage = !!options.imageUrl;
+
+  div.innerHTML = `
+    ${!isMine ? `<img src="${avatarUrl}" alt="${senderName}" class="${avatarClass}" />` : ""}
+    <div class="message-content">
+      <div class="message-bubble ${options.pending ? 'message-pending' : ''}">
+        ${hasImage ? `<img src="${options.imageUrl}" alt="Imagen adjunta" class="message-image" />` : ''}
+        ${text ? `<p class="message-text">${escapeHtml(text)}</p>` : ''}
+        ${isMine && messageId ? `
+          <button class="delete-message-btn" data-message-id="${messageId}" title="Eliminar mensaje">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        ` : ''}
       </div>
-      ${isMine ? `<img src="${avatarUrl}" alt="Tú" class="message-avatar" />` : ""}
-    `;
-    
-    container.appendChild(div);
+      <span class="message-time">${formatMessageTime(timestamp)}</span>
+    </div>
+    ${isMine ? `<img src="${avatarUrl}" alt="Tú" class="${avatarClass}" />` : ""}
+  `;
 
-    if (isMine && messageId) {
-      const deleteBtn = div.querySelector('.delete-message-btn');
-      deleteBtn?.addEventListener('click', () => deleteMessage(messageId));
-    }
+  container.appendChild(div);
+
+  if (isMine && messageId) {
+    const deleteBtn = div.querySelector('.delete-message-btn');
+    deleteBtn?.addEventListener('click', () => deleteMessage(messageId));
   }
+}
 
   socketClient.on('new-message', (msg) => {
-    console.log('📩 Mensaje recibido:', msg);
-    
-    const isForMe = msg.recipientId === currentUserId || msg.recipient === currentUserId;
-    const isFromCurrentChat = msg.senderId === currentRecipientId || msg.sender === currentRecipientId;
-    
-    if (isForMe && isFromCurrentChat) {
-      appendMessage(msg.text, false, msg.createdAt, msg.senderName || 'Usuario', msg._id);
-      scrollToBottom();
-      loadConversations();
-    } else if (isForMe) {
-      loadConversations();
-      showToast(`Nuevo mensaje de ${msg.senderName || 'Usuario'}`);
-    }
-  });
+  console.log('📩 Mensaje recibido:', msg);
+
+  const senderId =
+    (msg.sender && msg.sender._id) ||
+    msg.senderId ||
+    msg.sender;
+
+  const recipientId = msg.recipientId || msg.recipient;
+
+  const normalizedSenderId = String(senderId || '').replace(/"/g, '');
+  const normalizedRecipientId = String(recipientId || '').replace(/"/g, '');
+  const normalizedCurrentRecipientId = String(currentRecipientId || '').replace(/"/g, '');
+
+  const isForMe = normalizedRecipientId === currentUserId;
+  const isFromCurrentChat = normalizedSenderId === normalizedCurrentRecipientId;
+
+  const senderAvatar =
+    (msg.sender && msg.sender.profilePic) ||
+    msg.senderAvatar ||
+    null;
+
+  const options = {};
+  if ((msg.type === 'image' || msg.messageType === 'image') && (msg.fileUrl || msg.imageUrl)) {
+    options.imageUrl = msg.fileUrl || msg.imageUrl;
+  }
+
+  if (isForMe && isFromCurrentChat) {
+    appendMessage(
+      msg.text || '',
+      false,
+      msg.createdAt,
+      msg.senderName || 'Usuario',
+      msg._id,
+      senderAvatar,
+      options
+    );
+    scrollToBottom();
+    loadConversations();
+  } else if (isForMe) {
+    loadConversations();
+    showToast(`Nuevo mensaje de ${msg.senderName || 'Usuario'}`);
+  }
+});
 
   socketClient.on('message-deleted', (data) => {
     console.log('🗑️ Mensaje eliminado:', data);
@@ -493,13 +620,21 @@ import Navigation from '../components/shared/Navigation.astro';
       });
 
       if (res.ok) {
-        const data = await res.json();
-        console.log('✅ Mensaje enviado:', data);
-        
-        appendMessage(text, true, new Date(), '', data.data._id);
-        input.value = "";
-        scrollToBottom();
-        loadConversations();
+      const data = await res.json();
+      console.log('✅ Mensaje enviado:', data);
+
+      appendMessage(
+        text,
+        true,
+        new Date(),
+        localStorage.getItem('username') || '',
+        data.data._id,
+        localStorage.getItem('profilePic') || null
+      );
+
+      input.value = "";
+      scrollToBottom();
+      loadConversations();
       } else {
         console.error('❌ Error en respuesta:', await res.text());
         showToast("Error al enviar el mensaje");
@@ -729,13 +864,105 @@ import Navigation from '../components/shared/Navigation.astro';
     document.getElementById("file-input").click();
   });
 
-  document.getElementById("file-input")?.addEventListener("change", (e) => {
-    const files = e.target.files;
-    if (files.length > 0) {
-      showToast(`${files.length} archivo(s) seleccionado(s)`);
-      console.log('Archivos seleccionados:', files);
+  document.getElementById("file-input")?.addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files || []);
+
+  if (!currentRecipientId) {
+    showToast('Selecciona una conversación antes de adjuntar archivos');
+    e.target.value = '';
+    return;
+  }
+
+  if (!files.length) return;
+
+  for (const file of files) {
+    // 1) Vista previa local si es imagen
+    let localUrl = null;
+    if (file.type.startsWith('image/')) {
+      localUrl = URL.createObjectURL(file);
+      appendMessage(
+        '',                       // texto vacío
+        true,                     // es mío
+        new Date(),
+        localStorage.getItem('username') || '',
+        null,                     // sin id todavía (pendiente)
+        localStorage.getItem('profilePic') || null,
+        { imageUrl: localUrl, pending: true }
+      );
     }
-  });
+
+    try {
+      // 2) Subimos el archivo a /api/files/upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadRes = await fetch(`${API_URL}/api/files/upload`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!uploadRes.ok) throw new Error('Error al subir archivo');
+
+      const uploadData = await uploadRes.json();
+
+      // Ajusta según lo que devuelva tu backend: url, secure_url, fileUrl, etc.
+      const uploadedUrl =
+        uploadData.fileUrl ||
+        uploadData.url ||
+        uploadData.secure_url ||
+        (uploadData.data && (uploadData.data.fileUrl || uploadData.data.url));
+
+      if (!uploadedUrl) {
+        console.error('No se encontró URL en la respuesta de /api/files/upload:', uploadData);
+        showToast('No se pudo obtener la URL del archivo subido');
+        continue;
+      }
+
+      // 3) Creamos el mensaje usando /api/messages/send
+      const msgRes = await fetch(`${API_URL}/api/messages/send`, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          sender: currentUserId,
+          recipientId: currentRecipientId,
+          text: '',          // opcional: podrías añadir comentario
+          fileUrl: uploadedUrl,
+          type: 'image'      // asumiendo que tu modelo soporta esto
+        }),
+      });
+
+      if (!msgRes.ok) {
+        console.error('❌ Error en /api/messages/send:', await msgRes.text());
+        showToast('Error al enviar el mensaje con imagen');
+        continue;
+      }
+
+      const msgData = await msgRes.json();
+      const msg = msgData.data || msgData; // según tu backend
+
+      appendMessage(
+        msg.text || '',
+        true,
+        msg.createdAt || new Date(),
+        localStorage.getItem('username') || '',
+        msg._id,
+        localStorage.getItem('profilePic') || null,
+        { imageUrl: msg.fileUrl || uploadedUrl }
+      );
+
+      scrollToBottom();
+      loadConversations();
+    } catch (err) {
+      console.error('❌ Error enviando archivo:', err);
+      showToast('Error al enviar archivo');
+    }
+  }
+
+  // limpiar input para poder volver a seleccionar el mismo archivo si se quiere
+  e.target.value = '';
+});
 
   document.getElementById("emoji-btn")?.addEventListener("click", (e) => {
     const picker = document.getElementById("emoji-picker");
@@ -816,38 +1043,17 @@ import Navigation from '../components/shared/Navigation.astro';
     }
   });
 
-  document.getElementById("new-message-btn")?.addEventListener("click", async () => {
-    const modal = document.getElementById("new-message-modal");
-    modal.classList.remove("hidden");
-    
-    try {
-      const res = await fetch(`${API_URL}/api/users`, { credentials: "include" });
-      const users = await res.json();
-      const list = document.getElementById("users-list");
-      list.innerHTML = "";
-      
-      users.forEach(user => {
-        if (user._id !== currentUserId) {
-          const item = document.createElement("div");
-          item.className = "user-item";
-          item.innerHTML = `
-            <img src="${user.profilePic || `https://ui-avatars.com/api/?name=${user.username}&background=667BC6&color=fff`}" 
-                 alt="${user.username}" class="user-avatar" />
-            <div class="user-info">
-              <h4>${user.username}</h4>
-              <p>${user.email || 'Usuario'}</p>
-            </div>
-          `;
-          item.addEventListener("click", () => {
-            openConversation(user._id, user.username, user.profilePic);
-            modal.classList.add("hidden");
-          });
-          list.appendChild(item);
-        }
-      });
-    } catch (err) {
-      console.error("Error cargando usuarios:", err);
-    }
+  document.getElementById("new-message-btn")?.addEventListener("click", () => {
+  const modal = document.getElementById("new-message-modal");
+  const searchInput = document.getElementById("search-users");
+  const list = document.getElementById("users-list");
+
+  modal.classList.remove("hidden");
+  searchInput.value = "";
+  list.innerHTML = "";
+
+  // Cargamos una primera búsqueda vacía (puede traer todos o los más relevantes según tu backend)
+  searchUsers('');
   });
 
   document.getElementById("close-new-message")?.addEventListener("click", () => {
@@ -861,12 +1067,14 @@ import Navigation from '../components/shared/Navigation.astro';
   });
 
   document.getElementById("search-users")?.addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll(".user-item").forEach(item => {
-      const name = item.querySelector("h4").textContent.toLowerCase();
-      item.style.display = name.includes(q) ? "flex" : "none";
-    });
-  });
+  const q = e.target.value.trim();
+
+  clearTimeout(usersSearchTimeout);
+  usersSearchTimeout = setTimeout(() => {
+    searchUsers(q);
+  }, 300); // 300 ms para no spamear el backend mientras se escribe
+});
+
 
   function formatTime(ts) {
     const date = new Date(ts);
@@ -902,7 +1110,22 @@ import Navigation from '../components/shared/Navigation.astro';
 </script>
 
 <style>
+/* ===== VARIABLES DE TEMA ===== */
+:global(:root) {
+  --primary: #425638;
+  --primary-light: #687450;
+  --primary-dark: #364c2c;
+  --secondary: #DAE3B6;
+  --dark: #2b2b2b;
+  --gray: #777;
+  --gray-light: #f2f3ef;
+  --border: #e1e3da;
+  --success: #6db47c;
+  --card-bg: #ffffff;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
 
+/* ===== RESETEO BÁSICO ===== */
 :global(*) {
   margin: 0;
   padding: 0;
@@ -911,7 +1134,7 @@ import Navigation from '../components/shared/Navigation.astro';
 
 :global(body) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #f3f5ef 0%, #e8ebdf 100%);
   color: var(--dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -922,13 +1145,13 @@ import Navigation from '../components/shared/Navigation.astro';
 :global(.messages-layout) {
   display: grid;
   grid-template-columns: 380px 1fr;
-  min-height: calc(100vh - 60px); 
+  height: calc(100vh - 60px); /* altura fija para que no se baje el recuadro */
   width: 100%;
   margin: 0 auto;
   background: var(--card-bg);
-  overflow-y: auto; 
-  position: relative; 
-  top: 60px; 
+  overflow: hidden; /* el scroll se maneja dentro de las secciones */
+  position: relative;
+  top: 60px;
 }
 
 /* ===== SIDEBAR ===== */
@@ -939,6 +1162,7 @@ import Navigation from '../components/shared/Navigation.astro';
   background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
   position: relative;
   overflow: hidden;
+  min-height: 0; /* importante para que el scroll interno funcione bien */
 }
 
 :global(.sidebar-header) {
@@ -947,8 +1171,8 @@ import Navigation from '../components/shared/Navigation.astro';
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff;
   flex-shrink: 0;
 }
 
@@ -1086,7 +1310,7 @@ import Navigation from '../components/shared/Navigation.astro';
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
-  min-height: 0;
+  min-height: 0; /* clave para que el scroll funcione sin empujar nada */
 }
 
 :global(.loading-conversations) {
@@ -1236,6 +1460,7 @@ import Navigation from '../components/shared/Navigation.astro';
   background: #f8f9fb;
   height: 100%;
   position: relative;
+  min-height: 0; /* necesario para que el flex no empuje el footer */
 }
 
 :global(.empty-chat) {
@@ -1443,17 +1668,17 @@ import Navigation from '../components/shared/Navigation.astro';
 /* ===== MESSAGES ===== */
 :global(.messages-container) {
   flex: 1;
-  overflow-y: auto; 
+  overflow-y: auto;
   padding: 20px;
   background: linear-gradient(to bottom right, #fafafa, #f5f6fa);
   scroll-behavior: smooth;
+  min-height: 0; /* clave para que el footer se mantenga fijo */
 }
 
 :global(.messages-list) {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  min-height: 100%;
   position: relative;
   z-index: 1;
 }
@@ -1522,6 +1747,16 @@ import Navigation from '../components/shared/Navigation.astro';
   box-shadow: var(--shadow-sm);
 }
 
+:global(.message-avatar-mine) {
+  border: 3px solid var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(66, 86, 56, 0.3);
+}
+
+:global(.message-avatar-theirs) {
+  border: 3px solid var(--secondary);
+  box-shadow: 0 0 0 2px rgba(218, 227, 182, 0.6);
+}
+
 :global(.message-content) {
   display: flex;
   flex-direction: column;
@@ -1548,14 +1783,14 @@ import Navigation from '../components/shared/Navigation.astro';
 }
 
 :global(.message.theirs .message-bubble) {
-  background: white;
+  background: #fff;
   border: 1px solid var(--border);
   border-bottom-left-radius: 6px;
 }
 
 :global(.message.mine .message-bubble) {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  color: white;
+  color: #fff;
   border-bottom-right-radius: 6px;
   box-shadow: 0 4px 12px rgba(102, 123, 198, 0.3);
 }
@@ -1800,7 +2035,7 @@ import Navigation from '../components/shared/Navigation.astro';
   transform: scale(1.02) rotate(-3deg);
 }
 
-/* ===== MODALS ===== */
+/* ===== MODALES ===== */
 :global(.emoji-picker) {
   position: fixed;
   background: white;
@@ -2060,13 +2295,13 @@ import Navigation from '../components/shared/Navigation.astro';
 }
 
 @keyframes pulse-avatar {
-  0%, 100% { 
-    transform: scale(1); 
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); 
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
-  50% { 
-    transform: scale(1.05); 
-    box-shadow: 0 12px 40px rgba(102, 123, 198, 0.6); 
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(102, 123, 198, 0.6);
   }
 }
 
@@ -2236,7 +2471,7 @@ import Navigation from '../components/shared/Navigation.astro';
   background: var(--gray);
 }
 
-/* ===== ESTADOS ADICIONALES ===== */
+/* ===== ESTADOS ADICIONALES / ACCESIBILIDAD ===== */
 :global(.hidden) {
   display: none !important;
 }
@@ -2258,7 +2493,6 @@ import Navigation from '../components/shared/Navigation.astro';
   box-shadow: none;
 }
 
-/* ===== ACCESIBILIDAD ===== */
 :global(.conversation-item:focus),
 :global(.message-input:focus),
 :global(.search-input:focus),
@@ -2267,7 +2501,7 @@ import Navigation from '../components/shared/Navigation.astro';
   outline-offset: 2px;
 }
 
-/* ===== EFECTOS DE BOTONES ===== */
+/* ===== EFECTO DE CLICK EN BOTONES ===== */
 :global(button) {
   position: relative;
   overflow: hidden;
@@ -2448,42 +2682,7 @@ import Navigation from '../components/shared/Navigation.astro';
   }
 }
 
-:global(:root) {
-  --primary: #425638;
-  --primary-light: #687450;
-  --primary-dark: #364c2c;
-  --secondary: #DAE3B6;
-  --dark: #2b2b2b;
-  --gray: #777;
-  --gray-light: #f2f3ef;
-  --border: #e1e3da;
-  --success: #6db47c;
-  --card-bg: #ffffff;
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-/* 🌿 Fondo natural */
-:global(body) {
-  background: linear-gradient(135deg, #f3f5ef 0%, #e8ebdf 100%);
-}
-
-/* 🌿 Sidebar header */
-:global(.sidebar-header) {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  color: #fff;
-}
-
-/* 🌿 Burbujas de mensaje adaptadas */
-:global(.message.mine .message-bubble) {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  color: #fff;
-}
-:global(.message.theirs .message-bubble) {
-  background: #fff;
-  border: 1px solid var(--border);
-}
-
-/* 🌿 Botón flotante para mostrar header */
+/* Botón flotante de header (por si lo usas) */
 :global(.toggle-header-btn) {
   position: fixed;
   top: 14px;
@@ -2506,5 +2705,24 @@ import Navigation from '../components/shared/Navigation.astro';
 :global(.toggle-header-btn:hover) {
   background: var(--primary);
   transform: scale(1.1);
+}
+
+:global(.no-users) {
+  font-size: 14px;
+  color: var(--gray);
+  padding: 8px 0;
+}
+
+:global(.message-image) {
+  display: block;
+  max-width: 260px;
+  max-height: 260px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  object-fit: cover;
+}
+
+:global(.message-pending) {
+  opacity: 0.6;
 }
 </style>

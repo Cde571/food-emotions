@@ -705,7 +705,7 @@ async function loadActivityStats() {
 }
 
 // ============================================================
-// 📝 CREAR POST - MODAL FUNCIONAL (Sin duplicados)
+// 📝 CREAR POST - MODAL FUNCIONAL 
 // ============================================================
 function setupCreatePostModal() {
   const modal = document.getElementById('post-modal');
@@ -716,6 +716,9 @@ function setupCreatePostModal() {
   const captionInput = modal?.querySelector('#post-caption');
   const visibilitySelect = modal?.querySelector('#post-visibility');
 
+  const userNameEl = modal?.querySelector('#post-user-name');
+  const userAvatarEl = modal?.querySelector('#post-user-avatar');
+  
   // ✅ Evitar registrar eventos duplicados
   if (form?.dataset.initialized === "true") return;
   if (!modal || !form) {
@@ -723,6 +726,15 @@ function setupCreatePostModal() {
     return;
   }
   form.dataset.initialized = "true";
+
+  const username = localStorage.getItem('username') || 'Tú';
+  const profilePic = localStorage.getItem('profilePic') || '';
+
+  if (userNameEl) userNameEl.textContent = username;
+
+  if (userAvatarEl) {
+    userAvatarEl.src = profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=425638&color=fff`;
+  }
 
   // ============================================================
   // 🔒 Cerrar modal correctamente
@@ -818,11 +830,23 @@ function setupCreatePostModal() {
 
       showToast('Publicación creada exitosamente', 'success');
 
-      // ✅ Cerrar modal y limpiar
+      // ⬇️ nuevo: sacar el post y pintarlo en el feed
+      const createdPost = result.post;
+      if (createdPost) {
+        prependPostToFeed(createdPost);
+      }
+
+      // cerrar modal
       closeModal();
+      form.dataset.submitting = "false";
+      const submitBtn = form.querySelector('[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Publicar';
+      }
 
       // ============================================================
-      // 🔄 SOLUCIÓN: Solo agregar el nuevo post (sin recargar todo)
+      // 🔄 SOLUCIÓN: Solo agregar el nuevo post 
       // ============================================================
       const feedContainer = document.getElementById('posts-feed');
       
@@ -961,6 +985,39 @@ function formatTimeAgo(date) {
   }
   
   return 'justo ahora';
+}
+
+function prependPostToFeed(post) {
+  const feed = document.getElementById('posts-feed');
+  if (!feed) return;
+
+  const author = post.author || {};
+  const username = author.username || 'Usuario';
+  const profilePic =
+    author.profilePic ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=425638&color=fff`;
+
+  const firstImage = Array.isArray(post.images) && post.images.length > 0
+    ? post.images[0]
+    : null;
+
+  const card = document.createElement('article');
+  card.className = 'post-card';
+  card.innerHTML = `
+    <header class="post-card-header">
+      <img src="${profilePic}" alt="${username}" class="post-card-avatar" />
+      <div class="post-card-author">
+        <h3 class="post-card-username">${username}</h3>
+        <span class="post-card-time">Ahora mismo</span>
+      </div>
+    </header>
+    <div class="post-card-body">
+      ${post.caption ? `<p class="post-card-caption">${post.caption}</p>` : ''}
+      ${firstImage ? `<img src="${firstImage}" alt="Imagen de la publicación" class="post-card-image" />` : ''}
+    </div>
+  `;
+
+  feed.prepend(card);
 }
 
 // ============================================================

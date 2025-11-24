@@ -132,6 +132,41 @@
   let selectedLocation: any = null;
   let locationTimeout: any;
 
+  // 🧑‍🍳 Usuario actual cacheado (igual idea que en Profile.astro)
+let cachedUser: any = null;
+
+async function getCurrentUser() {
+  if (cachedUser) return cachedUser;
+
+  const res = await fetch(`${API_URL}/api/user/me`, {
+    credentials: 'include',
+    headers: { Accept: 'application/json' }
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      window.location.href = '/login';
+      return null;
+    }
+    throw new Error('Error obteniendo usuario actual');
+  }
+
+  const me = await res.json();
+
+  if (!me.loggedIn) {
+    window.location.href = '/login';
+    return null;
+  }
+
+  cachedUser = me;
+
+  // Guardamos también en localStorage para reutilizar en otras partes
+  if (me.username) localStorage.setItem('fe_username', me.username);
+  if (me.profilePic) localStorage.setItem('fe_profilePic', me.profilePic);
+
+  return me;
+}
+
   // ============================================================
   // 🔧 ELEMENTOS DEL DOM
   // ============================================================
@@ -155,37 +190,38 @@
   const tagsContainer = document.getElementById('tags-container');
   const emojiBtn = document.getElementById('add-emoji-btn');
 
-  // ============================================================
-  // 👤 CARGAR DATOS DEL USUARIO
-  // ============================================================
-  async function loadModalUserData() {
-    try {
-      console.log('🔄 Cargando datos para modal...');
-      
-      const response = await fetch(`${API_URL}/api/user/me`, {
-        credentials: 'include'
-      });
 
-      if (!response.ok) throw new Error('Error cargando usuario');
+// ============================================================
+// 👤 CARGAR DATOS DEL USUARIO
+// ============================================================
+async function loadModalUserData() {
+  try {
+    console.log('🔄 Cargando datos para modal de post...');
 
-      const user = await response.json();
-      console.log('✅ Usuario cargado para modal:', user);
+    const user = await getCurrentUser();
+    if (!user) return;
 
-      // Intentar obtener el avatar del elemento profile-pic primero
-      const profilePicElement = document.getElementById('profile-pic') as HTMLImageElement;
-      const avatarUrl = profilePicElement?.src || user.profilePic || 
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=687450&color=fff&size=48`;
-      
-      const modalAvatar = document.getElementById('modal-user-avatar') as HTMLImageElement;
-      const modalUsername = document.getElementById('modal-username');
-      
-      if (modalAvatar) modalAvatar.src = avatarUrl;
-      if (modalUsername) modalUsername.textContent = user.username;
+    const modalAvatar = document.getElementById('modal-user-avatar') as HTMLImageElement | null;
+    const modalUsername = document.getElementById('modal-username') as HTMLElement | null;
 
-    } catch (error) {
-      console.error('❌ Error cargando usuario en modal:', error);
-    }
+    const username =
+      user.username ||
+      localStorage.getItem('fe_username') ||
+      'Usuario';
+
+    const avatarUrl =
+      user.profilePic ||
+      localStorage.getItem('fe_profilePic') ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=687450&color=fff&size=48`;
+
+    if (modalAvatar) modalAvatar.src = avatarUrl;
+    if (modalUsername) modalUsername.textContent = username;
+
+    console.log('✅ Usuario cargado en modal:', { username, avatarUrl });
+  } catch (error) {
+    console.error('❌ Error cargando usuario en modal:', error);
   }
+}
 
   // ============================================================
   // 🎯 FUNCIONES DEL MODAL
@@ -715,34 +751,45 @@ form?.addEventListener('submit', async (e) => {
 });
 
 // ============================================================
-// 🎨 FUNCIÓN PARA CREAR HTML DEL POST (USANDO ESTILOS ANTIGUOS)
+// 🎨 FUNCIÓN PARA CREAR HTML DEL POST (USANDO AUTOR REAL)
 // ============================================================
-function createPostHTML(post) {
-  console.log('🎨 Creando HTML con estilos antiguos para post:', post._id);
+function createPostHTML(post: any) {
+  console.log('🎨 Creando HTML para post:', post._id);
 
   const date = new Date(post.createdAt);
   const timeAgo = formatTimeAgo(date);
 
-  // Obtener datos del usuario actual del modal
-  const modalUsername = document.getElementById('modal-username')?.textContent?.trim() || 'Usuario';
-  const modalAvatar = (document.getElementById('modal-user-avatar')?.src) || 'https://ui-avatars.com/api/?name=Usuario&background=72B340&color=fff';
+  // 🔹 Datos de autor: primero el que viene populado del backend
+  const author = post.author || {};
+  const username =
+    author.username ||
+    localStorage.getItem('fe_username') ||
+    'Usuario';
 
-  // Construcción de imágenes con mismas clases que en el feed
+  const avatarUrl =
+    author.profilePic ||
+    localStorage.getItem('fe_profilePic') ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=72B340&color=fff`;
+
+  // 🔹 Imágenes
   let mediaHTML = '';
   if (post.images && Array.isArray(post.images) && post.images.length > 0) {
     mediaHTML = `
       <div class="post-media">
-        ${post.images.map(img => `<img src="${img}" alt="Imagen del post" class="post-image" />`).join('')}
+        ${post.images
+          .map((img: string) => `<img src="${img}" alt="Imagen del post" class="post-image" />`)
+          .join('')}
       </div>
     `;
   }
 
-  // Ubicación si existe
+  // 🔹 Ubicación
   let locationHTML = '';
   if (post.location) {
-    const loc = typeof post.location === 'string'
-      ? post.location
-      : (post.location.city || post.location.name || '');
+    const loc =
+      typeof post.location === 'string'
+        ? post.location
+        : (post.location.city || post.location.name || '');
     if (loc) {
       locationHTML = `
         <div class="post-location">
@@ -756,29 +803,28 @@ function createPostHTML(post) {
     }
   }
 
-  // Tags si existen
+  // 🔹 Tags
   let tagsHTML = '';
   if (post.tags && post.tags.length > 0) {
     tagsHTML = `
       <div class="post-tags">
-        ${post.tags.map(tag => `<span class="tag">#${escapeHTML(tag)}</span>`).join(' ')}
+        ${post.tags.map((tag: string) => `<span class="tag">#${escapeHTML(tag)}</span>`).join(' ')}
       </div>
     `;
   }
 
-  // Visibilidad
+  // 🔹 Visibilidad
   let visibilityIcon = '';
   if (post.visibility === 'private') visibilityIcon = '🔒';
   else if (post.visibility === 'followers') visibilityIcon = '👥';
 
-  // Estructura HTML con las clases antiguas
   const html = `
     <article class="post-card fade-in" data-post-id="${post._id}">
       <header class="post-header">
         <div class="author-info">
-          <img src="${modalAvatar}" alt="${escapeHTML(modalUsername)}" class="author-avatar" />
+          <img src="${avatarUrl}" alt="${escapeHTML(username)}" class="author-avatar" />
           <div class="author-details">
-            <h3 class="author-name">${escapeHTML(modalUsername)} ${visibilityIcon}</h3>
+            <h3 class="author-name">${escapeHTML(username)} ${visibilityIcon}</h3>
             <span class="post-time">${timeAgo}</span>
           </div>
         </div>
@@ -817,7 +863,7 @@ function createPostHTML(post) {
     </article>
   `;
 
-  console.log('✅ HTML del post creado con estilo antiguo');
+  console.log('✅ HTML del post creado con autor real');
   return html;
 }
 
@@ -910,7 +956,7 @@ function formatTimeAgo(date: Date): string {
 
 <style>
   /* ===== VARIABLES ===== */
-  :root {
+  :global(:root) {
     --primary: #687450;
     --primary-dark: #5a6444;
     --secondary: #425638;
@@ -932,7 +978,7 @@ function formatTimeAgo(date: Date): string {
   }
 
   /* ===== MODAL OVERLAY ===== */
-  .modal-overlay {
+  :global(.modal-overlay) {
     position: fixed;
     inset: 0;
     background: linear-gradient(
@@ -950,7 +996,7 @@ function formatTimeAgo(date: Date): string {
     animation: overlayFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .modal-overlay.hidden {
+  :global(.modal-overlay.hidden) {
     display: none;
   }
 
@@ -966,7 +1012,7 @@ function formatTimeAgo(date: Date): string {
   }
 
   /* ===== MODAL CONTAINER ===== */
-  .modal-container {
+  :global(.modal-container) {
     background: var(--white);
     border-radius: var(--radius);
     box-shadow: var(--shadow-xl);
@@ -992,7 +1038,7 @@ function formatTimeAgo(date: Date): string {
     }
   }
 
-  .modal-container::before {
+  :global(.modal-container::before) {
     content: '';
     position: absolute;
     top: 0;
@@ -1004,7 +1050,7 @@ function formatTimeAgo(date: Date): string {
   }
 
   /* ===== HEADER ===== */
-  .modal-header {
+  :global(.modal-header) {
     padding: 24px 28px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -1014,7 +1060,7 @@ function formatTimeAgo(date: Date): string {
     background: linear-gradient(180deg, rgba(104, 116, 80, 0.03) 0%, transparent 100%);
   }
 
-  .modal-title {
+  :global(.modal-title) {
     font-size: 22px;
     font-weight: 700;
     color: var(--dark);
@@ -1025,7 +1071,7 @@ function formatTimeAgo(date: Date): string {
     background-clip: text;
   }
 
-  .modal-close {
+  :global(.modal-close) {
     background: var(--gray-light);
     border: 1px solid var(--border);
     width: 40px;
@@ -1041,7 +1087,7 @@ function formatTimeAgo(date: Date): string {
     overflow: hidden;
   }
 
-  .modal-close::before {
+  :global(.modal-close::before) {
     content: '';
     position: absolute;
     inset: 0;
@@ -1050,22 +1096,22 @@ function formatTimeAgo(date: Date): string {
     transition: opacity 0.3s;
   }
 
-  .modal-close:hover {
+  :global(.modal-close:hover) {
     border-color: var(--primary);
     transform: rotate(90deg);
   }
 
-  .modal-close:hover::before {
+  :global(.modal-close:hover::before) {
     opacity: 0.1;
   }
 
-  .modal-close svg {
+  :global(.modal-close svg) {
     position: relative;
     z-index: 1;
   }
 
   /* ===== BODY ===== */
-  .modal-body {
+  :global(.modal-body) {
     padding: 28px;
     overflow-y: auto;
     flex: 1;
@@ -1074,7 +1120,7 @@ function formatTimeAgo(date: Date): string {
   }
 
   /* ===== USER INFO ===== */
-  .user-info {
+  :global(.user-info) {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1085,7 +1131,7 @@ function formatTimeAgo(date: Date): string {
     border: 1px solid rgba(104, 116, 80, 0.1);
   }
 
-  .modal-avatar {
+  :global(.modal-avatar) {
     width: 52px;
     height: 52px;
     border-radius: 50%;
@@ -1095,20 +1141,20 @@ function formatTimeAgo(date: Date): string {
     box-shadow: 0 4px 12px rgba(104, 116, 80, 0.3);
   }
 
-  .user-details {
+  :global(.user-details) {
     display: flex;
     flex-direction: column;
     gap: 6px;
     flex: 1;
   }
 
-  .username {
+  :global(.username) {
     font-weight: 700;
     font-size: 16px;
     color: var(--dark);
   }
 
-  .privacy-select {
+  :global(.privacy-select) {
     background: var(--white);
     border: 1px solid var(--border);
     padding: 6px 12px;
@@ -1122,23 +1168,23 @@ function formatTimeAgo(date: Date): string {
     box-shadow: var(--shadow-sm);
   }
 
-  .privacy-select:hover {
+  :global(.privacy-select:hover) {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(104, 116, 80, 0.1);
   }
 
-  .privacy-select:focus {
+  :global(.privacy-select:focus) {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.15);
   }
 
   /* ===== POST INPUT ===== */
-  .post-input-wrapper {
+  :global(.post-input-wrapper) {
     position: relative;
     margin-bottom: 20px;
   }
 
-  .post-textarea {
+  :global(.post-textarea) {
     width: 100%;
     min-height: 140px;
     max-height: 320px;
@@ -1155,18 +1201,18 @@ function formatTimeAgo(date: Date): string {
     background: var(--white);
   }
 
-  .post-textarea:focus {
+  :global(.post-textarea:focus) {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.1);
     transform: translateY(-1px);
   }
 
-  .post-textarea::placeholder {
+  :global(.post-textarea::placeholder) {
     color: var(--gray);
     opacity: 0.7;
   }
 
-  .char-counter {
+  :global(.char-counter) {
     position: absolute;
     bottom: 14px;
     right: 18px;
@@ -1180,13 +1226,13 @@ function formatTimeAgo(date: Date): string {
     transition: var(--transition);
   }
 
-  .char-counter.warning {
+  :global(.char-counter.warning) {
     color: var(--error);
     background: rgba(216, 67, 21, 0.1);
   }
 
   /* ===== MEDIA PREVIEW ===== */
-  .media-preview {
+  :global(.media-preview) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 14px;
@@ -1197,17 +1243,17 @@ function formatTimeAgo(date: Date): string {
     border: 2px dashed var(--border);
   }
 
-  .media-preview:empty {
+  :global(.media-preview:empty) {
     display: none;
   }
 
-  .media-preview:not(:empty) {
+  :global(.media-preview:not(:empty)) {
     border-style: solid;
     border-color: var(--primary);
     background: linear-gradient(135deg, rgba(104, 116, 80, 0.03) 0%, rgba(66, 86, 56, 0.03) 100%);
   }
 
-  .media-item {
+  :global(.media-item) {
     position: relative;
     aspect-ratio: 1;
     border-radius: var(--radius-sm);
@@ -1218,21 +1264,21 @@ function formatTimeAgo(date: Date): string {
     box-shadow: var(--shadow-sm);
   }
 
-  .media-item:hover {
+  :global(.media-item:hover) {
     transform: scale(1.05) rotate(1deg);
     border-color: var(--primary);
     box-shadow: var(--shadow-md);
     z-index: 10;
   }
 
-  .media-item img {
+  :global(.media-item img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .remove-media {
+  :global(.remove-media) {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -1250,12 +1296,12 @@ function formatTimeAgo(date: Date): string {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
-  .remove-media:hover {
+  :global(.remove-media:hover) {
     background: var(--error);
     transform: scale(1.15) rotate(90deg);
   }
 
-  .media-number {
+  :global(.media-number) {
     position: absolute;
     bottom: 10px;
     left: 10px;
@@ -1270,14 +1316,14 @@ function formatTimeAgo(date: Date): string {
   }
 
   /* ===== ACTION BUTTONS ===== */
-  .post-actions-bar {
+  :global(.post-actions-bar) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 20px;
   }
 
-  .action-btn {
+  :global(.action-btn) {
     background: linear-gradient(135deg, rgba(104, 116, 80, 0.08) 0%, rgba(66, 86, 56, 0.08) 100%);
     border: 2px solid var(--border);
     padding: 14px 16px;
@@ -1295,7 +1341,7 @@ function formatTimeAgo(date: Date): string {
     overflow: hidden;
   }
 
-  .action-btn::before {
+  :global(.action-btn::before) {
     content: '';
     position: absolute;
     inset: 0;
@@ -1304,31 +1350,31 @@ function formatTimeAgo(date: Date): string {
     transition: opacity 0.3s;
   }
 
-  .action-btn:hover {
+  :global(.action-btn:hover) {
     border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(104, 116, 80, 0.2);
   }
 
-  .action-btn:hover::before {
+  :global(.action-btn:hover::before) {
     opacity: 0.1;
   }
 
-  .action-btn svg {
+  :global(.action-btn svg) {
     flex-shrink: 0;
     position: relative;
     z-index: 1;
   }
 
-  .action-btn span {
+  :global(.action-btn span) {
     position: relative;
     z-index: 1;
   }
 
   /* ===== LOCATION & TAGS ===== */
-  .location-input,
-  .tags-input {
+  :global(.location-input),
+  :global(.tags-input) {
     margin-bottom: 20px;
     padding: 18px;
     background: linear-gradient(135deg, rgba(104, 116, 80, 0.03) 0%, rgba(66, 86, 56, 0.03) 100%);
@@ -1338,19 +1384,19 @@ function formatTimeAgo(date: Date): string {
     position: relative;
   }
 
-  .location-input:hover,
-  .tags-input:hover {
+  :global(.location-input:hover),
+  :global(.tags-input:hover) {
     border-color: var(--primary);
   }
 
-  .location-input {
+  :global(.location-input) {
     display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
   }
 
-  .location-suggestions {
+  :global(.location-suggestions) {
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
@@ -1376,7 +1422,7 @@ function formatTimeAgo(date: Date): string {
     }
   }
 
-  .location-suggestion-item {
+  :global(.location-suggestion-item) {
     width: 100%;
     background: none;
     border: none;
@@ -1390,25 +1436,25 @@ function formatTimeAgo(date: Date): string {
     border-bottom: 1px solid var(--border);
   }
 
-  .location-suggestion-item:last-child {
+  :global(.location-suggestion-item:last-child) {
     border-bottom: none;
   }
 
-  .location-suggestion-item:hover {
+  :global(.location-suggestion-item:hover) {
     background: linear-gradient(135deg, rgba(104, 116, 80, 0.05) 0%, rgba(66, 86, 56, 0.05) 100%);
   }
 
-  .location-suggestion-item svg {
+  :global(.location-suggestion-item svg) {
     color: var(--primary);
     flex-shrink: 0;
   }
 
-  .location-suggestion-text {
+  :global(.location-suggestion-text) {
     flex: 1;
     min-width: 0;
   }
 
-  .location-name {
+  :global(.location-name) {
     font-size: 14px;
     font-weight: 600;
     color: var(--dark);
@@ -1417,14 +1463,14 @@ function formatTimeAgo(date: Date): string {
     text-overflow: ellipsis;
   }
 
-  .location-detail {
+  :global(.location-detail) {
     font-size: 12px;
     color: var(--gray);
     margin-top: 2px;
   }
 
-  .location-field,
-  .tag-field {
+  :global(.location-field),
+  :global(.tag-field) {
     flex: 1;
     background: var(--white);
     border: 2px solid var(--border);
@@ -1436,14 +1482,14 @@ function formatTimeAgo(date: Date): string {
     transition: var(--transition);
   }
 
-  .location-field:focus,
-  .tag-field:focus {
+  :global(.location-field:focus),
+  :global(.tag-field:focus) {
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(104, 116, 80, 0.1);
     transform: translateY(-1px);
   }
 
-  .remove-location {
+  :global(.remove-location) {
     background: var(--error);
     border: 2px solid var(--white);
     width: 40px;
@@ -1460,13 +1506,13 @@ function formatTimeAgo(date: Date): string {
     box-shadow: var(--shadow-sm);
   }
 
-  .remove-location:hover {
+  :global(.remove-location:hover) {
     background: #ba2d0b;
     transform: scale(1.1) rotate(90deg);
   }
 
   /* ===== EMOJI PICKER ===== */
-  .emoji-picker {
+  :global(.emoji-picker) {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 0;
@@ -1493,13 +1539,13 @@ function formatTimeAgo(date: Date): string {
     }
   }
 
-  .emoji-grid {
+  :global(.emoji-grid) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
     gap: 4px;
   }
 
-  .emoji-item {
+  :global(.emoji-item) {
     background: none;
     border: none;
     font-size: 24px;
@@ -1513,38 +1559,38 @@ function formatTimeAgo(date: Date): string {
     aspect-ratio: 1;
   }
 
-  .emoji-item:hover {
+  :global(.emoji-item:hover) {
     background: linear-gradient(135deg, rgba(104, 116, 80, 0.1) 0%, rgba(66, 86, 56, 0.1) 100%);
     transform: scale(1.2);
   }
 
-  .emoji-picker::-webkit-scrollbar {
+  :global(.emoji-picker::-webkit-scrollbar) {
     width: 8px;
   }
 
-  .emoji-picker::-webkit-scrollbar-track {
+  :global(.emoji-picker::-webkit-scrollbar-track) {
     background: var(--gray-light);
     border-radius: 4px;
   }
 
-  .emoji-picker::-webkit-scrollbar-thumb {
+  :global(.emoji-picker::-webkit-scrollbar-thumb) {
     background: var(--primary);
     border-radius: 4px;
   }
 
   /* ===== TAGS ===== */
-  .tags-container {
+  :global(.tags-container) {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 12px;
   }
 
-  .tags-container:empty {
+  :global(.tags-container:empty) {
     margin-bottom: 0;
   }
 
-  .tag-chip {
+  :global(.tag-chip) {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     color: var(--white);
     padding: 8px 14px;
@@ -1558,12 +1604,12 @@ function formatTimeAgo(date: Date): string {
     box-shadow: 0 4px 12px rgba(104, 116, 80, 0.3);
   }
 
-  .tag-chip:hover {
+  :global(.tag-chip:hover) {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 16px rgba(104, 116, 80, 0.4);
   }
 
-  .remove-tag {
+  :global(.remove-tag) {
     background: rgba(255, 255, 255, 0.25);
     border: none;
     color: var(--white);
@@ -1581,13 +1627,13 @@ function formatTimeAgo(date: Date): string {
     font-weight: 700;
   }
 
-  .remove-tag:hover {
+  :global(.remove-tag:hover) {
     background: rgba(255, 255, 255, 0.5);
     transform: rotate(90deg) scale(1.2);
   }
 
   /* ===== FOOTER ===== */
-  .modal-footer {
+  :global(.modal-footer) {
     padding: 20px 28px;
     border-top: 1px solid var(--border);
     display: flex;
@@ -1597,7 +1643,7 @@ function formatTimeAgo(date: Date): string {
     flex-shrink: 0;
   }
 
-  .btn-cancel {
+  :global(.btn-cancel) {
     background: var(--white);
     border: 2px solid var(--border);
     padding: 12px 24px;
@@ -1609,14 +1655,14 @@ function formatTimeAgo(date: Date): string {
     transition: var(--transition);
   }
 
-  .btn-cancel:hover {
+  :global(.btn-cancel:hover) {
     background: var(--gray-light);
     border-color: var(--gray);
     color: var(--dark);
     transform: translateY(-1px);
   }
 
-  .btn-publish {
+  :global(.btn-publish) {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     border: none;
     padding: 12px 28px;
@@ -1634,7 +1680,7 @@ function formatTimeAgo(date: Date): string {
     overflow: hidden;
   }
 
-  .btn-publish::before {
+  :global(.btn-publish::before) {
     content: '';
     position: absolute;
     top: 50%;
@@ -1647,34 +1693,34 @@ function formatTimeAgo(date: Date): string {
     transition: width 0.6s, height 0.6s;
   }
 
-  .btn-publish:hover:not(:disabled)::before {
+  :global(.btn-publish:hover:not(:disabled)::before) {
     width: 300px;
     height: 300px;
   }
 
-  .btn-publish:hover:not(:disabled) {
+  :global(.btn-publish:hover:not(:disabled)) {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 8px 24px rgba(104, 116, 80, 0.5);
   }
 
-  .btn-publish:active:not(:disabled) {
+  :global(.btn-publish:active:not(:disabled)) {
     transform: translateY(-1px) scale(1);
   }
 
-  .btn-publish:disabled {
+  :global(.btn-publish:disabled) {
     opacity: 0.6;
     cursor: not-allowed;
     box-shadow: none;
   }
 
-  .btn-publish svg,
-  .btn-publish span {
+  :global(.btn-publish svg),
+  :global(.btn-publish span) {
     position: relative;
     z-index: 1;
   }
 
   /* ===== SPINNER ===== */
-  .spinner {
+  :global(.spinner) {
     animation: rotate 1s linear infinite;
   }
 
@@ -1688,42 +1734,42 @@ function formatTimeAgo(date: Date): string {
     50% { opacity: 0.6; }
   }
 
-  .btn-publish:disabled .spinner {
+  :global(.btn-publish:disabled .spinner) {
     animation: rotate 1s linear infinite, pulse 2s ease-in-out infinite;
   }
 
   /* ===== HIDDEN ===== */
-  .hidden {
+  :global(.hidden) {
     display: none !important;
   }
 
   /* ===== SCROLLBAR PREMIUM ===== */
-  .modal-body::-webkit-scrollbar {
+  :global(.modal-body::-webkit-scrollbar) {
     width: 10px;
   }
 
-  .modal-body::-webkit-scrollbar-track {
+  :global(.modal-body::-webkit-scrollbar-track) {
     background: var(--gray-light);
     border-radius: 10px;
   }
 
-  .modal-body::-webkit-scrollbar-thumb {
+  :global(.modal-body::-webkit-scrollbar-thumb) {
     background: linear-gradient(180deg, var(--primary), var(--secondary));
     border-radius: 10px;
     border: 2px solid var(--gray-light);
   }
 
-  .modal-body::-webkit-scrollbar-thumb:hover {
+  :global(.modal-body::-webkit-scrollbar-thumb:hover) {
     background: linear-gradient(180deg, var(--primary-dark), var(--secondary));
   }
 
   /* ===== RESPONSIVE ===== */
   @media (max-width: 700px) {
-    .modal-overlay {
+    :global(.modal-overlay) {
       padding: 0;
     }
 
-    .modal-container {
+    :global(.modal-container) {
       max-height: 100vh;
       max-width: 100%;
       border-radius: 0;
@@ -1739,38 +1785,38 @@ function formatTimeAgo(date: Date): string {
       }
     }
 
-    .modal-header,
-    .modal-footer {
+    :global(.modal-header),
+    :global(.modal-footer) {
       padding: 18px 20px;
     }
 
-    .modal-body {
+    :global(.modal-body) {
       padding: 24px 20px;
     }
 
-    .post-actions-bar {
+    :global(.post-actions-bar) {
       grid-template-columns: 1fr;
     }
 
-    .action-btn {
+    :global(.action-btn) {
       padding: 16px;
     }
 
-    .action-btn span {
+    :global(.action-btn span) {
       display: inline;
     }
 
-    .media-preview {
+    :global(.media-preview) {
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 10px;
       padding: 12px;
     }
 
-    .user-info {
+    :global(.user-info) {
       padding: 14px;
     }
 
-    .modal-avatar {
+    :global(.modal-avatar) {
       width: 48px;
       height: 48px;
     }
@@ -1778,117 +1824,117 @@ function formatTimeAgo(date: Date): string {
 
   /* ===== DARK MODE ===== */
   @media (prefers-color-scheme: dark) {
-    .modal-container {
+    :global(.modal-container) {
       background: #1f2937;
       border-color: #374151;
     }
 
-    .modal-header,
-    .modal-footer {
+    :global(.modal-header),
+    :global(.modal-footer) {
       background: #111827;
       border-color: #374151;
     }
 
-    .modal-title,
-    .username {
+    :global(.modal-title),
+    :global(.username) {
       color: #f9fafb;
     }
 
-    .post-textarea,
-    .location-field,
-    .tag-field,
-    .privacy-select {
+    :global(.post-textarea),
+    :global(.location-field),
+    :global(.tag-field),
+    :global(.privacy-select) {
       background: #111827;
       border-color: #374151;
       color: #f9fafb;
     }
 
-    .action-btn,
-    .user-info,
-    .location-input,
-    .tags-input {
+    :global(.action-btn),
+    :global(.user-info),
+    :global(.location-input),
+    :global(.tags-input) {
       background: #111827;
       border-color: #374151;
     }
 
-    .btn-cancel {
+    :global(.btn-cancel) {
       background: #1f2937;
       border-color: #374151;
       color: #9ca3af;
     }
 
-    .btn-cancel:hover {
+    :global(.btn-cancel:hover) {
       background: #374151;
       color: #f9fafb;
     }
 
-    .media-preview {
+    :global(.media-preview) {
       background: #111827;
       border-color: #374151;
     }
 
-    .media-item {
+    :global(.media-item) {
       background: #1f2937;
       border-color: #374151;
     }
 
-    .emoji-picker,
-    .location-suggestions {
+    :global(.emoji-picker),
+    :global(.location-suggestions) {
       background: #1f2937;
       border-color: #374151;
     }
   }
 
   /* ===== FOCUS VISIBLE ===== */
-  *:focus-visible {
+  :global(*:focus-visible) {
     outline: 3px solid rgba(104, 116, 80, 0.5);
     outline-offset: 3px;
   }
 
   /* ===== TRANSICIONES GLOBALES ===== */
-  * {
+  :global(*) {
     transition-property: background-color, border-color, color, transform, box-shadow, opacity;
     transition-duration: 0.2s;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* ===== ANIMACIÓN FADE IN PARA NUEVO POST ===== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 
-.post.fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-}
-
-.post.fade-in::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  border-radius: var(--radius);
-  opacity: 0.15;
-  animation: highlightPulse 2s ease-out;
-  pointer-events: none;
-  z-index: -1;
-}
-
-@keyframes highlightPulse {
-  0% {
-    opacity: 0.3;
-    transform: scale(1.02);
+  :global(.post.fade-in) {
+    animation: fadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
   }
-  100% {
-    opacity: 0;
-    transform: scale(1);
+
+  :global(.post.fade-in::before) {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: var(--radius);
+    opacity: 0.15;
+    animation: highlightPulse 2s ease-out;
+    pointer-events: none;
+    z-index: -1;
   }
-}
+
+  @keyframes highlightPulse {
+    0% {
+      opacity: 0.3;
+      transform: scale(1.02);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
 </style>
